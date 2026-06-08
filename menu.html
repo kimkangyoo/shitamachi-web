@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>映像制作メニュー｜下町きろくの動画屋</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;700&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Shippori Mincho',serif;background:#e8dcc8;color:#2a1a08;}
+
+nav{background:#150c02;padding:22px 64px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #7a5218;}
+.nav-logo{font-family:'Shippori Mincho',serif;font-size:20px;letter-spacing:.25em;color:#e8d090;text-decoration:none;display:block;}
+.nav-logo span{color:#c8880a;}
+.nav-links{display:flex;gap:36px;}
+.nav-links a{font-size:15px;letter-spacing:.15em;color:rgba(232,208,144,.7);text-decoration:none;font-family:'Shippori Mincho',serif;}
+.nav-links a:hover{color:#c8880a;}
+
+.page-hero{background:#150c02;padding:72px 48px 60px;border-bottom:1px solid #3a2010;}
+.page-hero-eyebrow{font-size:9px;letter-spacing:.6em;color:#8b6820;margin-bottom:14px;font-family:'Noto Sans JP',sans-serif;}
+.page-hero-title{font-family:'Shippori Mincho',serif;font-size:30px;font-weight:400;letter-spacing:.15em;color:#e8d090;margin-bottom:16px;}
+.page-hero-sub{font-family:'Shippori Mincho',serif;font-size:14px;color:rgba(232,208,144,.6);letter-spacing:.1em;line-height:2.2;}
+
+.inner{max-width:800px;margin:0 auto;}
+.sec{padding:80px 48px;}
+
+/* サービスブロック */
+.service-block{margin-bottom:80px;padding-bottom:80px;border-bottom:1px solid #b89848;}
+.service-block:last-of-type{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+
+.service-cat{font-family:'Shippori Mincho',serif;font-size:15px;letter-spacing:.25em;color:#f0ddb0;margin-bottom:24px;padding:12px 20px;border-left:4px solid #c8880a;background:#150c02;display:inline-block;}
+
+.service-title{font-family:'Shippori Mincho',serif;font-size:26px;font-weight:400;letter-spacing:.08em;color:#1a0e04;margin-bottom:8px;}
+.service-sub{font-family:'Shippori Mincho',serif;font-size:14px;color:#8b6820;letter-spacing:.06em;margin-bottom:32px;}
+.service-desc{font-family:'Shippori Mincho',serif;font-size:16px;color:#3a2010;line-height:2.6;margin-bottom:40px;}
+
+/* 料金・納期 */
+.service-meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px;background:#b89848;margin-bottom:40px;}
+.service-meta-item{background:#e8dcc8;padding:24px 28px;}
+.service-meta-label{font-size:9px;letter-spacing:.4em;color:#8b6820;margin-bottom:10px;font-family:'Noto Sans JP',sans-serif;}
+.service-meta-value{font-family:'Shippori Mincho',serif;font-size:22px;color:#1a0e04;letter-spacing:.04em;}
+.service-meta-note{font-size:11px;color:#8b6820;margin-top:6px;font-family:'Noto Sans JP',sans-serif;}
+
+/* 流れ */
+.flow-title{font-family:'Shippori Mincho',serif;font-size:13px;letter-spacing:.3em;color:#8b6820;margin-bottom:20px;}
+.flow{display:flex;gap:0;margin-bottom:40px;flex-wrap:wrap;}
+.flow-step{flex:1;min-width:120px;padding:20px 16px;background:#e0d4b8;text-align:center;position:relative;}
+.flow-step::after{content:'›';position:absolute;right:-10px;top:50%;transform:translateY(-50%);color:#b89848;font-size:20px;z-index:1;}
+.flow-step:last-child::after{display:none;}
+.flow-num{font-size:9px;letter-spacing:.3em;color:#8b6820;margin-bottom:8px;font-family:'Noto Sans JP',sans-serif;}
+.flow-text{font-family:'Shippori Mincho',serif;font-size:13px;color:#1a0e04;line-height:1.8;}
+
+/* サンプル */
+.sample-box{background:#ddd0b0;border:1px dashed #b89848;padding:48px;text-align:center;border-radius:4px;}
+.sample-box p{font-family:'Shippori Mincho',serif;font-size:14px;color:#8b6820;letter-spacing:.1em;line-height:2.4;}
+
+/* CTA */
+.cta-area{background:#150c02;padding:64px 48px;text-align:center;margin-top:0;}
+.cta-text{font-family:'Shippori Mincho',serif;font-size:20px;color:#e8d090;letter-spacing:.1em;margin-bottom:8px;}
+.cta-sub{font-family:'Shippori Mincho',serif;font-size:13px;color:rgba(232,208,144,.5);letter-spacing:.08em;margin-bottom:36px;}
+.cta-btn{display:inline-block;border:1px solid #c8880a;color:#c8880a;font-family:'Shippori Mincho',serif;font-size:14px;letter-spacing:.4em;padding:18px 56px;text-decoration:none;}
+.cta-btn:hover{background:rgba(200,136,10,.1);}
+
+.divider{display:flex;align-items:center;padding:0 48px;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:linear-gradient(to right,transparent,#b89848);}
+.divider::after{background:linear-gradient(to left,transparent,#b89848);}
+.divider-inner{font-family:'Shippori Mincho',serif;font-size:14px;color:#b89848;padding:12px 20px;flex-shrink:0;}
+
+footer{background:#0c0600;padding:32px 48px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;border-top:1px solid #2a1804;}
+.foot-logo{font-family:'Shippori Mincho',serif;font-size:14px;letter-spacing:.25em;color:#8b6820;}
+.foot-meta{font-size:10px;color:#3a2408;letter-spacing:.12em;line-height:2.4;text-align:right;font-family:'Noto Sans JP',sans-serif;}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">下町きろくの<span>動画屋</span></a>
+  <div class="nav-links">
+    <a href="index.html#about">動画屋とは</a>
+    <a href="menu.html">映像制作</a>
+    <a href="index.html#works">記録の現場から</a>
+    <a href="index.html#profile">記録者</a>
+    <a href="index.html#contact">お問い合わせ</a>
+  </div>
+</nav>
+
+<div class="page-hero">
+  <div class="inner">
+    <p class="page-hero-eyebrow">VIDEO SERVICES</p>
+    <h1 class="page-hero-title">映像制作メニュー</h1>
+    <p class="page-hero-sub">打ち合わせから撮影・編集・納品まで、一貫してお任せください。<br>納期は目安3週間。内容によりご相談いたします。</p>
+  </div>
+</div>
+
+<section class="sec">
+  <div class="inner">
+
+    <!-- ① 街のドキュメント -->
+    <div class="service-block">
+      <p class="service-cat">街のドキュメント制作</p>
+      <h2 class="service-title">人、お店、地域の記録</h2>
+      <p class="service-sub">家族・あなた　／　お店・会社　／　団体・地域</p>
+      <p class="service-desc">七五三・入学・卒業などの家族の節目から、店主のこだわりや職人の手仕事、地域団体の活動記録まで。その場の空気ごと、未来へ残します。ただの記録映像ではなく、その人・その場所の「物語」として編集します。</p>
+
+      <div class="service-meta">
+        <div class="service-meta-item">
+          <p class="service-meta-label">料金</p>
+          <p class="service-meta-value">¥50,000〜</p>
+          <p class="service-meta-note">内容・時間により変動</p>
+        </div>
+        <div class="service-meta-item">
+          <p class="service-meta-label">納期</p>
+          <p class="service-meta-value">約3週間</p>
+          <p class="service-meta-note">撮影完了後より</p>
+        </div>
+        <div class="service-meta-item">
+          <p class="service-meta-label">納品形式</p>
+          <p class="service-meta-value">データ</p>
+          <p class="service-meta-note">MP4／活用サポートあり</p>
+        </div>
+      </div>
+
+      <p class="flow-title">制作の流れ</p>
+      <div class="flow">
+        <div class="flow-step"><p class="flow-num">01</p><p class="flow-text">お問い合わせ・<br>ご相談</p></div>
+        <div class="flow-step"><p class="flow-num">02</p><p class="flow-text">打ち合わせ・<br>内容確認</p></div>
+        <div class="flow-step"><p class="flow-num">03</p><p class="flow-text">撮影</p></div>
+        <div class="flow-step"><p class="flow-num">04</p><p class="flow-text">編集・<br>確認</p></div>
+        <div class="flow-step"><p class="flow-num">05</p><p class="flow-text">納品</p></div>
+      </div>
+
+      <div class="sample-box">
+        <p>サンプル映像<br>準備中</p>
+      </div>
+    </div>
+
+    <!-- ② イベント制作 -->
+    <div class="service-block">
+      <p class="service-cat">イベント制作</p>
+      <h2 class="service-title">その日の物語を、残す</h2>
+      <p class="service-sub">お祭り・式典・演奏会・講演会・発表会など</p>
+      <p class="service-desc">地域のお祭り、式典、舞台、講演会、活動報告。ただ撮るのではなく、その日の熱量と物語ごと映像に残します。どんな規模でも、まずはご相談ください。</p>
+
+      <div class="service-meta">
+        <div class="service-meta-item">
+          <p class="service-meta-label">料金</p>
+          <p class="service-meta-value">¥30,000〜</p>
+          <p class="service-meta-note">規模・時間により変動</p>
+        </div>
+        <div class="service-meta-item">
+          <p class="service-meta-label">納期</p>
+          <p class="service-meta-value">約3週間</p>
+          <p class="service-meta-note">撮影完了後より</p>
+        </div>
+        <div class="service-meta-item">
+          <p class="service-meta-label">納品形式</p>
+          <p class="service-meta-value">データ</p>
+          <p class="service-meta-note">MP4／活用サポートあり</p>
+        </div>
+      </div>
+
+      <p class="flow-title">制作の流れ</p>
+      <div class="flow">
+        <div class="flow-step"><p class="flow-num">01</p><p class="flow-text">お問い合わせ・<br>ご相談</p></div>
+        <div class="flow-step"><p class="flow-num">02</p><p class="flow-text">打ち合わせ・<br>内容確認</p></div>
+        <div class="flow-step"><p class="flow-num">03</p><p class="flow-text">当日撮影</p></div>
+        <div class="flow-step"><p class="flow-num">04</p><p class="flow-text">編集・<br>確認</p></div>
+        <div class="flow-step"><p class="flow-num">05</p><p class="flow-text">納品</p></div>
+      </div>
+
+      <div class="sample-box">
+        <p>サンプル映像<br>準備中</p>
+      </div>
+    </div>
+
+    <!-- ③ 写真撮影 -->
+    <div class="service-block">
+      <p class="service-cat">写真撮影</p>
+      <h2 class="service-title">一枚の記録</h2>
+      <p class="service-sub">イベント・お店・人物・街の記録など</p>
+      <p class="service-desc">映像制作と合わせた撮影も、写真のみのご依頼も承ります。その瞬間の表情や空気を、一枚にとどめます。</p>
+
+      <div class="service-meta">
+        <div class="service-meta-item">
+          <p class="service-meta-label">料金</p>
+          <p class="service-meta-value">¥10,000〜</p>
+          <p class="service-meta-note">内容により変動</p>
+        </div>
+        <div class="service-meta-item">
+          <p class="service-meta-label">納期</p>
+          <p class="service-meta-value">約1週間</p>
+          <p class="service-meta-note">撮影完了後より</p>
+        </div>
+        <div class="service-meta-item">
+          <p class="service-meta-label">納品形式</p>
+          <p class="service-meta-value">データ</p>
+          <p class="service-meta-note">JPEG／枚数はご相談</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ④ あなたの記録 -->
+    <div class="service-block">
+      <p class="service-cat">あなたの記録</p>
+      <h2 class="service-title">想いを、かたちに</h2>
+      <p class="service-sub">メッセージ映像　／　スマホ編集</p>
+      <p class="service-desc">大切な人への想いをあなたの声と表情で残すメッセージ映像。スマホの中に眠っている写真や動画をまとめて、家族の歴史を一本の作品に。小さな記録も、大切な一本になります。</p>
+
+      <div class="service-meta">
+        <div class="service-meta-item">
+          <p class="service-meta-label">料金</p>
+          <p class="service-meta-value">¥15,000〜</p>
+          <p class="service-meta-note">内容により変動</p>
+        </div>
+        <div class="service-meta-item">
+          <p class="service-meta-label">納期</p>
+          <p class="service-meta-value">約3週間</p>
+          <p class="service-meta-note">素材受領後より</p>
+        </div>
+        <div class="service-meta-item">
+          <p class="service-meta-label">納品形式</p>
+          <p class="service-meta-value">データ</p>
+          <p class="service-meta-note">MP4／活用サポートあり</p>
+        </div>
+      </div>
+
+      <div class="sample-box">
+        <p>サンプル映像<br>準備中</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="cta-area">
+  <p class="cta-text">まずは、お気軽にご相談ください。</p>
+  <p class="cta-sub">料金・納期はご要望・内容により柔軟に対応いたします。</p>
+  <a href="index.html#contact" class="cta-btn">お問い合わせはこちら</a>
+</div>
+
+<footer>
+  <div class="foot-logo">下町きろくの動画屋</div>
+  <div class="foot-meta">大阪市生野区 桃谷 ／ 地域ドキュメンタリー作家 金 康裕<br>2029年 開店予定</div>
+</footer>
+
+</body>
+</html>
