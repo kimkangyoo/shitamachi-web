@@ -70,6 +70,20 @@ nav{background:#150c02;padding:22px 64px;display:flex;align-items:center;justify
 footer{background:#0c0600;padding:32px 48px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;border-top:1px solid #2a1804;}
 .foot-logo{font-family:'Shippori Mincho',serif;font-size:14px;letter-spacing:.25em;color:#8b6820;}
 .foot-meta{font-size:10px;color:#3a2408;letter-spacing:.12em;line-height:2.4;text-align:right;font-family:'Noto Sans JP',sans-serif;}
+
+@media(max-width:768px){
+  nav{padding:16px 20px;}
+  .nav-links{gap:16px;}
+  .nav-links a{font-size:13px;}
+  .nav-logo{font-size:16px;}
+  .page-hero{padding:48px 20px 40px;}
+  .sec{padding:56px 20px;}
+  .service-meta{grid-template-columns:1fr !important;}
+  .flow{flex-direction:column;}
+  .flow-step::after{content:'↓';right:50%;top:auto;bottom:-14px;transform:translateX(50%);}
+  footer{padding:24px 20px;flex-direction:column;align-items:flex-start;}
+  .foot-meta{text-align:left;}
+}
 </style>
 </head>
 <body>
@@ -176,7 +190,7 @@ footer{background:#0c0600;padding:32px 48px;display:flex;justify-content:space-b
         <div class="flow-step"><p class="flow-num">05</p><p class="flow-text">納品</p></div>
       </div>
 
-      <a href="https://www.youtube.com/watch?v=r-OEgeUL70g&t=300s" target="_blank" style="display:block;position:relative;border-radius:4px;overflow:hidden;text-decoration:none;margin-bottom:40px;">
+      <a href="https://www.youtube.com/watch?v=r-OEgeUL70g" target="_blank" style="display:block;position:relative;border-radius:4px;overflow:hidden;text-decoration:none;margin-bottom:40px;">
         <img src="https://img.youtube.com/vi/r-OEgeUL70g/maxresdefault.jpg" alt="サンプル映像" style="width:100%;display:block;border-radius:4px;">
         <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.3);">
           <div style="width:72px;height:72px;border-radius:50%;background:rgba(200,136,10,.9);display:flex;align-items:center;justify-content:center;">
