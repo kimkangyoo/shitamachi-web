@@ -305,22 +305,24 @@ footer{background:#0c0600;padding:32px 48px;display:flex;justify-content:space-b
     <p class="sec-eyebrow">CONTACT</p>
     <h2 class="sec-title">お問い合わせ</h2>
     <div class="form-grid">
+      <form action="contact.php" method="POST">
       <div class="form-row">
         <div class="form-group">
           <label>お名前</label>
-          <input type="text" placeholder="山田 太郎">
+          <input type="text" name="name" placeholder="山田 太郎" required>
         </div>
         <div class="form-group">
           <label>メールアドレス</label>
-          <input type="email" placeholder="example@mail.com">
+          <input type="email" name="email" placeholder="example@mail.com" required>
         </div>
       </div>
       <div class="form-group">
         <label>ご相談内容</label>
-        <select>
+        <select name="category">
           <option value="">選択してください</option>
           <option>街のドキュメント制作</option>
           <option>物語のあるイベント制作</option>
+          <option>写真撮影</option>
           <option>メッセージ映像</option>
           <option>スマホ編集</option>
           <option>その他</option>
@@ -328,10 +330,11 @@ footer{background:#0c0600;padding:32px 48px;display:flex;justify-content:space-b
       </div>
       <div class="form-group">
         <label>メッセージ</label>
-        <textarea placeholder="ご相談内容・ご質問をお気軽にどうぞ。&#10;小さなことでも歓迎しております。"></textarea>
+        <textarea name="message" placeholder="ご相談内容・ご質問をお気軽にどうぞ。&#10;小さなことでも歓迎しております。"></textarea>
       </div>
-      <button class="form-submit">送　信</button>
+      <button type="submit" class="form-submit">送　信</button>
       <p class="form-note">通常2〜3営業日以内にご返信いたします。</p>
+      </form>
     </div>
   </div>
 </section>
