@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>動画サイズダウン</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+      background: #0f0f0f;
+      color: #e0e0e0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: 0.05em;
+    }
+
+    .subtitle {
+      color: #888;
+      font-size: 0.9rem;
+      margin-bottom: 40px;
+    }
+
+    .card {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 16px;
+      padding: 32px;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .drop-zone {
+      border: 2px dashed #444;
+      border-radius: 12px;
+      padding: 48px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .drop-zone:hover, .drop-zone.drag-over {
+      border-color: #7c6fff;
+      background: rgba(124, 111, 255, 0.05);
+    }
+
+    .drop-zone svg {
+      width: 48px;
+      height: 48px;
+      color: #555;
+      margin-bottom: 12px;
+    }
+
+    .drop-zone p {
+      color: #888;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .drop-zone span {
+      color: #7c6fff;
+      font-weight: 600;
+    }
+
+    #file-input { display: none; }
+
+    .settings {
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .setting-label {
+      font-size: 0.9rem;
+      color: #ccc;
+      min-width: 100px;
+    }
+
+    select, input[type="range"] {
+      flex: 1;
+    }
+
+    select {
+      background: #252525;
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: #e0e0e0;
+      padding: 8px 12px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      outline: none;
+    }
+
+    select:focus { border-color: #7c6fff; }
+
+    input[type="range"] {
+      accent-color: #7c6fff;
+      cursor: pointer;
+    }
+
+    .range-value {
+      min-width: 48px;
+      text-align: right;
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      margin-top: 24px;
+      padding: 14px;
+      background: #7c6fff;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, opacity 0.2s;
+    }
+
+    .btn:hover { background: #6a5de0; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .file-info {
+      display: none;
+      background: #252525;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 0.85rem;
+      color: #aaa;
+      margin-top: 16px;
+      word-break: break-all;
+    }
+
+    .file-info strong { color: #e0e0e0; }
+
+    .progress-area {
+      display: none;
+      margin-top: 24px;
+    }
+
+    .progress-label {
+      font-size: 0.85rem;
+      color: #aaa;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .progress-bar-bg {
+      background: #252525;
+      border-radius: 99px;
+      height: 8px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #7c6fff, #a78bfa);
+      border-radius: 99px;
+      width: 0%;
+      transition: width 0.3s;
+    }
+
+    .log {
+      margin-top: 12px;
+      font-size: 0.78rem;
+      color: #666;
+      font-family: monospace;
+      max-height: 60px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .result {
+      display: none;
+      margin-top: 24px;
+      background: #1e2a1e;
+      border: 1px solid #2a3a2a;
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .result h3 {
+      font-size: 1rem;
+      color: #6fcf97;
+      margin-bottom: 12px;
+    }
+
+    .result-stats {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      flex: 1;
+      min-width: 100px;
+      background: #252525;
+      border-radius: 8px;
+      padding: 10px 14px;
+      text-align: center;
+    }
+
+    .stat .val { font-size: 1.2rem; font-weight: 700; color: #e0e0e0; }
+    .stat .lbl { font-size: 0.75rem; color: #888; margin-top: 2px; }
+    .stat.saved .val { color: #6fcf97; }
+
+    .btn-download {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      background: #27ae60;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      text-align: center;
+      text-decoration: none;
+    }
+
+    .btn-download:hover { background: #219150; }
+
+    .note {
+      margin-top: 24px;
+      font-size: 0.78rem;
+      color: #555;
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    .loading-ffmpeg {
+      display: none;
+      text-align: center;
+      padding: 20px;
+      color: #888;
+      font-size: 0.9rem;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #333;
+      border-top-color: #7c6fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <h1>🎬 動画サイズダウン</h1>
+  <p class="subtitle">ブラウザ上で完結 — ファイルはどこにも送信されません</p>
+
+  <div class="card">
+    <div class="drop-zone" id="drop-zone">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+      </svg>
+      <p><span>クリックして選択</span> またはここにドラッグ＆ドロップ</p>
+      <p style="margin-top:6px; font-size:0.8rem;">MP4 / MOV / AVI / MKV / WebM など</p>
+    </div>
+    <input type="file" id="file-input" accept="video/*">
+
+    <div class="file-info" id="file-info"></div>
+
+    <div class="loading-ffmpeg" id="loading-ffmpeg">
+      <span class="spinner"></span>FFmpeg を読み込み中...（初回のみ時間がかかります）
+    </div>
+
+    <div class="settings" id="settings" style="display:none">
+      <div class="setting-row">
+        <span class="setting-label">品質</span>
+        <input type="range" id="crf" min="18" max="40" value="28" step="1">
+        <span class="range-value" id="crf-val">28</span>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">解像度</span>
+        <select id="resolution">
+          <option value="">そのまま</option>
+          <option value="1920:1080">1080p (FHD)</option>
+          <option value="1280:720">720p (HD)</option>
+          <option value="854:480">480p</option>
+          <option value="640:360">360p</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">出力形式</span>
+        <select id="format">
+          <option value="mp4">MP4 (H.264)</option>
+          <option value="webm">WebM (VP9)</option>
+        </select>
+      </div>
+
+      <button class="btn" id="compress-btn">圧縮を開始</button>
+    </div>
+
+    <div class="progress-area" id="progress-area">
+      <div class="progress-label">
+        <span>処理中...</span>
+        <span id="pct">0%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+      <div class="log" id="log"></div>
+    </div>
+
+    <div class="result" id="result">
+      <h3>✅ 圧縮完了！</h3>
+      <div class="result-stats">
+        <div class="stat">
+          <div class="val" id="orig-size">-</div>
+          <div class="lbl">元のサイズ</div>
+        </div>
+        <div class="stat">
+          <div class="val" id="new-size">-</div>
+          <div class="lbl">圧縮後</div>
+        </div>
+        <div class="stat saved">
+          <div class="val" id="saved-pct">-</div>
+          <div class="lbl">削減率</div>
+        </div>
+      </div>
+      <a class="btn-download" id="download-link">⬇ ダウンロード</a>
+    </div>
+
+    <p class="note">処理はすべてブラウザ内で行われます。<br>ファイルは外部サーバーに送信されません。</p>
+  </div>
+
+  <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.6/dist/umd/ffmpeg.js"></script>
+  <script src="https://unpkg.com/@ffmpeg/util@0.12.1/dist/umd/index.js"></script>
+  <script>
+    const { FFmpeg } = FFmpegWASM;
+    const { fetchFile, toBlobURL } = FFmpegUtil;
+
+    let ffmpeg = null;
+    let selectedFile = null;
+    let outputURL = null;
+
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const fileInfo = document.getElementById('file-info');
+    const settings = document.getElementById('settings');
+    const loadingFFmpeg = document.getElementById('loading-ffmpeg');
+    const compressBtn = document.getElementById('compress-btn');
+    const progressArea = document.getElementById('progress-area');
+    const progressBar = document.getElementById('progress-bar');
+    const pct = document.getElementById('pct');
+    const logEl = document.getElementById('log');
+    const resultEl = document.getElementById('result');
+    const crfInput = document.getElementById('crf');
+    const crfVal = document.getElementById('crf-val');
+
+    crfInput.addEventListener('input', () => {
+      crfVal.textContent = crfInput.value;
+    });
+
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropZone.classList.remove('drag-over');
+      const f = e.dataTransfer.files[0];
+      if (f && f.type.startsWith('video/')) handleFile(f);
+    });
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files[0]) handleFile(fileInput.files[0]);
+    });
+
+    function fmtSize(bytes) {
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    function handleFile(file) {
+      selectedFile = file;
+      fileInfo.style.display = 'block';
+      fileInfo.innerHTML = `<strong>${file.name}</strong>　${fmtSize(file.size)}`;
+      resultEl.style.display = 'none';
+      progressArea.style.display = 'none';
+      if (outputURL) { URL.revokeObjectURL(outputURL); outputURL = null; }
+
+      if (!ffmpeg) {
+        loadingFFmpeg.style.display = 'block';
+        settings.style.display = 'none';
+        loadFFmpeg().then(() => {
+          loadingFFmpeg.style.display = 'none';
+          settings.style.display = 'flex';
+        }).catch(err => {
+          loadingFFmpeg.innerHTML = '❌ FFmpeg の読み込みに失敗しました。ページを再読み込みしてください。';
+          console.error(err);
+        });
+      } else {
+        settings.style.display = 'flex';
+      }
+    }
+
+    async function loadFFmpeg() {
+      ffmpeg = new FFmpeg();
+      const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
+      await ffmpeg.load({
+        coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+        wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+      });
+      ffmpeg.on('log', ({ message }) => {
+        logEl.textContent = message;
+      });
+      ffmpeg.on('progress', ({ progress }) => {
+        const p = Math.min(Math.round(progress * 100), 100);
+        progressBar.style.width = p + '%';
+        pct.textContent = p + '%';
+      });
+    }
+
+    compressBtn.addEventListener('click', async () => {
+      if (!selectedFile || !ffmpeg) return;
+
+      compressBtn.disabled = true;
+      progressArea.style.display = 'block';
+      resultEl.style.display = 'none';
+      progressBar.style.width = '0%';
+      pct.textContent = '0%';
+
+      const crf = crfInput.value;
+      const resolution = document.getElementById('resolution').value;
+      const format = document.getElementById('format').value;
+      const ext = format === 'webm' ? 'webm' : 'mp4';
+      const inName = 'input.' + (selectedFile.name.split('.').pop() || 'mp4');
+      const outName = 'output.' + ext;
+
+      try {
+        await ffmpeg.writeFile(inName, await fetchFile(selectedFile));
+
+        const args = ['-i', inName];
+
+        if (format === 'mp4') {
+          args.push('-c:v', 'libx264', '-crf', crf, '-preset', 'fast', '-c:a', 'aac', '-b:a', '128k');
+        } else {
+          args.push('-c:v', 'libvpx-vp9', '-crf', crf, '-b:v', '0', '-c:a', 'libopus', '-b:a', '128k');
+        }
+
+        if (resolution) {
+          args.push('-vf', `scale=${resolution}:force_original_aspect_ratio=decrease`);
+        }
+
+        args.push('-movflags', '+faststart', outName);
+
+        await ffmpeg.exec(args);
+
+        const data = await ffmpeg.readFile(outName);
+        const blob = new Blob([data.buffer], { type: format === 'webm' ? 'video/webm' : 'video/mp4' });
+        if (outputURL) URL.revokeObjectURL(outputURL);
+        outputURL = URL.createObjectURL(blob);
+
+        const origMB = selectedFile.size;
+        const newMB = blob.size;
+        const saved = Math.round((1 - newMB / origMB) * 100);
+
+        document.getElementById('orig-size').textContent = fmtSize(origMB);
+        document.getElementById('new-size').textContent = fmtSize(newMB);
+        document.getElementById('saved-pct').textContent = saved > 0 ? `-${saved}%` : `+${Math.abs(saved)}%`;
+
+        const dl = document.getElementById('download-link');
+        const baseName = selectedFile.name.replace(/\.[^.]+$/, '');
+        dl.href = outputURL;
+        dl.download = `${baseName}_compressed.${ext}`;
+
+        resultEl.style.display = 'block';
+        progressBar.style.width = '100%';
+        pct.textContent = '100%';
+
+        await ffmpeg.deleteFile(inName);
+        await ffmpeg.deleteFile(outName);
+      } catch (err) {
+        console.error(err);
+        logEl.textContent = '❌ エラーが発生しました: ' + err.message;
+      }
+
+      compressBtn.disabled = false;
+    });
+  </script>
+</body>
+</html>
