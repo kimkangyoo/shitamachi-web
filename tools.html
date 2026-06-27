@@ -269,6 +269,46 @@ tr.shot-complete td{opacity:.5;}
 .sb-fullscreen{position:fixed;inset:0;background:#000;z-index:10002;display:flex;align-items:center;justify-content:center;cursor:pointer;}
 .sb-fullscreen img{max-width:100%;max-height:100%;object-fit:contain;}
 
+/* DOCS */
+.doc-tabs{display:flex;gap:2px;margin-bottom:24px;background:#b89848;}
+.doc-tab{padding:12px 24px;font-family:'Shippori Mincho',serif;font-size:13px;letter-spacing:.15em;color:#8b6820;cursor:pointer;background:#e8dcc8;}
+.doc-tab:hover{color:#c8880a;}
+.doc-tab.active{background:#150c02;color:#e8d090;}
+.doc-section{display:none;}
+.doc-section.active{display:block;}
+.doc-form{background:#f0e4cc;border:1px solid rgba(184,152,72,.4);padding:24px;margin-bottom:24px;}
+.doc-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.doc-form-grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;}
+.doc-item-row{display:grid;grid-template-columns:1fr 80px 100px 100px 40px;gap:6px;margin-bottom:6px;align-items:center;}
+.doc-item-row input,.doc-item-row select{font-size:12px;padding:7px 10px;}
+.doc-total-row{display:flex;justify-content:flex-end;gap:24px;padding:16px 0;border-top:1px solid #b89848;margin-top:12px;}
+.doc-total-item{display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
+.doc-total-label{font-size:10px;letter-spacing:.3em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;}
+.doc-total-value{font-family:'Shippori Mincho',serif;font-size:18px;color:#1a0e04;}
+
+/* PRINT PREVIEW */
+.print-preview{background:#fff;border:1px solid #ccc;padding:40px;max-width:720px;font-family:'Noto Sans JP',sans-serif;font-size:13px;color:#111;line-height:1.8;margin-bottom:24px;}
+.print-preview h1{font-family:'Shippori Mincho',serif;font-size:24px;text-align:center;margin-bottom:32px;letter-spacing:.2em;border-bottom:2px solid #111;padding-bottom:16px;}
+.print-preview h2{font-size:13px;letter-spacing:.2em;margin:20px 0 8px;border-left:3px solid #888;padding-left:10px;}
+.print-meta{display:flex;justify-content:space-between;margin-bottom:24px;}
+.print-meta-left{font-size:16px;font-weight:700;}
+.print-meta-right{text-align:right;font-size:12px;color:#555;}
+.print-table{width:100%;border-collapse:collapse;margin:12px 0;}
+.print-table th{background:#f5f5f5;font-size:11px;letter-spacing:.1em;padding:8px 10px;border:1px solid #ddd;text-align:left;}
+.print-table td{padding:8px 10px;border:1px solid #ddd;font-size:12px;}
+.print-table .num{text-align:right;}
+.print-total{text-align:right;margin-top:12px;}
+.print-total table{margin-left:auto;}
+.print-total td{padding:4px 12px;font-size:13px;}
+.print-total .grand{font-size:16px;font-weight:700;border-top:2px solid #111;}
+.print-seal{width:60px;height:60px;border:2px solid #c00;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#c00;font-size:11px;margin-left:16px;vertical-align:middle;}
+.print-notes{background:#f9f9f9;border:1px solid #eee;padding:12px 16px;font-size:12px;margin-top:16px;}
+@media print{
+  body > *:not(.print-modal){display:none !important;}
+  .print-modal{position:fixed;inset:0;background:#fff;z-index:99999;padding:24px;}
+  .print-modal .no-print{display:none !important;}
+}
+
 /* TOAST */
 .toast{position:fixed;bottom:32px;right:32px;background:#150c02;border:1px solid #c8880a;color:#e8d090;font-family:'Noto Sans JP',sans-serif;font-size:12px;letter-spacing:.1em;padding:14px 24px;z-index:10000;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;}
 .toast.show{opacity:1;transform:translateY(0);}
@@ -322,6 +362,7 @@ tr.shot-complete td{opacity:.5;}
   <div class="tab" onclick="switchTab('nd')">NDフィルター</div>
   <div class="tab" onclick="switchTab('timeline')">撮影タイムライン</div>
   <div class="tab" onclick="switchTab('storyboard')">絵コンテ</div>
+  <div class="tab" onclick="switchTab('docs')">書類</div>
 </div>
 
 <!-- ======================== SHOOT TAB ======================== -->
@@ -1015,6 +1056,138 @@ tr.shot-complete td{opacity:.5;}
   <div class="tl-list" id="tlList"></div>
 </div>
 
+<!-- ======================== DOCS TAB ======================== -->
+<div class="tab-content" id="tab-docs">
+  <div class="sec-head">
+    <div><div class="sec-eyebrow">DOCUMENTS</div><div class="sec-title">書類作成</div></div>
+  </div>
+
+  <div class="doc-tabs">
+    <div class="doc-tab active" onclick="switchDocTab('brief')">案件概要</div>
+    <div class="doc-tab" onclick="switchDocTab('rundown')">進行表</div>
+    <div class="doc-tab" onclick="switchDocTab('estimate')">見積書</div>
+    <div class="doc-tab" onclick="switchDocTab('invoice')">請求書</div>
+    <div class="doc-tab" onclick="switchDocTab('receipt')">領収書</div>
+  </div>
+
+  <!-- 案件概要 -->
+  <div class="doc-section active" id="docsec-brief">
+    <div class="doc-form">
+      <div class="doc-form-grid">
+        <div><span class="field-label">クライアント名</span><input type="text" id="br-client" placeholder="田中太郎 様"></div>
+        <div><span class="field-label">案件名・タイトル</span><input type="text" id="br-title" placeholder="結婚式映像制作"></div>
+        <div><span class="field-label">撮影日</span><input type="date" id="br-shoot"></div>
+        <div><span class="field-label">撮影場所</span><input type="text" id="br-location" placeholder="○○ホテル"></div>
+        <div><span class="field-label">納品日</span><input type="date" id="br-delivery"></div>
+        <div><span class="field-label">担当者</span><input type="text" id="br-staff" placeholder="自社担当者名"></div>
+      </div>
+      <div style="margin-bottom:12px;"><span class="field-label">撮影内容・概要</span><textarea id="br-overview" style="min-height:80px;" placeholder="撮影する内容の概要"></textarea></div>
+      <div style="margin-bottom:12px;"><span class="field-label">納品物</span><textarea id="br-deliverables" style="min-height:60px;" placeholder="例：本編動画 1本（約5分）&#10;ハイライト動画 1本（約90秒）&#10;写真スライドショー 1本"></textarea></div>
+      <div style="margin-bottom:12px;"><span class="field-label">特記事項・クライアント要望</span><textarea id="br-notes" style="min-height:60px;" placeholder="特記事項など"></textarea></div>
+      <button class="btn btn-primary" onclick="printDoc('brief')">印刷 / PDF保存</button>
+    </div>
+  </div>
+
+  <!-- 進行表 -->
+  <div class="doc-section" id="docsec-rundown">
+    <div class="doc-form">
+      <div class="doc-form-grid">
+        <div><span class="field-label">案件名</span><input type="text" id="rd-title" placeholder="結婚式映像制作"></div>
+        <div><span class="field-label">撮影日</span><input type="date" id="rd-date"></div>
+        <div><span class="field-label">集合場所</span><input type="text" id="rd-venue" placeholder="○○ホテル 正面玄関"></div>
+        <div><span class="field-label">スタッフ</span><input type="text" id="rd-staff" placeholder="例：撮影 田中・音声 鈴木"></div>
+      </div>
+      <div style="margin-bottom:8px;font-size:10px;letter-spacing:.4em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;">タイムスケジュール</div>
+      <div id="rd-items"></div>
+      <div style="display:grid;grid-template-columns:90px 1fr 80px auto;gap:8px;margin-top:8px;align-items:end;">
+        <div><span class="field-label">時刻</span><input type="time" id="rd-new-time" value="09:00"></div>
+        <div><span class="field-label">内容</span><input type="text" id="rd-new-name" placeholder="例：会場入り・機材セット" onkeydown="if(event.key==='Enter')addRdItem()"></div>
+        <div><span class="field-label">担当</span><input type="text" id="rd-new-who" placeholder="全員"></div>
+        <button class="btn btn-primary" onclick="addRdItem()" style="align-self:flex-end;">追加</button>
+      </div>
+      <div style="margin-top:16px;"><span class="field-label">備考・注意事項</span><textarea id="rd-notes" style="min-height:60px;" placeholder="駐車場・搬入口の案内など"></textarea></div>
+      <button class="btn btn-primary" onclick="printDoc('rundown')" style="margin-top:12px;">印刷 / PDF保存</button>
+    </div>
+  </div>
+
+  <!-- 見積書 -->
+  <div class="doc-section" id="docsec-estimate">
+    <div class="doc-form">
+      <div class="doc-form-grid">
+        <div><span class="field-label">宛先</span><input type="text" id="es-to" placeholder="田中太郎 様"></div>
+        <div><span class="field-label">見積番号</span><input type="text" id="es-no" placeholder="EST-001"></div>
+        <div><span class="field-label">発行日</span><input type="date" id="es-date"></div>
+        <div><span class="field-label">有効期限</span><input type="date" id="es-expire"></div>
+        <div><span class="field-label">件名</span><input type="text" id="es-title" placeholder="映像制作費用"></div>
+        <div><span class="field-label">支払条件</span><input type="text" id="es-payment" placeholder="例：納品後30日以内"></div>
+      </div>
+      <div style="margin-bottom:8px;font-size:10px;letter-spacing:.4em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;">明細</div>
+      <div id="es-items"></div>
+      <div class="doc-item-row" style="margin-top:8px;">
+        <input type="text" id="es-new-name" placeholder="品目名" onkeydown="if(event.key==='Enter')addDocItem('es')">
+        <input type="number" id="es-new-qty" placeholder="数量" value="1" min="1">
+        <input type="number" id="es-new-price" placeholder="単価" min="0">
+        <select id="es-new-tax"><option value="10">税10%</option><option value="8">税8%</option><option value="0">非課税</option></select>
+        <button class="btn btn-primary" onclick="addDocItem('es')">+</button>
+      </div>
+      <div class="doc-total-row" id="es-total"></div>
+      <div style="margin-top:8px;"><span class="field-label">備考</span><textarea id="es-notes" style="min-height:50px;" placeholder="特記事項など"></textarea></div>
+      <button class="btn btn-primary" onclick="printDoc('estimate')" style="margin-top:12px;">印刷 / PDF保存</button>
+    </div>
+  </div>
+
+  <!-- 請求書 -->
+  <div class="doc-section" id="docsec-invoice">
+    <div class="doc-form">
+      <div class="doc-form-grid">
+        <div><span class="field-label">宛先</span><input type="text" id="iv-to" placeholder="田中太郎 様"></div>
+        <div><span class="field-label">請求番号</span><input type="text" id="iv-no" placeholder="INV-001"></div>
+        <div><span class="field-label">発行日</span><input type="date" id="iv-date"></div>
+        <div><span class="field-label">支払期限</span><input type="date" id="iv-due"></div>
+        <div><span class="field-label">件名</span><input type="text" id="iv-title" placeholder="映像制作費用"></div>
+        <div><span class="field-label">振込先</span><input type="text" id="iv-bank" placeholder="○○銀行 ××支店 普通 1234567"></div>
+      </div>
+      <div style="margin-bottom:8px;font-size:10px;letter-spacing:.4em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;">明細</div>
+      <div id="iv-items"></div>
+      <div class="doc-item-row" style="margin-top:8px;">
+        <input type="text" id="iv-new-name" placeholder="品目名" onkeydown="if(event.key==='Enter')addDocItem('iv')">
+        <input type="number" id="iv-new-qty" placeholder="数量" value="1" min="1">
+        <input type="number" id="iv-new-price" placeholder="単価" min="0">
+        <select id="iv-new-tax"><option value="10">税10%</option><option value="8">税8%</option><option value="0">非課税</option></select>
+        <button class="btn btn-primary" onclick="addDocItem('iv')">+</button>
+      </div>
+      <div class="doc-total-row" id="iv-total"></div>
+      <div style="margin-top:8px;"><span class="field-label">備考</span><textarea id="iv-notes" style="min-height:50px;" placeholder="特記事項など"></textarea></div>
+      <button class="btn btn-primary" onclick="printDoc('invoice')" style="margin-top:12px;">印刷 / PDF保存</button>
+    </div>
+  </div>
+
+  <!-- 領収書 -->
+  <div class="doc-section" id="docsec-receipt">
+    <div class="doc-form">
+      <div class="doc-form-grid">
+        <div><span class="field-label">宛先（上様）</span><input type="text" id="rc-to" placeholder="田中太郎 様"></div>
+        <div><span class="field-label">発行日</span><input type="date" id="rc-date"></div>
+        <div><span class="field-label">件名</span><input type="text" id="rc-title" placeholder="映像制作費用"></div>
+        <div><span class="field-label">金額（税込）</span><input type="number" id="rc-amount" placeholder="100000"></div>
+        <div><span class="field-label">うち消費税</span><input type="number" id="rc-tax" placeholder="9090"></div>
+        <div><span class="field-label">支払方法</span><select id="rc-method"><option>銀行振込</option><option>現金</option><option>クレジットカード</option><option>その他</option></select></div>
+      </div>
+      <div><span class="field-label">但し書き</span><input type="text" id="rc-note" placeholder="映像制作費として" style="margin-bottom:12px;"></div>
+      <button class="btn btn-primary" onclick="printDoc('receipt')">印刷 / PDF保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- PRINT MODAL -->
+<div id="printModal" class="print-modal" style="display:none;position:fixed;inset:0;background:#fff;z-index:99999;padding:32px;overflow-y:auto;">
+  <div class="no-print" style="margin-bottom:16px;display:flex;gap:12px;">
+    <button class="btn btn-primary" onclick="window.print()">印刷 / PDF保存</button>
+    <button class="btn btn-ghost" onclick="document.getElementById('printModal').style.display='none'">閉じる</button>
+  </div>
+  <div id="printContent"></div>
+</div>
+
 <!-- ======================== STORYBOARD TAB ======================== -->
 <div class="tab-content" id="tab-storyboard">
   <div class="sec-head">
@@ -1185,6 +1358,7 @@ function switchTab(name){
   event.target.classList.add('active');
   document.getElementById('tab-' + name).classList.add('active');
   if(name==='schedule'){ renderSchedule(); renderDashboard(); }
+  if(name==='docs'){ renderRdItems(); }
   if(name==='timeline') renderTimeline();
   if(name==='nd') initND();
   if(name==='storyboard') renderSB();
@@ -1825,6 +1999,223 @@ function switchToProject(id){
   renderDashboard();
 }
 
+// ─── DOCUMENTS ───────────────────────────────────────────────────────────────
+function switchDocTab(name){
+  document.querySelectorAll('.doc-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.doc-section').forEach(s=>s.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('docsec-'+name).classList.add('active');
+}
+
+// 自社情報（ローカルストレージに保存）
+function myInfo(){
+  return JSON.parse(localStorage.getItem('myInfo') || '{"name":"","address":"","tel":"","email":"","bank":""}');
+}
+
+function fmtYen(n){ return '¥' + Number(n||0).toLocaleString(); }
+function fmtDateJP(str){ if(!str) return ''; const d=new Date(str); return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`; }
+
+// ── 明細管理 ──
+const docItems = {es:[], iv:[]};
+
+function addDocItem(prefix){
+  const name  = document.getElementById(`${prefix}-new-name`).value.trim();
+  const qty   = parseInt(document.getElementById(`${prefix}-new-qty`).value) || 1;
+  const price = parseInt(document.getElementById(`${prefix}-new-price`).value) || 0;
+  const tax   = parseInt(document.getElementById(`${prefix}-new-tax`).value);
+  if(!name){ showToast('品目名を入力してください'); return; }
+  docItems[prefix].push({name, qty, price, tax});
+  document.getElementById(`${prefix}-new-name`).value = '';
+  document.getElementById(`${prefix}-new-price`).value = '';
+  renderDocItems(prefix);
+}
+
+function delDocItem(prefix, i){ docItems[prefix].splice(i,1); renderDocItems(prefix); }
+
+function renderDocItems(prefix){
+  const container = document.getElementById(`${prefix}-items`);
+  let html = '';
+  docItems[prefix].forEach((item,i)=>{
+    const subtotal = item.qty * item.price;
+    html += `<div class="doc-item-row">
+      <input type="text" value="${esc(item.name)}" onchange="docItems['${prefix}'][${i}].name=this.value;renderDocItems('${prefix}')">
+      <input type="number" value="${item.qty}" min="1" onchange="docItems['${prefix}'][${i}].qty=parseInt(this.value)||1;renderDocItems('${prefix}')">
+      <input type="number" value="${item.price}" min="0" onchange="docItems['${prefix}'][${i}].price=parseInt(this.value)||0;renderDocItems('${prefix}')">
+      <div style="font-size:12px;color:#5a3c18;padding:0 4px;">${fmtYen(subtotal)}</div>
+      <button class="btn-danger" style="padding:4px 10px;" onclick="delDocItem('${prefix}',${i})">×</button>
+    </div>`;
+  });
+  container.innerHTML = html;
+  renderDocTotal(prefix);
+}
+
+function renderDocTotal(prefix){
+  const items = docItems[prefix];
+  const subtotal = items.reduce((s,i)=>s+i.qty*i.price, 0);
+  const tax10 = items.filter(i=>i.tax===10).reduce((s,i)=>s+Math.floor(i.qty*i.price*0.1),0);
+  const tax8  = items.filter(i=>i.tax===8).reduce((s,i)=>s+Math.floor(i.qty*i.price*0.08),0);
+  const total = subtotal + tax10 + tax8;
+  const el = document.getElementById(`${prefix}-total`);
+  el.innerHTML = `
+    <div class="doc-total-item"><div class="doc-total-label">小計</div><div class="doc-total-value">${fmtYen(subtotal)}</div></div>
+    ${tax10?`<div class="doc-total-item"><div class="doc-total-label">消費税（10%）</div><div class="doc-total-value">${fmtYen(tax10)}</div></div>`:''}
+    ${tax8?`<div class="doc-total-item"><div class="doc-total-label">消費税（8%）</div><div class="doc-total-value">${fmtYen(tax8)}</div></div>`:''}
+    <div class="doc-total-item"><div class="doc-total-label">合計（税込）</div><div class="doc-total-value" style="font-size:22px;color:#1a0e04;">${fmtYen(total)}</div></div>`;
+}
+
+// ── 進行表アイテム ──
+let rdItems = [];
+function addRdItem(){
+  const time = document.getElementById('rd-new-time').value;
+  const name = document.getElementById('rd-new-name').value.trim();
+  const who  = document.getElementById('rd-new-who').value.trim();
+  if(!name){ showToast('内容を入力してください'); return; }
+  rdItems.push({time, name, who});
+  rdItems.sort((a,b)=>a.time.localeCompare(b.time));
+  document.getElementById('rd-new-name').value = '';
+  renderRdItems();
+}
+function delRdItem(i){ rdItems.splice(i,1); renderRdItems(); }
+function renderRdItems(){
+  const c = document.getElementById('rd-items');
+  if(!rdItems.length){ c.innerHTML=''; return; }
+  let html = '<div style="display:grid;grid-template-columns:90px 1fr 80px 40px;gap:2px;background:#b89848;margin-bottom:2px;">'
+    + ['時刻','内容','担当',''].map(h=>`<div style="background:#150c02;color:#8b6820;font-family:\'Noto Sans JP\',sans-serif;font-size:10px;letter-spacing:.3em;padding:8px 12px;">${h}</div>`).join('')+'</div>';
+  rdItems.forEach((item,i)=>{
+    html += `<div style="display:grid;grid-template-columns:90px 1fr 80px 40px;gap:2px;background:#b89848;margin-bottom:1px;">
+      <div style="background:#f0e4cc;padding:8px 12px;font-family:monospace;font-size:13px;">${item.time}</div>
+      <div style="background:#f0e4cc;padding:8px 12px;font-family:\'Noto Sans JP\',sans-serif;font-size:12px;">${esc(item.name)}</div>
+      <div style="background:#f0e4cc;padding:8px 12px;font-family:\'Noto Sans JP\',sans-serif;font-size:12px;color:#8b6820;">${esc(item.who)}</div>
+      <div style="background:#f0e4cc;padding:4px;display:flex;align-items:center;justify-content:center;"><button class="btn-danger" style="padding:4px 8px;" onclick="delRdItem(${i})">×</button></div>
+    </div>`;
+  });
+  c.innerHTML = html;
+}
+
+// ── 印刷 ──
+function printDoc(type){
+  const me = myInfo();
+  let html = '';
+
+  if(type === 'brief'){
+    const client = document.getElementById('br-client').value;
+    const title  = document.getElementById('br-title').value;
+    html = `<div class="print-preview">
+      <h1>案件概要書</h1>
+      <div class="print-meta">
+        <div class="print-meta-left">${esc(client)}</div>
+        <div class="print-meta-right">${me.name}<br>${fmtDateJP(document.getElementById('br-shoot').value)}</div>
+      </div>
+      <h2>基本情報</h2>
+      <table class="print-table">
+        <tr><th style="width:140px;">案件名</th><td>${esc(title)}</td></tr>
+        <tr><th>クライアント</th><td>${esc(client)}</td></tr>
+        <tr><th>撮影日</th><td>${fmtDateJP(document.getElementById('br-shoot').value)}</td></tr>
+        <tr><th>撮影場所</th><td>${esc(document.getElementById('br-location').value)}</td></tr>
+        <tr><th>納品日</th><td>${fmtDateJP(document.getElementById('br-delivery').value)}</td></tr>
+        <tr><th>担当者</th><td>${esc(document.getElementById('br-staff').value)}</td></tr>
+      </table>
+      <h2>撮影内容・概要</h2>
+      <div class="print-notes">${esc(document.getElementById('br-overview').value).replace(/\n/g,'<br>')}</div>
+      <h2>納品物</h2>
+      <div class="print-notes">${esc(document.getElementById('br-deliverables').value).replace(/\n/g,'<br>')}</div>
+      ${document.getElementById('br-notes').value?`<h2>特記事項</h2><div class="print-notes">${esc(document.getElementById('br-notes').value).replace(/\n/g,'<br>')}</div>`:''}
+    </div>`;
+
+  } else if(type === 'rundown'){
+    const rows = rdItems.map(item=>`<tr><td style="font-family:monospace;">${item.time}</td><td>${esc(item.name)}</td><td>${esc(item.who)}</td></tr>`).join('');
+    html = `<div class="print-preview">
+      <h1>撮影進行表</h1>
+      <div class="print-meta">
+        <div class="print-meta-left">${esc(document.getElementById('rd-title').value)}</div>
+        <div class="print-meta-right">${fmtDateJP(document.getElementById('rd-date').value)}</div>
+      </div>
+      <table class="print-table" style="margin-bottom:8px;">
+        <tr><th style="width:120px;">集合場所</th><td>${esc(document.getElementById('rd-venue').value)}</td></tr>
+        <tr><th>スタッフ</th><td>${esc(document.getElementById('rd-staff').value)}</td></tr>
+      </table>
+      <h2>タイムスケジュール</h2>
+      <table class="print-table"><thead><tr><th style="width:80px;">時刻</th><th>内容</th><th style="width:100px;">担当</th></tr></thead><tbody>${rows}</tbody></table>
+      ${document.getElementById('rd-notes').value?`<h2>備考・注意事項</h2><div class="print-notes">${esc(document.getElementById('rd-notes').value).replace(/\n/g,'<br>')}</div>`:''}
+    </div>`;
+
+  } else if(type === 'estimate'){
+    const items = docItems['es'];
+    const subtotal = items.reduce((s,i)=>s+i.qty*i.price,0);
+    const tax10 = items.filter(i=>i.tax===10).reduce((s,i)=>s+Math.floor(i.qty*i.price*0.1),0);
+    const tax8  = items.filter(i=>i.tax===8).reduce((s,i)=>s+Math.floor(i.qty*i.price*0.08),0);
+    const total = subtotal+tax10+tax8;
+    const rows = items.map(i=>`<tr><td>${esc(i.name)}</td><td class="num">${i.qty}</td><td class="num">${fmtYen(i.price)}</td><td class="num">${fmtYen(i.qty*i.price)}</td><td>${i.tax?i.tax+'%':'非課税'}</td></tr>`).join('');
+    html = `<div class="print-preview">
+      <h1>御見積書</h1>
+      <div class="print-meta">
+        <div class="print-meta-left">${esc(document.getElementById('es-to').value)}</div>
+        <div class="print-meta-right">${me.name||'氏名未設定'}<br>発行日：${fmtDateJP(document.getElementById('es-date').value)}<br>見積番号：${esc(document.getElementById('es-no').value)}<br>有効期限：${fmtDateJP(document.getElementById('es-expire').value)}</div>
+      </div>
+      <div style="margin-bottom:16px;font-size:14px;">件名：<strong>${esc(document.getElementById('es-title').value)}</strong></div>
+      <table class="print-table"><thead><tr><th>品目</th><th class="num">数量</th><th class="num">単価</th><th class="num">金額</th><th>税率</th></tr></thead><tbody>${rows}</tbody></table>
+      <div class="print-total"><table>
+        <tr><td>小計</td><td class="num">${fmtYen(subtotal)}</td></tr>
+        ${tax10?`<tr><td>消費税（10%）</td><td class="num">${fmtYen(tax10)}</td></tr>`:''}
+        ${tax8?`<tr><td>消費税（8%）</td><td class="num">${fmtYen(tax8)}</td></tr>`:''}
+        <tr class="grand"><td>合計（税込）</td><td class="num">${fmtYen(total)}</td></tr>
+      </table></div>
+      ${document.getElementById('es-payment').value?`<div class="print-notes">支払条件：${esc(document.getElementById('es-payment').value)}</div>`:''}
+      ${document.getElementById('es-notes').value?`<div class="print-notes">備考：${esc(document.getElementById('es-notes').value)}</div>`:''}
+    </div>`;
+
+  } else if(type === 'invoice'){
+    const items = docItems['iv'];
+    const subtotal = items.reduce((s,i)=>s+i.qty*i.price,0);
+    const tax10 = items.filter(i=>i.tax===10).reduce((s,i)=>s+Math.floor(i.qty*i.price*0.1),0);
+    const tax8  = items.filter(i=>i.tax===8).reduce((s,i)=>s+Math.floor(i.qty*i.price*0.08),0);
+    const total = subtotal+tax10+tax8;
+    const rows = items.map(i=>`<tr><td>${esc(i.name)}</td><td class="num">${i.qty}</td><td class="num">${fmtYen(i.price)}</td><td class="num">${fmtYen(i.qty*i.price)}</td><td>${i.tax?i.tax+'%':'非課税'}</td></tr>`).join('');
+    html = `<div class="print-preview">
+      <h1>請求書</h1>
+      <div class="print-meta">
+        <div class="print-meta-left">${esc(document.getElementById('iv-to').value)}</div>
+        <div class="print-meta-right">${me.name||'氏名未設定'}<br>発行日：${fmtDateJP(document.getElementById('iv-date').value)}<br>請求番号：${esc(document.getElementById('iv-no').value)}<br>お支払期限：${fmtDateJP(document.getElementById('iv-due').value)}</div>
+      </div>
+      <div style="margin-bottom:16px;font-size:14px;">件名：<strong>${esc(document.getElementById('iv-title').value)}</strong></div>
+      <table class="print-table"><thead><tr><th>品目</th><th class="num">数量</th><th class="num">単価</th><th class="num">金額</th><th>税率</th></tr></thead><tbody>${rows}</tbody></table>
+      <div class="print-total"><table>
+        <tr><td>小計</td><td class="num">${fmtYen(subtotal)}</td></tr>
+        ${tax10?`<tr><td>消費税（10%）</td><td class="num">${fmtYen(tax10)}</td></tr>`:''}
+        ${tax8?`<tr><td>消費税（8%）</td><td class="num">${fmtYen(tax8)}</td></tr>`:''}
+        <tr class="grand"><td>ご請求金額（税込）</td><td class="num">${fmtYen(total)}</td></tr>
+      </table></div>
+      ${document.getElementById('iv-bank').value?`<div class="print-notes">振込先：${esc(document.getElementById('iv-bank').value)}</div>`:''}
+      ${document.getElementById('iv-notes').value?`<div class="print-notes">備考：${esc(document.getElementById('iv-notes').value)}</div>`:''}
+    </div>`;
+
+  } else if(type === 'receipt'){
+    const amount = parseInt(document.getElementById('rc-amount').value)||0;
+    const tax    = parseInt(document.getElementById('rc-tax').value)||0;
+    html = `<div class="print-preview" style="max-width:480px;">
+      <h1>領収書</h1>
+      <div style="margin:24px 0;font-size:18px;">${esc(document.getElementById('rc-to').value)}</div>
+      <div style="font-size:32px;font-weight:700;margin:24px 0;border-bottom:2px solid #111;padding-bottom:16px;">${fmtYen(amount)}</div>
+      <table class="print-table" style="margin-bottom:24px;">
+        <tr><th style="width:120px;">但し書き</th><td>${esc(document.getElementById('rc-note').value)}</td></tr>
+        <tr><th>うち消費税</th><td>${fmtYen(tax)}</td></tr>
+        <tr><th>支払方法</th><td>${document.getElementById('rc-method').value}</td></tr>
+        <tr><th>発行日</th><td>${fmtDateJP(document.getElementById('rc-date').value)}</td></tr>
+      </table>
+      <div style="text-align:right;">
+        ${me.name||'氏名未設定'}<br>
+        ${me.address||''}<br>
+        ${me.tel||''}
+        <div class="print-seal">印</div>
+      </div>
+    </div>`;
+  }
+
+  document.getElementById('printContent').innerHTML = html;
+  document.getElementById('printModal').style.display = 'block';
+  window.scrollTo(0,0);
+}
+
 // ─── STORYBOARD ──────────────────────────────────────────────────────────────
 // 画像はIndexedDBに保存、メタデータはLocalStorageのstateに保存
 let sbDB = null;
@@ -2138,6 +2529,12 @@ renderProjectSelect(Object.keys(state)[0]);
 renderAll();
 initND();
 loadTL();
+// 書類の日付デフォルト
+const today = new Date().toISOString().split('T')[0];
+['es-date','iv-date','rc-date','rd-date','br-shoot'].forEach(id=>{
+  const el = document.getElementById(id);
+  if(el && !el.value) el.value = today;
+});
 
 // ─── VIDEO COMPRESSOR ────────────────────────────────────────────────────────
 let ffmpegLoaded = false;
