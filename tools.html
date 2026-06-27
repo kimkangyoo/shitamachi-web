@@ -154,6 +154,28 @@ tr.shot-complete td{opacity:.5;}
 .result-bar .fi-value{color:#80e850;}
 .saving-badge{background:#c8880a;color:#0d0700;font-family:'Noto Sans JP',sans-serif;font-size:12px;padding:6px 16px;letter-spacing:.1em;}
 
+/* FILE ORGANIZER */
+.folder-btn{display:flex;align-items:center;gap:16px;background:#150c02;border:1px solid #5a3c18;padding:24px 32px;cursor:pointer;width:100%;text-align:left;margin-bottom:24px;transition:border-color .2s;}
+.folder-btn:hover{border-color:#c8880a;}
+.folder-btn-icon{font-size:32px;}
+.folder-btn-text{font-family:'Shippori Mincho',serif;font-size:16px;color:#e8d090;letter-spacing:.15em;}
+.folder-btn-sub{font-family:'Noto Sans JP',sans-serif;font-size:11px;color:#8b6820;margin-top:4px;letter-spacing:.05em;}
+.rename-settings{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end;background:#f0e4cc;border:1px solid rgba(184,152,72,.4);padding:20px 24px;margin-bottom:24px;}
+.rename-preview-box{background:#1e1004;border:1px solid #5a3c18;padding:12px 20px;font-family:monospace;font-size:13px;color:#c8d080;letter-spacing:.05em;margin-bottom:24px;}
+.date-group{margin-bottom:32px;}
+.date-group-header{background:#150c02;color:#e8d090;font-family:'Shippori Mincho',serif;font-size:14px;letter-spacing:.2em;padding:12px 20px;border-left:4px solid #c8880a;margin-bottom:2px;display:flex;align-items:center;justify-content:space-between;}
+.date-group-count{font-size:11px;color:#8b6820;font-family:'Noto Sans JP',sans-serif;letter-spacing:.1em;}
+.file-row{display:grid;grid-template-columns:32px 1fr 1fr 80px 80px;gap:0;background:#b89848;margin-bottom:1px;}
+.file-row > div{background:#f0e4cc;padding:10px 14px;font-family:'Noto Sans JP',sans-serif;font-size:12px;display:flex;align-items:center;}
+.file-row-head > div{background:#2a1a08;color:#8b6820;font-size:10px;letter-spacing:.3em;padding:8px 14px;}
+.file-orig{color:#5a3c18;word-break:break-all;}
+.file-new{color:#c8880a;font-weight:700;word-break:break-all;}
+.file-size{color:#8b6820;justify-content:flex-end;}
+.file-type{color:#8b6820;}
+.file-check input{width:16px;height:16px;accent-color:#c8880a;}
+.script-output{background:#0d0700;border:1px solid #3a2208;padding:20px;font-family:monospace;font-size:11px;color:#8b9878;line-height:2;white-space:pre-wrap;word-break:break-all;max-height:240px;overflow-y:auto;margin:16px 0;}
+.dl-row{display:flex;gap:12px;flex-wrap:wrap;}
+
 /* TOAST */
 .toast{position:fixed;bottom:32px;right:32px;background:#150c02;border:1px solid #c8880a;color:#e8d090;font-family:'Noto Sans JP',sans-serif;font-size:12px;letter-spacing:.1em;padding:14px 24px;z-index:10000;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;}
 .toast.show{opacity:1;transform:translateY(0);}
@@ -202,6 +224,7 @@ tr.shot-complete td{opacity:.5;}
   <div class="tab active" onclick="switchTab('shoot')">撮影</div>
   <div class="tab" onclick="switchTab('edit')">編集</div>
   <div class="tab" onclick="switchTab('compress')">動画圧縮</div>
+  <div class="tab" onclick="switchTab('organizer')">ファイル整理</div>
 </div>
 
 <!-- ======================== SHOOT TAB ======================== -->
@@ -562,6 +585,88 @@ tr.shot-complete td{opacity:.5;}
     <div class="video-preview">
       <div><div class="preview-label">元動画</div><video id="previewOrig" controls></video></div>
       <div><div class="preview-label">圧縮後</div><video id="previewOut" controls></video></div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== ORGANIZER TAB ======================== -->
+<div class="tab-content" id="tab-organizer">
+  <div class="sec-head">
+    <div>
+      <div class="sec-eyebrow">FILE ORGANIZER</div>
+      <div class="sec-title">ファイル整理・リネーム</div>
+    </div>
+    <button class="btn btn-ghost" id="btnRescan" onclick="rescanFolder()" style="display:none;">再スキャン</button>
+  </div>
+  <p style="font-family:'Noto Sans JP',sans-serif;font-size:12px;color:#5a3c18;margin-bottom:24px;line-height:2;letter-spacing:.05em;">
+    SDカードやフォルダを選択すると動画ファイルを撮影日別に表示します。<br>
+    リネームはスクリプトファイルをダウンロードして実行します（ファイルは移動しません）。
+  </p>
+
+  <!-- FOLDER SELECT -->
+  <button class="folder-btn" id="folderBtn" onclick="selectFolder()">
+    <div class="folder-btn-icon">📁</div>
+    <div>
+      <div class="folder-btn-text">フォルダ / SDカードを選択</div>
+      <div class="folder-btn-sub">クリックしてフォルダを開く（サブフォルダも含めてスキャン）</div>
+    </div>
+  </button>
+
+  <div id="orgBody" style="display:none;">
+    <!-- RENAME SETTINGS -->
+    <div class="sec-head" style="margin-top:8px;">
+      <div>
+        <div class="sec-eyebrow">RENAME PATTERN</div>
+        <div class="sec-title" style="font-size:16px;">命名パターン設定</div>
+      </div>
+    </div>
+    <div class="rename-settings">
+      <div>
+        <span class="field-label">案件名（プレフィックス）</span>
+        <input type="text" id="orgPrefix" placeholder="例：結婚式_田中様" oninput="updateRenamePreview()">
+      </div>
+      <div>
+        <span class="field-label">連番の桁数</span>
+        <select id="orgDigits" onchange="updateRenamePreview()">
+          <option value="2">2桁（01〜）</option>
+          <option value="3" selected>3桁（001〜）</option>
+          <option value="4">4桁（0001〜）</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="applyRename()">プレビュー更新</button>
+    </div>
+    <div class="rename-preview-box" id="renamePreviewBox">
+      パターン例：<span id="renamePreviewText">案件名_20240615_001.mp4</span>
+    </div>
+
+    <!-- STATS -->
+    <div class="file-info" id="orgStats" style="margin-bottom:24px;">
+      <div class="fi-item"><div class="fi-label">動画ファイル数</div><div class="fi-value" id="orgTotal">0</div></div>
+      <div class="fi-item"><div class="fi-label">撮影日数</div><div class="fi-value" id="orgDays">0</div></div>
+      <div class="fi-item"><div class="fi-label">合計サイズ</div><div class="fi-value" id="orgSize">0</div></div>
+    </div>
+
+    <!-- FILE LIST -->
+    <div id="orgFileList"></div>
+
+    <!-- SCRIPT DOWNLOAD -->
+    <div id="orgScriptSection" style="display:none;margin-top:32px;">
+      <div class="sec-head">
+        <div>
+          <div class="sec-eyebrow">RENAME SCRIPT</div>
+          <div class="sec-title" style="font-size:16px;">リネームスクリプト</div>
+        </div>
+      </div>
+      <p style="font-family:'Noto Sans JP',sans-serif;font-size:12px;color:#5a3c18;margin-bottom:16px;line-height:2;">
+        スクリプトをダウンロードして、SDカード（またはコピー先フォルダ）に置いてダブルクリックで実行してください。<br>
+        <strong style="color:#c8880a;">元のファイルは上書きされません。</strong>同じフォルダ内でリネームします。
+      </p>
+      <div class="script-output" id="orgScript"></div>
+      <div class="dl-row">
+        <button class="btn btn-primary" onclick="downloadScript('sh')">Mac用 .sh をダウンロード</button>
+        <button class="btn btn-ghost" onclick="downloadScript('bat')">Windows用 .bat をダウンロード</button>
+        <button class="btn btn-ghost" onclick="copyScript()">スクリプトをコピー</button>
+      </div>
     </div>
   </div>
 </div>
@@ -930,6 +1035,162 @@ function renderAll(){
   renderCuts();
   renderTelop();
   renderEditNotes();
+}
+
+// ─── FILE ORGANIZER ──────────────────────────────────────────────────────────
+const VIDEO_EXTS = new Set(['mp4','mov','avi','mkv','mxf','m2ts','mts','webm','m4v','3gp']);
+let orgFiles = [];   // {file, date, dateStr, ext, newName}
+let orgHandle = null;
+
+async function selectFolder(){
+  if(!window.showDirectoryPicker){ showToast('このブラウザは非対応です（Chrome推奨）'); return; }
+  try {
+    orgHandle = await window.showDirectoryPicker({mode:'read'});
+    await scanFolder();
+  } catch(e){ if(e.name !== 'AbortError') showToast('フォルダの選択に失敗しました'); }
+}
+
+async function rescanFolder(){
+  if(orgHandle) await scanFolder();
+}
+
+async function scanFolder(){
+  orgFiles = [];
+  await walkDir(orgHandle, '');
+  orgFiles.sort((a,b)=> a.date - b.date);
+  document.getElementById('orgBody').style.display = 'block';
+  document.getElementById('btnRescan').style.display = 'inline-block';
+  document.getElementById('folderBtn').querySelector('.folder-btn-text').textContent = '📂 ' + orgHandle.name;
+  applyRename();
+}
+
+async function walkDir(dirHandle, relPath){
+  for await (const [name, handle] of dirHandle.entries()){
+    if(handle.kind === 'directory'){
+      await walkDir(handle, relPath ? relPath + '/' + name : name);
+    } else {
+      const ext = name.split('.').pop().toLowerCase();
+      if(!VIDEO_EXTS.has(ext)) continue;
+      const file = await handle.getFile();
+      const date = new Date(file.lastModified);
+      orgFiles.push({file, date, ext, relPath, origName: name, newName:''});
+    }
+  }
+}
+
+function fmtDate(d){
+  return d.getFullYear()
+    + String(d.getMonth()+1).padStart(2,'0')
+    + String(d.getDate()).padStart(2,'0');
+}
+
+function fmtDateLabel(d){
+  return d.getFullYear() + '年' + (d.getMonth()+1) + '月' + d.getDate() + '日';
+}
+
+function applyRename(){
+  const prefix = (document.getElementById('orgPrefix').value.trim() || '動画').replace(/[\/\\:*?"<>|]/g,'_');
+  const digits = parseInt(document.getElementById('orgDigits').value);
+  const byDate = {};
+  orgFiles.forEach(f=>{
+    const ds = fmtDate(f.date);
+    if(!byDate[ds]) byDate[ds] = [];
+    byDate[ds].push(f);
+  });
+  Object.keys(byDate).sort().forEach(ds=>{
+    byDate[ds].forEach((f,i)=>{
+      const num = String(i+1).padStart(digits,'0');
+      f.newName = `${prefix}_${ds}_${num}.${f.ext}`;
+    });
+  });
+  updateRenamePreview();
+  renderOrgList(byDate);
+  generateScript();
+}
+
+function updateRenamePreview(){
+  const prefix = (document.getElementById('orgPrefix').value.trim() || '案件名').replace(/[\/\\:*?"<>|]/g,'_');
+  const digits = parseInt(document.getElementById('orgDigits').value);
+  const today = fmtDate(new Date());
+  document.getElementById('renamePreviewText').textContent =
+    `${prefix}_${today}_${'1'.padStart(digits,'0')}.mp4`;
+}
+
+function renderOrgList(byDate){
+  const container = document.getElementById('orgFileList');
+  container.innerHTML = '';
+  let totalSize = 0;
+  orgFiles.forEach(f=> totalSize += f.file.size);
+  document.getElementById('orgTotal').textContent = orgFiles.length + ' 本';
+  document.getElementById('orgDays').textContent = Object.keys(byDate).length + ' 日';
+  document.getElementById('orgSize').textContent = fmtSize(totalSize);
+
+  Object.keys(byDate).sort().forEach(ds=>{
+    const files = byDate[ds];
+    const grp = document.createElement('div');
+    grp.className = 'date-group';
+
+    const hdr = document.createElement('div');
+    hdr.className = 'date-group-header';
+    const d = files[0].date;
+    hdr.innerHTML = `<span>${fmtDateLabel(d)}</span><span class="date-group-count">${files.length} ファイル</span>`;
+    grp.appendChild(hdr);
+
+    const headRow = document.createElement('div');
+    headRow.className = 'file-row file-row-head';
+    headRow.innerHTML = `<div></div><div>元のファイル名</div><div>変更後のファイル名</div><div style="justify-content:flex-end;">サイズ</div><div>形式</div>`;
+    grp.appendChild(headRow);
+
+    files.forEach((f,i)=>{
+      const row = document.createElement('div');
+      row.className = 'file-row';
+      row.innerHTML = `
+        <div class="file-check"><span style="font-family:monospace;font-size:11px;color:#8b6820;">${String(i+1).padStart(3,'0')}</span></div>
+        <div class="file-orig">${f.origName}${f.relPath ? '<br><span style="font-size:10px;color:#8b6820;">'+f.relPath+'</span>' : ''}</div>
+        <div class="file-new">${f.newName}</div>
+        <div class="file-size">${fmtSize(f.file.size)}</div>
+        <div class="file-type">${f.ext.toUpperCase()}</div>`;
+      grp.appendChild(row);
+    });
+    container.appendChild(grp);
+  });
+
+  document.getElementById('orgScriptSection').style.display = orgFiles.length ? 'block' : 'none';
+}
+
+function generateScript(){
+  const shLines = ['#!/bin/bash','# リネームスクリプト（Mac / Linux用）','# このファイルと同じ場所で実行してください',''];
+  const batLines = ['@echo off','chcp 65001 > nul','rem リネームスクリプト（Windows用）','rem このファイルと同じ場所で実行してください',''];
+
+  orgFiles.forEach(f=>{
+    const orig = f.origName.replace(/'/g,"'\\''");
+    const newN = f.newName;
+    const sub = f.relPath ? f.relPath + '/' : '';
+    shLines.push(`mv -n "${sub}${f.origName}" "${sub}${newN}"`);
+    batLines.push(`ren "${sub.replace(/\//g,'\\')}${f.origName}" "${newN}"`);
+  });
+
+  shLines.push('','echo "リネーム完了！"');
+  batLines.push('','echo リネーム完了！','pause');
+
+  document.getElementById('orgScript').textContent = shLines.join('\n');
+  document._orgShScript = shLines.join('\n');
+  document._orgBatScript = batLines.join('\n');
+}
+
+function downloadScript(type){
+  const content = type === 'sh' ? document._orgShScript : document._orgBatScript;
+  const mime = type === 'sh' ? 'text/x-shellscript' : 'text/plain';
+  const blob = new Blob([content], {type: mime});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'rename_videos.' + type;
+  a.click();
+  showToast('スクリプトをダウンロードしました');
+}
+
+function copyScript(){
+  copyText(document._orgShScript || '');
 }
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
