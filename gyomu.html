@@ -1483,23 +1483,56 @@ function runVoiceCheck(){
     .filter(p=>p.days!==null && p.days<=watchDays)
     .sort((a,b)=>a.days-b.days);
 
+  // やることリスト（期日つき・未完了）
+  const todoAlerts = (G.manualTasks||[])
+    .filter(t=>!t.done && t.dueDate)
+    .map(t=>({name:t.text, days:daysUntil(t.dueDate)}))
+    .filter(t=>t.days!==null && t.days<=watchDays)
+    .sort((a,b)=>a.days-b.days);
+
   // Reset overdue message rotation each check
   overdueIdx = 0;
 
-  if(alerts.length===0){
-    speak('現在、締切が近い案件はありません。順調です。');
+  if(alerts.length===0 && todoAlerts.length===0){
+    speak('現在、締切が近い案件もやることもありません。順調です。');
     return;
   }
 
-  const msgs = alerts.map(p=>{
-    const d = p.days;
-    if(d<0) return buildMsg(p.name, `すでに${Math.abs(d)}日超過しています`, 'overdue', strict);
-    if(d===0) return buildMsg(p.name, '本日が締切です', 'today', strict);
-    if(d<=3)  return buildMsg(p.name, `締切まであと${d}日です`, 'urgent', strict);
-    return buildMsg(p.name, `締切まであと${d}日です`, 'near', strict);
-  });
+  const msgs = [
+    ...alerts.map(p=>{
+      const d = p.days;
+      if(d<0) return buildMsg(p.name, `すでに${Math.abs(d)}日超過しています`, 'overdue', strict);
+      if(d===0) return buildMsg(p.name, '本日が締切です', 'today', strict);
+      if(d<=3)  return buildMsg(p.name, `締切まであと${d}日です`, 'urgent', strict);
+      return buildMsg(p.name, `締切まであと${d}日です`, 'near', strict);
+    }),
+    ...todoAlerts.map(t=>{
+      const d = t.days;
+      if(d<0) return buildTodoMsg(t.name, `${Math.abs(d)}日`, 'overdue', strict);
+      if(d===0) return buildTodoMsg(t.name, '今日', 'today', strict);
+      if(d<=3)  return buildTodoMsg(t.name, `${d}日`, 'urgent', strict);
+      return buildTodoMsg(t.name, `${d}日`, 'near', strict);
+    })
+  ];
 
   speakSequence(msgs);
+}
+
+function buildTodoMsg(name, num, level, strict){
+  if(strict==='soft'){
+    if(level==='overdue') return `やることの「${name}」が${num}過ぎています。やっておきましょう。`;
+    if(level==='today')   return `やることの「${name}」は${num}が期限です。忘れずに。`;
+    return `やることの「${name}」は期限まであと${num}です。`;
+  }
+  if(strict==='normal'){
+    if(level==='overdue') return `「${name}」の期限が${num}過ぎています！早く片付けてください！`;
+    if(level==='today')   return `「${name}」は${num}が期限です！今日中にやってください！`;
+    return `「${name}」は期限まであと${num}！忘れないように！`;
+  }
+  // strict
+  if(level==='overdue') return `「${name}」をまだやっていないんですか！${num}も過ぎていますよ！先延ばしにする癖は身を滅ぼします！今すぐやりなさい！`;
+  if(level==='today')   return `「${name}」は今日が期限です！後回しにせず今すぐ手をつけなさい！`;
+  return `「${name}」は期限まであと${num}！早めに終わらせなさい！`;
 }
 
 const OVERDUE_MSGS = [
