@@ -151,10 +151,11 @@ tr:hover td{background:#fdf5e0;}
 
 /* RESPONSIVE */
 @media(max-width:700px){
-  nav,  .tabs,.tab-content{padding-left:16px;padding-right:16px;}
+  nav,.tabs,.tab-content{padding-left:16px;padding-right:16px;}
   .form-grid,.form-grid.three{grid-template-columns:1fr;}
   .span2{grid-column:span 1;}
   .dash-grid{grid-template-columns:1fr 1fr;}
+  .dash-today-grid{grid-template-columns:1fr!important;}
 }
 </style>
 </head>
@@ -193,7 +194,33 @@ tr:hover td{background:#fdf5e0;}
 
   <div class="dash-grid" id="dashCards"></div>
 
-  <div class="sec-head" style="margin-top:8px;"><h2>締切が近い案件</h2></div>
+  <!-- TODAY 2-column layout -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:8px;">
+
+    <!-- TODAY'S SCHEDULE -->
+    <div>
+      <div class="sec-head" style="margin-top:0;">
+        <h2>今日の予定</h2>
+        <span class="sec-sub" id="dashTodayLabel"></span>
+      </div>
+      <div id="dashSchedule"></div>
+    </div>
+
+    <!-- TODO LIST -->
+    <div>
+      <div class="sec-head" style="margin-top:0;">
+        <h2>TODOリスト</h2>
+        <form id="dashTodoForm" onsubmit="addDashTodo(event)" style="display:flex;gap:6px;">
+          <input type="text" id="dashTodoInput" placeholder="今日やること" style="font-size:12px;padding:5px 8px;flex:1;">
+          <button class="btn btn-gold btn-sm" type="submit">追加</button>
+        </form>
+      </div>
+      <div id="dashTodoList"></div>
+    </div>
+
+  </div>
+
+  <div class="sec-head" style="margin-top:16px;"><h2>締切が近い案件</h2></div>
   <div id="dashProjects"></div>
 
   <!-- GOOGLE CALENDAR -->
@@ -665,11 +692,100 @@ function renderDashboard(){
     </div>`;
   }).join('');
 
+  // Today schedule & todo
+  renderDashSchedule();
+  renderDashTodo();
+
   // Google Calendar embed
   renderGcal();
 
   // Links
   renderLinks();
+}
+
+// ─── DASH TODO ────────────────────────────────────────────────────────────────
+function addDashTodo(e){
+  e.preventDefault();
+  const v = document.getElementById('dashTodoInput').value.trim();
+  if(!v) return;
+  G.manualTasks.push({id:uid(), text:v, done:false});
+  saveG(); renderDashTodo();
+  document.getElementById('dashTodoInput').value = '';
+}
+
+function renderDashTodo(){
+  const el = document.getElementById('dashTodoList');
+  if(!el) return;
+  const undone = G.manualTasks.filter(t=>!t.done);
+  const done   = G.manualTasks.filter(t=>t.done);
+  const all = [...undone, ...done];
+  el.innerHTML = all.length===0
+    ? '<div style="color:#8b6820;font-size:12px;padding:8px 0;">タスクがありません。</div>'
+    : all.map((t,i)=>{
+        const idx = G.manualTasks.indexOf(t);
+        return `<div class="task-item ${t.done?'done':''}" style="padding:8px 12px;margin-bottom:5px;">
+          <input type="checkbox" ${t.done?'checked':''} onchange="toggleDashTodo(${idx})">
+          <label onclick="toggleDashTodo(${idx})" style="flex:1;font-size:12px;cursor:pointer;">${esc(t.text)}</label>
+          <button onclick="deleteDashTodo(${idx})" style="background:none;border:none;color:#a09080;cursor:pointer;font-size:14px;line-height:1;">✕</button>
+        </div>`;
+      }).join('');
+}
+
+function toggleDashTodo(i){ G.manualTasks[i].done=!G.manualTasks[i].done; saveG(); renderDashTodo(); }
+function deleteDashTodo(i){ G.manualTasks.splice(i,1); saveG(); renderDashTodo(); }
+
+// ─── DASH SCHEDULE ────────────────────────────────────────────────────────────
+function renderDashSchedule(){
+  const el = document.getElementById('dashSchedule');
+  const label = document.getElementById('dashTodayLabel');
+  if(!el) return;
+  const d = new Date();
+  const dow = ['日','月','火','水','木','金','土'][d.getDay()];
+  if(label) label.textContent = `${d.getMonth()+1}月${d.getDate()}日（${dow}）`;
+
+  const todayStr = today();
+  loadVideo();
+
+  // Projects with shoot date = today or deadline = today
+  const items = [];
+  Object.entries(videoState).forEach(([id,p])=>{
+    const s = p.schedule||{};
+    if(s.shootDate===todayStr) items.push({type:'撮影', name:p.name, time:s.shootDate, client:s.client});
+    else if(s.deadline===todayStr) items.push({type:'納品', name:p.name, time:s.deadline, client:s.client});
+  });
+
+  // Routines for today
+  const dow2 = d.getDay();
+  const routines = G.routines.filter(r=>!r.days||r.days.includes(dow2));
+  const donelist = G.routineDone[todayStr]||[];
+
+  if(items.length===0 && routines.length===0){
+    el.innerHTML='<div style="color:#8b6820;font-size:12px;padding:8px 0;">今日の予定はありません。</div>';
+    return;
+  }
+
+  el.innerHTML = [
+    ...items.map(it=>`
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#fffdf5;border:1px solid #ddc890;border-radius:5px;margin-bottom:5px;">
+        <span class="badge ${it.type==='撮影'?'badge-blue':'badge-green'}" style="flex-shrink:0;">${it.type}</span>
+        <span style="font-size:12px;flex:1;">${esc(it.name)}${it.client?`<span style="color:#8b6820;"> / ${esc(it.client)}</span>`:''}</span>
+      </div>`),
+    ...routines.map(r=>{
+      const done = donelist.includes(r.id);
+      return `<div class="task-item ${done?'done':''}" style="padding:8px 12px;margin-bottom:5px;">
+        <input type="checkbox" ${done?'checked':''} onchange="toggleRoutineFromDash('${r.id}')">
+        <label onclick="toggleRoutineFromDash('${r.id}')" style="font-size:12px;flex:1;cursor:pointer;">${esc(r.text)}</label>
+      </div>`;
+    })
+  ].join('');
+}
+
+function toggleRoutineFromDash(id){
+  const ts=today();
+  if(!G.routineDone[ts]) G.routineDone[ts]=[];
+  const idx=G.routineDone[ts].indexOf(id);
+  if(idx>=0) G.routineDone[ts].splice(idx,1); else G.routineDone[ts].push(id);
+  saveG(); renderDashSchedule();
 }
 
 // ─── GOOGLE CALENDAR ──────────────────────────────────────────────────────────
