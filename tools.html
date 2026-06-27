@@ -6,6 +6,7 @@
 <title>制作ツール — 下町きろくの動画屋</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;700&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Shippori Mincho',serif;background:#e8dcc8;color:#2a1a08;min-height:100vh;}
@@ -126,6 +127,33 @@ tr.shot-complete td{opacity:.5;}
 .preset-chip{background:#150c02;color:#e8d090;font-family:'Noto Sans JP',sans-serif;font-size:11px;padding:6px 16px;cursor:pointer;letter-spacing:.1em;border:1px solid #3a2208;}
 .preset-chip:hover{border-color:#c8880a;color:#c8880a;}
 
+/* COMPRESS */
+.drop-zone{border:2px dashed #b89848;background:#f0e4cc;padding:64px 32px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;}
+.drop-zone:hover,.drop-zone.drag-over{border-color:#c8880a;background:#f8f0e4;}
+.drop-icon{font-size:48px;margin-bottom:16px;opacity:.5;}
+.drop-text{font-family:'Noto Sans JP',sans-serif;font-size:13px;color:#5a3c18;line-height:2;letter-spacing:.05em;}
+.drop-text strong{color:#c8880a;}
+.compress-settings{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:#b89848;margin:24px 0;}
+.cs-cell{background:#f0e4cc;padding:20px 18px;}
+.cs-label{font-size:9px;letter-spacing:.5em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;margin-bottom:8px;}
+.cs-cell select,.cs-cell input{font-size:13px;font-family:'Noto Sans JP',sans-serif;}
+.file-info{background:#1e1004;border:1px solid #5a3c18;padding:18px 24px;display:flex;gap:32px;margin-bottom:24px;flex-wrap:wrap;}
+.fi-item{display:flex;flex-direction:column;gap:4px;}
+.fi-label{font-size:9px;letter-spacing:.5em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;}
+.fi-value{font-family:'Shippori Mincho',serif;font-size:16px;color:#e8d090;}
+.compress-log{background:#0d0700;border:1px solid #3a2208;padding:16px;font-family:monospace;font-size:12px;color:#8b9878;line-height:1.8;max-height:160px;overflow-y:auto;margin:16px 0;}
+.compress-log p{margin:0;}
+.compress-log .log-ok{color:#80b850;}
+.compress-log .log-err{color:#c84020;}
+.progress-compress{height:6px;background:#d4c4a4;margin:16px 0;}
+.progress-compress-fill{height:100%;background:#c8880a;width:0%;transition:width .3s;}
+.video-preview{display:flex;gap:24px;margin-top:24px;flex-wrap:wrap;}
+.video-preview video{max-width:100%;height:200px;background:#000;border:1px solid #5a3c18;}
+.preview-label{font-size:10px;letter-spacing:.4em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;margin-bottom:8px;}
+.result-bar{background:#0d2010;border:1px solid #2a5020;padding:18px 24px;display:flex;gap:32px;align-items:center;flex-wrap:wrap;}
+.result-bar .fi-value{color:#80e850;}
+.saving-badge{background:#c8880a;color:#0d0700;font-family:'Noto Sans JP',sans-serif;font-size:12px;padding:6px 16px;letter-spacing:.1em;}
+
 /* TOAST */
 .toast{position:fixed;bottom:32px;right:32px;background:#150c02;border:1px solid #c8880a;color:#e8d090;font-family:'Noto Sans JP',sans-serif;font-size:12px;letter-spacing:.1em;padding:14px 24px;z-index:10000;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;}
 .toast.show{opacity:1;transform:translateY(0);}
@@ -173,6 +201,7 @@ tr.shot-complete td{opacity:.5;}
 <div class="tabs">
   <div class="tab active" onclick="switchTab('shoot')">撮影</div>
   <div class="tab" onclick="switchTab('edit')">編集</div>
+  <div class="tab" onclick="switchTab('compress')">動画圧縮</div>
 </div>
 
 <!-- ======================== SHOOT TAB ======================== -->
@@ -449,6 +478,92 @@ tr.shot-complete td{opacity:.5;}
     <textarea class="notes-area" id="editNotes" placeholder="BGMのタイミング・カラーグレーディング方針・クライアント要望など"></textarea>
   </div>
 
+</div>
+
+<!-- ======================== COMPRESS TAB ======================== -->
+<div class="tab-content" id="tab-compress">
+  <div class="sec-head">
+    <div>
+      <div class="sec-eyebrow">VIDEO COMPRESSOR</div>
+      <div class="sec-title">動画サイズ圧縮</div>
+    </div>
+  </div>
+  <p style="font-family:'Noto Sans JP',sans-serif;font-size:12px;color:#5a3c18;margin-bottom:24px;line-height:2;letter-spacing:.05em;">
+    動画はすべてブラウザ内で処理されます。サーバーへの送信はありません。<br>
+    初回利用時にFFmpegエンジン（約30MB）をダウンロードします。
+  </p>
+
+  <!-- DROP ZONE -->
+  <div class="drop-zone" id="dropZone" onclick="document.getElementById('videoInput').click()" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+    <div class="drop-icon">🎬</div>
+    <div class="drop-text">クリックまたはドラッグ＆ドロップで動画を選択<br><strong>MP4 / MOV / AVI / MKV / WebM</strong> に対応</div>
+  </div>
+  <input type="file" id="videoInput" accept="video/*" style="display:none" onchange="onFileSelect(this.files[0])">
+
+  <!-- FILE INFO -->
+  <div class="file-info" id="fileInfo" style="display:none;">
+    <div class="fi-item"><div class="fi-label">ファイル名</div><div class="fi-value" id="fiName">—</div></div>
+    <div class="fi-item"><div class="fi-label">元サイズ</div><div class="fi-value" id="fiSize">—</div></div>
+    <div class="fi-item"><div class="fi-label">解像度</div><div class="fi-value" id="fiRes">—</div></div>
+    <div class="fi-item"><div class="fi-label">長さ</div><div class="fi-value" id="fiDur">—</div></div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div id="compressSettings" style="display:none;">
+    <div style="font-size:11px;letter-spacing:.4em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;margin:24px 0 8px;">圧縮設定</div>
+    <div class="compress-settings">
+      <div class="cs-cell">
+        <div class="cs-label">出力解像度</div>
+        <select id="outRes">
+          <option value="original">元のまま</option>
+          <option value="1920x1080">1920×1080 (FHD)</option>
+          <option value="1280x720">1280×720 (HD)</option>
+          <option value="854x480">854×480 (SD)</option>
+          <option value="640x360">640×360</option>
+        </select>
+      </div>
+      <div class="cs-cell">
+        <div class="cs-label">品質（CRF）</div>
+        <select id="outCrf">
+          <option value="18">高品質（ファイル大）CRF 18</option>
+          <option value="23" selected>標準 CRF 23</option>
+          <option value="28">小サイズ CRF 28</option>
+          <option value="35">最小サイズ CRF 35</option>
+        </select>
+      </div>
+      <div class="cs-cell">
+        <div class="cs-label">出力フォーマット</div>
+        <select id="outFmt">
+          <option value="mp4">MP4 (H.264)</option>
+          <option value="webm">WebM (VP9)</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px;">
+      <button class="btn btn-primary" id="btnCompress" onclick="startCompress()">圧縮開始</button>
+      <button class="btn btn-ghost" onclick="resetCompress()">ファイルを変更</button>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div id="compressProgress" style="display:none;">
+    <div class="progress-compress"><div class="progress-compress-fill" id="compressFill"></div></div>
+    <div class="compress-log" id="compressLog"></div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="compressResult" style="display:none;">
+    <div class="result-bar" id="resultBar">
+      <div class="fi-item"><div class="fi-label">圧縮後サイズ</div><div class="fi-value" id="resSize">—</div></div>
+      <div class="fi-item"><div class="fi-label">削減量</div><div class="fi-value" id="resSaving">—</div></div>
+      <div class="fi-item"><div class="fi-label">削減率</div><div class="fi-value" id="resRatio">—</div></div>
+      <a id="downloadLink" class="btn btn-primary" style="text-decoration:none;margin-left:auto;">ダウンロード</a>
+    </div>
+    <div class="video-preview">
+      <div><div class="preview-label">元動画</div><video id="previewOrig" controls></video></div>
+      <div><div class="preview-label">圧縮後</div><video id="previewOut" controls></video></div>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -821,6 +936,150 @@ function renderAll(){
 loadState();
 renderProjectSelect(Object.keys(state)[0]);
 renderAll();
+
+// ─── VIDEO COMPRESSOR ────────────────────────────────────────────────────────
+let ffmpegLoaded = false;
+let ffmpegInstance = null;
+let currentFile = null;
+let outputBlob = null;
+
+function onDragOver(e){ e.preventDefault(); document.getElementById('dropZone').classList.add('drag-over'); }
+function onDragLeave(e){ document.getElementById('dropZone').classList.remove('drag-over'); }
+function onDrop(e){
+  e.preventDefault();
+  document.getElementById('dropZone').classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if(f && f.type.startsWith('video/')) onFileSelect(f);
+  else showToast('動画ファイルを選択してください');
+}
+
+function fmtSize(bytes){
+  if(bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+  return (bytes/(1024*1024)).toFixed(1) + ' MB';
+}
+
+function onFileSelect(file){
+  if(!file) return;
+  currentFile = file;
+  outputBlob = null;
+  document.getElementById('fileInfo').style.display = 'flex';
+  document.getElementById('compressSettings').style.display = 'block';
+  document.getElementById('compressProgress').style.display = 'none';
+  document.getElementById('compressResult').style.display = 'none';
+  document.getElementById('fiName').textContent = file.name;
+  document.getElementById('fiSize').textContent = fmtSize(file.size);
+
+  const url = URL.createObjectURL(file);
+  const vid = document.createElement('video');
+  vid.src = url;
+  document.getElementById('previewOrig').src = url;
+  vid.onloadedmetadata = ()=>{
+    document.getElementById('fiRes').textContent = vid.videoWidth + '×' + vid.videoHeight;
+    const s = Math.round(vid.duration);
+    document.getElementById('fiDur').textContent = Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
+  };
+}
+
+function log(msg, cls=''){
+  const box = document.getElementById('compressLog');
+  const p = document.createElement('p');
+  p.className = cls;
+  p.textContent = msg;
+  box.appendChild(p);
+  box.scrollTop = box.scrollHeight;
+}
+
+function setProgress(pct){ document.getElementById('compressFill').style.width = pct + '%'; }
+
+async function startCompress(){
+  if(!currentFile){ showToast('動画ファイルを選択してください'); return; }
+  document.getElementById('btnCompress').disabled = true;
+  document.getElementById('compressProgress').style.display = 'block';
+  document.getElementById('compressResult').style.display = 'none';
+  document.getElementById('compressLog').innerHTML = '';
+  setProgress(0);
+
+  try {
+    if(!ffmpegLoaded){
+      log('FFmpegエンジンをダウンロード中... (初回のみ・約30MB)');
+      const { createFFmpeg } = FFmpeg;
+      ffmpegInstance = createFFmpeg({
+        log: false,
+        progress: ({ratio}) => setProgress(Math.round(ratio * 90))
+      });
+      await ffmpegInstance.load();
+      ffmpegLoaded = true;
+      log('FFmpegの準備完了', 'log-ok');
+    }
+
+    const ff = ffmpegInstance;
+    const { fetchFile } = FFmpeg;
+
+    log('ファイルを読み込み中...');
+    const inName = 'input_' + Date.now() + '.' + currentFile.name.split('.').pop();
+    const fmt = document.getElementById('outFmt').value;
+    const outName = 'output.' + fmt;
+    ff.FS('writeFile', inName, await fetchFile(currentFile));
+    log('エンコード開始...', 'log-ok');
+
+    const crf = document.getElementById('outCrf').value;
+    const res = document.getElementById('outRes').value;
+    const args = ['-i', inName];
+
+    if(res !== 'original'){
+      args.push('-vf', 'scale=' + res.replace('x',':'));
+    }
+
+    if(fmt === 'mp4'){
+      args.push('-c:v','libx264','-crf',crf,'-preset','fast','-c:a','aac','-b:a','128k');
+    } else {
+      args.push('-c:v','libvpx-vp9','-crf',crf,'-b:v','0','-c:a','libopus');
+    }
+    args.push(outName);
+
+    await ff.run(...args);
+    setProgress(95);
+    log('出力ファイルを生成中...');
+
+    const data = ff.FS('readFile', outName);
+    outputBlob = new Blob([data.buffer], {type: fmt === 'mp4' ? 'video/mp4' : 'video/webm'});
+
+    ff.FS('unlink', inName);
+    ff.FS('unlink', outName);
+
+    setProgress(100);
+    log('完了！', 'log-ok');
+
+    const outUrl = URL.createObjectURL(outputBlob);
+    const saving = currentFile.size - outputBlob.size;
+    const ratio = (saving / currentFile.size * 100).toFixed(1);
+
+    document.getElementById('resSize').textContent = fmtSize(outputBlob.size);
+    document.getElementById('resSaving').textContent = (saving > 0 ? '−' : '+') + fmtSize(Math.abs(saving));
+    document.getElementById('resRatio').textContent = ratio + '%削減';
+    const dl = document.getElementById('downloadLink');
+    const baseName = currentFile.name.replace(/\.[^.]+$/, '');
+    dl.href = outUrl;
+    dl.download = baseName + '_compressed.' + fmt;
+    document.getElementById('previewOut').src = outUrl;
+    document.getElementById('compressResult').style.display = 'block';
+
+  } catch(e) {
+    log('エラー: ' + e.message, 'log-err');
+    showToast('圧縮に失敗しました');
+  }
+  document.getElementById('btnCompress').disabled = false;
+}
+
+function resetCompress(){
+  currentFile = null;
+  outputBlob = null;
+  document.getElementById('fileInfo').style.display = 'none';
+  document.getElementById('compressSettings').style.display = 'none';
+  document.getElementById('compressProgress').style.display = 'none';
+  document.getElementById('compressResult').style.display = 'none';
+  document.getElementById('videoInput').value = '';
+}
 </script>
 </body>
 </html>
