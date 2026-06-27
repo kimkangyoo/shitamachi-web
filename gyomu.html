@@ -697,16 +697,34 @@ function renderDashTodo(){
   const undone = G.manualTasks.filter(t=>!t.done);
   const done   = G.manualTasks.filter(t=>t.done);
   const all = [...undone, ...done];
-  el.innerHTML = all.length===0
-    ? '<div style="color:#8b6820;font-size:12px;padding:8px 0;">タスクがありません。</div>'
-    : all.map((t,i)=>{
-        const idx = G.manualTasks.indexOf(t);
-        return `<div class="task-item ${t.done?'done':''}" style="padding:8px 12px;margin-bottom:5px;">
-          <input type="checkbox" ${t.done?'checked':''} onchange="toggleDashTodo(${idx})">
-          <label onclick="toggleDashTodo(${idx})" style="flex:1;font-size:12px;cursor:pointer;">${esc(t.text)}</label>
-          <button onclick="deleteDashTodo(${idx})" style="background:none;border:none;color:#a09080;cursor:pointer;font-size:14px;line-height:1;">✕</button>
-        </div>`;
-      }).join('');
+  if(all.length===0){
+    el.innerHTML='<div style="color:#8b6820;font-size:12px;padding:8px 0;">タスクがありません。</div>';
+    return;
+  }
+  let html = '<ul style="list-style:none;padding:0;margin:0;">';
+  if(undone.length>0){
+    html += undone.map(t=>{
+      const idx = G.manualTasks.indexOf(t);
+      return `<li style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:#fffdf5;border:1px solid #ddc890;border-radius:5px;margin-bottom:6px;">
+        <input type="checkbox" style="width:17px;height:17px;accent-color:#c8880a;cursor:pointer;flex-shrink:0;" onchange="toggleDashTodo(${idx})">
+        <span style="flex:1;font-size:13px;cursor:pointer;" onclick="toggleDashTodo(${idx})">${esc(t.text)}</span>
+        <button onclick="deleteDashTodo(${idx})" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:15px;line-height:1;padding:0;">✕</button>
+      </li>`;
+    }).join('');
+  }
+  if(done.length>0){
+    html += `<li style="font-size:10px;letter-spacing:.2em;color:#a09080;padding:8px 4px 4px;">完了済み</li>`;
+    html += done.map(t=>{
+      const idx = G.manualTasks.indexOf(t);
+      return `<li style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:#f5f0e8;border:1px solid #e8dcc8;border-radius:5px;margin-bottom:6px;opacity:.7;">
+        <input type="checkbox" checked style="width:17px;height:17px;accent-color:#c8880a;cursor:pointer;flex-shrink:0;" onchange="toggleDashTodo(${idx})">
+        <span style="flex:1;font-size:13px;text-decoration:line-through;color:#a09080;cursor:pointer;" onclick="toggleDashTodo(${idx})">${esc(t.text)}</span>
+        <button onclick="deleteDashTodo(${idx})" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:15px;line-height:1;padding:0;">✕</button>
+      </li>`;
+    }).join('');
+  }
+  html += '</ul>';
+  el.innerHTML = html;
 }
 
 function toggleDashTodo(i){ G.manualTasks[i].done=!G.manualTasks[i].done; saveG(); renderDashTodo(); }
