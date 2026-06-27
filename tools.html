@@ -212,6 +212,35 @@ tr.shot-complete td{opacity:.5;}
 .tl-color-chip{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;}
 .tl-color-chip.selected{border-color:#c8880a;}
 
+/* STORYBOARD */
+.sb-drop{border:2px dashed #b89848;background:#f0e4cc;padding:40px;text-align:center;cursor:pointer;transition:border-color .2s;}
+.sb-drop:hover,.sb-drop.drag-over{border-color:#c8880a;background:#f8f0e4;}
+.sb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:24px;}
+.sb-card{background:#f0e4cc;border:1px solid rgba(184,152,72,.4);overflow:hidden;position:relative;}
+.sb-card-img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:#1e1004;cursor:pointer;}
+.sb-card-img-placeholder{width:100%;aspect-ratio:16/9;background:#1e1004;display:flex;align-items:center;justify-content:center;color:#3a2208;font-size:32px;}
+.sb-card-body{padding:12px 14px;}
+.sb-card-num{font-family:'Shippori Mincho',serif;font-size:11px;color:#8b6820;letter-spacing:.2em;margin-bottom:6px;}
+.sb-card-scene{font-family:'Noto Sans JP',sans-serif;font-size:13px;color:#1a0e04;font-weight:700;margin-bottom:4px;}
+.sb-card-meta{font-family:'Noto Sans JP',sans-serif;font-size:11px;color:#8b6820;margin-bottom:6px;}
+.sb-card-note{font-family:'Noto Sans JP',sans-serif;font-size:11px;color:#5a3c18;line-height:1.7;}
+.sb-card-actions{display:flex;gap:6px;padding:8px 14px;border-top:1px solid rgba(184,152,72,.3);background:#ece0c8;}
+.sb-card-del{background:none;border:none;color:#b43c14;cursor:pointer;font-size:12px;font-family:'Noto Sans JP',sans-serif;padding:4px 8px;}
+.sb-card-del:hover{text-decoration:underline;}
+.sb-card-edit{background:none;border:none;color:#8b6820;cursor:pointer;font-size:12px;font-family:'Noto Sans JP',sans-serif;padding:4px 8px;}
+.sb-card-edit:hover{color:#c8880a;}
+.sb-modal{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:10001;display:flex;align-items:center;justify-content:center;padding:24px;}
+.sb-modal-box{background:#e8dcc8;border:1px solid #b89848;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;}
+.sb-modal-head{background:#150c02;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;}
+.sb-modal-title{font-family:'Shippori Mincho',serif;font-size:16px;color:#e8d090;letter-spacing:.15em;}
+.sb-modal-close{background:none;border:none;color:#8b6820;font-size:22px;cursor:pointer;line-height:1;}
+.sb-modal-close:hover{color:#c8880a;}
+.sb-modal-body{padding:24px;}
+.sb-modal-img{width:100%;aspect-ratio:16/9;object-fit:cover;margin-bottom:16px;background:#1e1004;}
+.sb-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.sb-fullscreen{position:fixed;inset:0;background:#000;z-index:10002;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.sb-fullscreen img{max-width:100%;max-height:100%;object-fit:contain;}
+
 /* TOAST */
 .toast{position:fixed;bottom:32px;right:32px;background:#150c02;border:1px solid #c8880a;color:#e8d090;font-family:'Noto Sans JP',sans-serif;font-size:12px;letter-spacing:.1em;padding:14px 24px;z-index:10000;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;}
 .toast.show{opacity:1;transform:translateY(0);}
@@ -263,6 +292,7 @@ tr.shot-complete td{opacity:.5;}
   <div class="tab" onclick="switchTab('organizer')">ファイル整理</div>
   <div class="tab" onclick="switchTab('nd')">NDフィルター</div>
   <div class="tab" onclick="switchTab('timeline')">撮影タイムライン</div>
+  <div class="tab" onclick="switchTab('storyboard')">絵コンテ</div>
 </div>
 
 <!-- ======================== SHOOT TAB ======================== -->
@@ -885,6 +915,92 @@ tr.shot-complete td{opacity:.5;}
   <div class="tl-list" id="tlList"></div>
 </div>
 
+<!-- ======================== STORYBOARD TAB ======================== -->
+<div class="tab-content" id="tab-storyboard">
+  <div class="sec-head">
+    <div>
+      <div class="sec-eyebrow">STORYBOARD</div>
+      <div class="sec-title">絵コンテ</div>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <span id="sbCount" style="font-family:'Noto Sans JP',sans-serif;font-size:12px;color:#8b6820;align-self:center;"></span>
+      <button class="btn btn-ghost" onclick="document.getElementById('sbFileInput').click()">＋ 画像を追加</button>
+    </div>
+  </div>
+
+  <div class="sb-drop" id="sbDrop"
+    onclick="document.getElementById('sbFileInput').click()"
+    ondragover="sbDragOver(event)" ondragleave="sbDragLeave(event)" ondrop="sbDropFiles(event)">
+    <div style="font-size:40px;margin-bottom:12px;opacity:.5;">🎬</div>
+    <div style="font-family:'Noto Sans JP',sans-serif;font-size:13px;color:#5a3c18;line-height:2;">
+      クリックまたはドラッグ＆ドロップで絵コンテ画像を追加<br>
+      <strong style="color:#c8880a;">JPG / PNG / WebP</strong>　複数枚まとめて追加できます
+    </div>
+  </div>
+  <input type="file" id="sbFileInput" accept="image/*" multiple style="display:none" onchange="sbAddFiles(this.files)">
+
+  <div class="sb-grid" id="sbGrid"></div>
+</div>
+
+<!-- STORYBOARD EDIT MODAL -->
+<div class="sb-modal" id="sbModal" style="display:none;" onclick="if(event.target===this)closeSbModal()">
+  <div class="sb-modal-box">
+    <div class="sb-modal-head">
+      <div class="sb-modal-title">カット情報を編集</div>
+      <button class="sb-modal-close" onclick="closeSbModal()">×</button>
+    </div>
+    <div class="sb-modal-body">
+      <img id="sbModalImg" class="sb-modal-img" src="" alt="">
+      <div class="sb-form-grid">
+        <div>
+          <span class="field-label">シーン番号</span>
+          <input type="text" id="sbEditScene" placeholder="例：シーン1">
+        </div>
+        <div>
+          <span class="field-label">カット番号</span>
+          <input type="text" id="sbEditCut" placeholder="例：C01">
+        </div>
+        <div>
+          <span class="field-label">ショット種別</span>
+          <select id="sbEditType">
+            <option value="">—</option>
+            <option>WS（ワイド）</option>
+            <option>MS（ミディアム）</option>
+            <option>CU（クローズアップ）</option>
+            <option>ECU（超クローズアップ）</option>
+            <option>バストアップ</option>
+            <option>ローアングル</option>
+            <option>ハイアングル</option>
+            <option>ドローン</option>
+            <option>インサート</option>
+          </select>
+        </div>
+        <div>
+          <span class="field-label">尺（秒）</span>
+          <input type="number" id="sbEditDur" placeholder="例：5" min="0" step="0.5">
+        </div>
+      </div>
+      <div style="margin-bottom:12px;">
+        <span class="field-label">カメラワーク・動き</span>
+        <input type="text" id="sbEditMotion" placeholder="例：ゆっくりズームイン、固定">
+      </div>
+      <div style="margin-bottom:20px;">
+        <span class="field-label">セリフ・ナレーション・メモ</span>
+        <textarea id="sbEditNote" style="min-height:80px;" placeholder="セリフやシーンの説明など"></textarea>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-primary" onclick="saveSbEdit()">保存</button>
+        <button class="btn btn-ghost" onclick="closeSbModal()">キャンセル</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FULLSCREEN VIEW -->
+<div class="sb-fullscreen" id="sbFullscreen" style="display:none;" onclick="this.style.display='none'">
+  <img id="sbFullImg" src="" alt="">
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -916,7 +1032,8 @@ function initProject(name){
     camera: {iso:'',ss:'',fstop:'',wb:'',focus:'',pp:'',note:''},
     cuts: [],
     telop: [],
-    editNotes: ''
+    editNotes: '',
+    storyboard: []
   };
 }
 
@@ -969,6 +1086,7 @@ function switchTab(name){
   document.getElementById('tab-' + name).classList.add('active');
   if(name==='timeline') renderTimeline();
   if(name==='nd') initND();
+  if(name==='storyboard') renderSB();
 }
 
 // ─── CHECKLIST ───────────────────────────────────────────────────────────────
@@ -1251,6 +1369,7 @@ function renderAll(){
   renderCuts();
   renderTelop();
   renderEditNotes();
+  renderSB();
 }
 
 // ─── ND FILTER ───────────────────────────────────────────────────────────────
@@ -1458,6 +1577,157 @@ function exportTimeline(){
   const lines = [`撮影タイムライン — ${proj().name}`, d.date||'', d.venue||'', ''];
   d.events.forEach(ev=>{ lines.push(`${ev.start}〜${ev.end}（${ev.dur}分）　${ev.name}`); });
   copyText(lines.join('\n'));
+}
+
+// ─── STORYBOARD ──────────────────────────────────────────────────────────────
+// 画像はIndexedDBに保存、メタデータはLocalStorageのstateに保存
+let sbDB = null;
+
+function openSbDB(){
+  return new Promise((resolve, reject)=>{
+    const req = indexedDB.open('sbImages', 1);
+    req.onupgradeneeded = e => e.target.result.createObjectStore('images', {keyPath:'id'});
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror = () => reject();
+  });
+}
+
+async function getSbDB(){
+  if(!sbDB) sbDB = await openSbDB();
+  return sbDB;
+}
+
+async function saveImgToDB(id, dataUrl){
+  const db = await getSbDB();
+  return new Promise((resolve)=>{
+    const tx = db.transaction('images','readwrite');
+    tx.objectStore('images').put({id, dataUrl});
+    tx.oncomplete = resolve;
+  });
+}
+
+async function getImgFromDB(id){
+  const db = await getSbDB();
+  return new Promise((resolve)=>{
+    const req = db.transaction('images').objectStore('images').get(id);
+    req.onsuccess = e => resolve(e.result?.dataUrl || null);
+  });
+}
+
+async function delImgFromDB(id){
+  const db = await getSbDB();
+  return new Promise((resolve)=>{
+    const tx = db.transaction('images','readwrite');
+    tx.objectStore('images').delete(id);
+    tx.oncomplete = resolve;
+  });
+}
+
+function sbDragOver(e){ e.preventDefault(); document.getElementById('sbDrop').classList.add('drag-over'); }
+function sbDragLeave(){ document.getElementById('sbDrop').classList.remove('drag-over'); }
+function sbDropFiles(e){ e.preventDefault(); sbDragLeave(); sbAddFiles(e.dataTransfer.files); }
+
+async function sbAddFiles(files){
+  if(!files || !files.length) return;
+  if(!proj().storyboard) proj().storyboard = [];
+  for(const file of files){
+    if(!file.type.startsWith('image/')) continue;
+    const dataUrl = await new Promise(r=>{ const fr=new FileReader(); fr.onload=e=>r(e.target.result); fr.readAsDataURL(file); });
+    const id = 'sb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+    await saveImgToDB(id, dataUrl);
+    const num = proj().storyboard.length + 1;
+    proj().storyboard.push({id, scene:'シーン'+num, cut:'C'+String(num).padStart(2,'0'), type:'', dur:'', motion:'', note:''});
+  }
+  saveState();
+  renderSB();
+  showToast('追加しました');
+}
+
+let sbEditIdx = null;
+
+async function renderSB(){
+  const cards = proj().storyboard || [];
+  document.getElementById('sbCount').textContent = cards.length ? cards.length + ' カット' : '';
+  const grid = document.getElementById('sbGrid');
+  grid.innerHTML = '';
+  for(let i=0; i<cards.length; i++){
+    const c = cards[i];
+    const dataUrl = await getImgFromDB(c.id);
+    const card = document.createElement('div');
+    card.className = 'sb-card';
+    card.innerHTML = `
+      ${dataUrl
+        ? `<img class="sb-card-img" src="${dataUrl}" alt="" onclick="sbFullscreen('${c.id}')">`
+        : `<div class="sb-card-img-placeholder">🖼</div>`}
+      <div class="sb-card-body">
+        <div class="sb-card-num">${c.scene}　${c.cut}${c.dur?' · '+c.dur+'秒':''}</div>
+        ${c.type?`<div class="sb-card-meta">${c.type}${c.motion?' · '+c.motion:''}</div>`:''}
+        ${c.note?`<div class="sb-card-note">${esc(c.note)}</div>`:''}
+      </div>
+      <div class="sb-card-actions">
+        <button class="sb-card-edit" onclick="openSbEdit(${i})">編集</button>
+        <button class="sb-card-del" onclick="deleteSbCard(${i})">削除</button>
+        ${i>0?`<button class="sb-card-edit" onclick="moveSb(${i},-1)">◀</button>`:''}
+        ${i<cards.length-1?`<button class="sb-card-edit" onclick="moveSb(${i},1)">▶</button>`:''}
+      </div>`;
+    grid.appendChild(card);
+  }
+}
+
+async function openSbEdit(i){
+  sbEditIdx = i;
+  const c = proj().storyboard[i];
+  const dataUrl = await getImgFromDB(c.id);
+  document.getElementById('sbModalImg').src = dataUrl || '';
+  document.getElementById('sbEditScene').value = c.scene || '';
+  document.getElementById('sbEditCut').value = c.cut || '';
+  document.getElementById('sbEditType').value = c.type || '';
+  document.getElementById('sbEditDur').value = c.dur || '';
+  document.getElementById('sbEditMotion').value = c.motion || '';
+  document.getElementById('sbEditNote').value = c.note || '';
+  document.getElementById('sbModal').style.display = 'flex';
+}
+
+function saveSbEdit(){
+  if(sbEditIdx === null) return;
+  const c = proj().storyboard[sbEditIdx];
+  c.scene = document.getElementById('sbEditScene').value;
+  c.cut = document.getElementById('sbEditCut').value;
+  c.type = document.getElementById('sbEditType').value;
+  c.dur = document.getElementById('sbEditDur').value;
+  c.motion = document.getElementById('sbEditMotion').value;
+  c.note = document.getElementById('sbEditNote').value;
+  saveState();
+  closeSbModal();
+  renderSB();
+  showToast('保存しました');
+}
+
+function closeSbModal(){ document.getElementById('sbModal').style.display='none'; sbEditIdx=null; }
+
+async function sbFullscreen(id){
+  const dataUrl = await getImgFromDB(id);
+  if(!dataUrl) return;
+  document.getElementById('sbFullImg').src = dataUrl;
+  document.getElementById('sbFullscreen').style.display = 'flex';
+}
+
+async function deleteSbCard(i){
+  if(!confirm('このカットを削除しますか？')) return;
+  const c = proj().storyboard[i];
+  await delImgFromDB(c.id);
+  proj().storyboard.splice(i,1);
+  saveState();
+  renderSB();
+}
+
+function moveSb(i, dir){
+  const sb = proj().storyboard;
+  const j = i + dir;
+  if(j<0||j>=sb.length) return;
+  [sb[i],sb[j]] = [sb[j],sb[i]];
+  saveState();
+  renderSB();
 }
 
 // ─── FILE ORGANIZER ──────────────────────────────────────────────────────────
