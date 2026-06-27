@@ -200,6 +200,7 @@ tr:hover td{background:#fdf5e0;}
   <div class="tab" onclick="switchTab('expenses')">経費</div>
   <div class="tab" onclick="switchTab('docs')">帳票作成</div>
   <div class="tab" onclick="switchTab('calendar')">カレンダー</div>
+  <div class="tab" onclick="switchTab('sns')">SNS</div>
   <div class="tab" onclick="switchTab('memos')">メモ</div>
   <div class="tab" onclick="switchTab('settings')">設定</div>
 </div>
@@ -477,6 +478,111 @@ tr:hover td{background:#fdf5e0;}
   </div>
 </div>
 
+<!-- SNS -->
+<div class="tab-content" id="tab-sns">
+  <div class="sec-head"><h2>SNS</h2></div>
+
+  <!-- INSTAGRAM ACCOUNTS -->
+  <div class="sec-head" style="margin-top:0;">
+    <h2 style="font-size:15px;">Instagramアカウント</h2>
+    <button class="btn btn-outline btn-sm" onclick="openSnsAccModal(null)">＋ アカウント追加</button>
+  </div>
+  <div id="snsAccList" style="margin-bottom:8px;"></div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:32px;">
+    <a href="https://www.instagram.com/" target="_blank" rel="noopener" class="btn btn-gold btn-sm" style="text-decoration:none;">📷 Instagramを開く</a>
+    <a href="https://studio.youtube.com/" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="text-decoration:none;">▶ YouTube Studio</a>
+    <a href="https://x.com/compose/post" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="text-decoration:none;">✕ Xに投稿</a>
+    <a href="https://www.tiktok.com/upload" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="text-decoration:none;">🎵 TikTokに投稿</a>
+  </div>
+
+  <!-- HASHTAG / TEMPLATES -->
+  <div class="sec-head">
+    <h2 style="font-size:15px;">ハッシュタグ・定型文</h2>
+    <button class="btn btn-outline btn-sm" onclick="openSnsTplModal(null)">＋ 追加</button>
+  </div>
+  <div id="snsTplList" style="margin-bottom:32px;"></div>
+
+  <!-- THUMBNAIL CONVERTER -->
+  <div class="sec-head">
+    <h2 style="font-size:15px;">横向き → 縦向き変換</h2>
+    <span class="sec-sub">リール・ストーリー用（9:16）</span>
+  </div>
+  <div class="card">
+    <p style="font-size:12px;color:#5a3a10;margin-bottom:14px;line-height:1.8;">
+      横向き（16:9など）の画像を、リールやストーリー用の縦長（9:16）に変換します。背景は元画像をぼかして埋めます。
+    </p>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;">
+      <div style="flex:1;min-width:200px;">
+        <label class="btn btn-gold" style="cursor:pointer;display:inline-block;">
+          📂 画像を選ぶ
+          <input type="file" accept="image/*" onchange="loadThumbImage(event)" style="display:none;">
+        </label>
+        <div class="form-grid" style="margin-top:16px;">
+          <div><label class="fl">出力サイズ</label>
+            <select id="thumbRatio" onchange="renderThumb()">
+              <option value="9:16">縦長 9:16（リール・ストーリー）</option>
+              <option value="4:5">縦長 4:5（フィード推奨）</option>
+              <option value="1:1">正方形 1:1</option>
+            </select>
+          </div>
+          <div><label class="fl">背景</label>
+            <select id="thumbBg" onchange="renderThumb()">
+              <option value="blur">元画像をぼかす</option>
+              <option value="white">白</option>
+              <option value="black">黒</option>
+            </select>
+          </div>
+          <div class="span2"><label class="fl">画像の拡大率 <span id="thumbScaleVal">100%</span></label>
+            <input type="range" id="thumbScale" min="100" max="200" value="100" oninput="document.getElementById('thumbScaleVal').textContent=this.value+'%';renderThumb()" style="width:100%;">
+          </div>
+        </div>
+        <button class="btn btn-gold" onclick="downloadThumb()" style="margin-top:8px;">💾 ダウンロード</button>
+      </div>
+      <div style="flex-shrink:0;">
+        <canvas id="thumbCanvas" style="max-width:200px;max-height:360px;border:1px solid #d4b870;border-radius:4px;background:#f0ebe0;"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SNS ACCOUNT MODAL -->
+<div class="modal-bg" id="snsAccModal">
+  <div class="modal">
+    <div class="modal-head"><h3 id="snsAccModalTitle">アカウント追加</h3><button class="modal-close" onclick="closeModal('snsAccModal')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="snsAccEditId">
+      <div class="form-grid one">
+        <div><label class="fl">アカウント名（表示用）</label><input type="text" id="sa-name" placeholder="例：本店アカウント" required></div>
+        <div><label class="fl">ユーザー名（@は不要）</label><input type="text" id="sa-handle" placeholder="例：shitamachi_kiroku"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-gold" onclick="saveSnsAcc()">保存</button>
+        <button class="btn btn-outline" onclick="closeModal('snsAccModal')">キャンセル</button>
+        <button class="btn btn-danger" id="snsAccDeleteBtn" onclick="deleteSnsAcc()" style="display:none;">削除</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SNS TEMPLATE MODAL -->
+<div class="modal-bg" id="snsTplModal">
+  <div class="modal">
+    <div class="modal-head"><h3 id="snsTplModalTitle">定型文を追加</h3><button class="modal-close" onclick="closeModal('snsTplModal')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="snsTplEditId">
+      <div class="form-grid one">
+        <div><label class="fl">タイトル</label><input type="text" id="st-title" placeholder="例：撮影報告用ハッシュタグ" required></div>
+        <div><label class="fl">本文・ハッシュタグ</label><textarea id="st-body" style="min-height:160px;" placeholder="#動画制作 #映像クリエイター #大阪..."></textarea></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-gold" onclick="saveSnsTpl()">保存</button>
+        <button class="btn btn-outline" onclick="closeModal('snsTplModal')">キャンセル</button>
+        <button class="btn btn-danger" id="snsTplDeleteBtn" onclick="deleteSnsTpl()" style="display:none;">削除</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- MEMOS -->
 <div class="tab-content" id="tab-memos">
   <div class="sec-head"><h2>メモ</h2>
@@ -680,6 +786,8 @@ function loadG(){
   if(!G.routines) G.routines = [];
   if(!G.routineDone) G.routineDone = {};
   if(!G.links) G.links = [];
+  if(!G.snsAccounts) G.snsAccounts = [];
+  if(!G.snsTemplates) G.snsTemplates = [];
   if(!G.projectMeta) G.projectMeta = {};
   if(!G.settings) G.settings = {bizName:'下町きろくの動画屋',bizOwner:'',bizAddr:'大阪市生野区 桃谷',bizTel:'',bizEmail:'',bizBank:'',watchDays:5};
 }
@@ -727,6 +835,7 @@ function switchTab(name){
   if(name==='expenses') renderExpenses();
   if(name==='docs') renderDocTab();
   if(name==='calendar'){ if(!G.calEvents) G.calEvents=[]; renderCalendar(); }
+  if(name==='sns') renderSns();
   if(name==='memos') renderMemos();
   if(name==='settings') renderSettings();
 }
@@ -1870,6 +1979,170 @@ function showDashCalDay(ds, evMap){
 function openCalEventModalFromDash(){
   openCalEventModal(null);
   if(dashCalSelectedDate) document.getElementById('ce-date').value=dashCalSelectedDate;
+}
+
+// ─── SNS ──────────────────────────────────────────────────────────────────────
+function renderSns(){
+  renderSnsAcc();
+  renderSnsTpl();
+}
+
+// Instagram accounts
+function renderSnsAcc(){
+  const el = document.getElementById('snsAccList');
+  if((G.snsAccounts||[]).length===0){
+    el.innerHTML = '<div style="color:#8b6820;font-size:12px;margin-bottom:8px;">アカウントが登録されていません。「＋ アカウント追加」から登録してください。</div>';
+    return;
+  }
+  el.innerHTML = G.snsAccounts.map((a,i)=>{
+    const url = a.handle ? `https://www.instagram.com/${encodeURIComponent(a.handle)}/` : 'https://www.instagram.com/';
+    return `<div class="list-item" style="padding:10px 14px;">
+      <div class="list-item-body">
+        <div class="list-item-title">${esc(a.name)}</div>
+        ${a.handle?`<div class="list-item-meta">@${esc(a.handle)}</div>`:''}
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <a href="${url}" target="_blank" rel="noopener" class="btn btn-gold btn-sm" style="text-decoration:none;white-space:nowrap;">📷 開く</a>
+        <button class="btn btn-outline btn-sm" onclick="openSnsAccModal(${i})">編集</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openSnsAccModal(i){
+  const a = i!==null ? G.snsAccounts[i] : null;
+  document.getElementById('snsAccModalTitle').textContent = a?'アカウントを編集':'アカウント追加';
+  document.getElementById('snsAccEditId').value = i!==null ? i : '';
+  document.getElementById('sa-name').value = a?.name||'';
+  document.getElementById('sa-handle').value = a?.handle||'';
+  document.getElementById('snsAccDeleteBtn').style.display = a?'block':'none';
+  document.getElementById('snsAccModal').classList.add('open');
+}
+function saveSnsAcc(){
+  const i = document.getElementById('snsAccEditId').value;
+  const obj = {name:document.getElementById('sa-name').value, handle:document.getElementById('sa-handle').value.replace(/^@/,'')};
+  if(!obj.name){ showToast('アカウント名を入力してください'); return; }
+  if(i!=='') G.snsAccounts[Number(i)]=obj; else G.snsAccounts.push(obj);
+  saveG(); closeModal('snsAccModal'); renderSnsAcc();
+  showToast('保存しました');
+}
+function deleteSnsAcc(){
+  const i = Number(document.getElementById('snsAccEditId').value);
+  if(!confirm('このアカウントを削除しますか？')) return;
+  G.snsAccounts.splice(i,1); saveG(); closeModal('snsAccModal'); renderSnsAcc();
+}
+
+// Hashtag / templates
+function renderSnsTpl(){
+  const el = document.getElementById('snsTplList');
+  if((G.snsTemplates||[]).length===0){
+    el.innerHTML = '<div style="color:#8b6820;font-size:12px;">定型文が登録されていません。「＋ 追加」から登録してください。</div>';
+    return;
+  }
+  el.innerHTML = G.snsTemplates.map((t,i)=>`
+    <div class="card" style="margin-bottom:12px;padding:14px 16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div style="font-size:14px;font-weight:700;color:#1c0f02;">${esc(t.title)}</div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-gold btn-sm" onclick="copySnsTpl(${i})">📋 コピー</button>
+          <button class="btn btn-outline btn-sm" onclick="openSnsTplModal(${i})">編集</button>
+        </div>
+      </div>
+      <div style="font-size:12px;color:#5a3a10;line-height:1.7;white-space:pre-wrap;word-break:break-word;">${esc(t.body)}</div>
+    </div>
+  `).join('');
+}
+
+function openSnsTplModal(i){
+  const t = i!==null ? G.snsTemplates[i] : null;
+  document.getElementById('snsTplModalTitle').textContent = t?'定型文を編集':'定型文を追加';
+  document.getElementById('snsTplEditId').value = i!==null ? i : '';
+  document.getElementById('st-title').value = t?.title||'';
+  document.getElementById('st-body').value = t?.body||'';
+  document.getElementById('snsTplDeleteBtn').style.display = t?'block':'none';
+  document.getElementById('snsTplModal').classList.add('open');
+}
+function saveSnsTpl(){
+  const i = document.getElementById('snsTplEditId').value;
+  const obj = {title:document.getElementById('st-title').value, body:document.getElementById('st-body').value};
+  if(!obj.title){ showToast('タイトルを入力してください'); return; }
+  if(i!=='') G.snsTemplates[Number(i)]=obj; else G.snsTemplates.push(obj);
+  saveG(); closeModal('snsTplModal'); renderSnsTpl();
+  showToast('保存しました');
+}
+function deleteSnsTpl(){
+  const i = Number(document.getElementById('snsTplEditId').value);
+  if(!confirm('この定型文を削除しますか？')) return;
+  G.snsTemplates.splice(i,1); saveG(); closeModal('snsTplModal'); renderSnsTpl();
+}
+function copySnsTpl(i){
+  const text = G.snsTemplates[i].body;
+  navigator.clipboard.writeText(text).then(()=>showToast('コピーしました')).catch(()=>{
+    // Fallback
+    const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select();
+    try{document.execCommand('copy');showToast('コピーしました');}catch(e){showToast('コピーに失敗しました');}
+    document.body.removeChild(ta);
+  });
+}
+
+// Thumbnail converter (horizontal -> vertical)
+let thumbImg = null;
+function loadThumbImage(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = ()=>{ thumbImg = img; renderThumb(); };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function renderThumb(){
+  if(!thumbImg) return;
+  const canvas = document.getElementById('thumbCanvas');
+  const ratio = document.getElementById('thumbRatio').value;
+  const bg = document.getElementById('thumbBg').value;
+  const scale = Number(document.getElementById('thumbScale').value)/100;
+
+  // Output size
+  let W, H;
+  if(ratio==='9:16'){ W=1080; H=1920; }
+  else if(ratio==='4:5'){ W=1080; H=1350; }
+  else { W=1080; H=1080; }
+  canvas.width=W; canvas.height=H;
+  const ctx = canvas.getContext('2d');
+
+  // Background
+  if(bg==='white'){ ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H); }
+  else if(bg==='black'){ ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H); }
+  else {
+    // Blurred cover of the image
+    const cover = Math.max(W/thumbImg.width, H/thumbImg.height);
+    const bw = thumbImg.width*cover, bh = thumbImg.height*cover;
+    ctx.filter = 'blur(30px)';
+    ctx.drawImage(thumbImg, (W-bw)/2, (H-bh)/2, bw, bh);
+    ctx.filter = 'none';
+    // Slight dark overlay so foreground stands out
+    ctx.fillStyle = 'rgba(0,0,0,0.15)';
+    ctx.fillRect(0,0,W,H);
+  }
+
+  // Foreground: fit image inside, centered, with scale
+  const fit = Math.min(W/thumbImg.width, H/thumbImg.height) * scale;
+  const fw = thumbImg.width*fit, fh = thumbImg.height*fit;
+  ctx.drawImage(thumbImg, (W-fw)/2, (H-fh)/2, fw, fh);
+}
+
+function downloadThumb(){
+  if(!thumbImg){ showToast('先に画像を選んでください'); return; }
+  const canvas = document.getElementById('thumbCanvas');
+  const a = document.createElement('a');
+  a.href = canvas.toDataURL('image/jpeg', 0.92);
+  a.download = `thumb_vertical_${Date.now()}.jpg`;
+  a.click();
+  showToast('画像を保存しました');
 }
 
 // ─── BACKUP / RESTORE ─────────────────────────────────────────────────────────
