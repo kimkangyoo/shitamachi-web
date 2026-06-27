@@ -212,6 +212,34 @@ tr.shot-complete td{opacity:.5;}
 .tl-color-chip{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;}
 .tl-color-chip.selected{border-color:#c8880a;}
 
+/* SCHEDULE */
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:2px;background:#b89848;margin-bottom:8px;}
+.dash-card{background:#f0e4cc;padding:20px 22px;cursor:pointer;transition:background .15s;}
+.dash-card:hover{background:#f8f0e4;}
+.dash-card.active-proj{background:#1e1004;border-left:4px solid #c8880a;}
+.dash-card.active-proj .dash-name{color:#e8d090;}
+.dash-name{font-family:'Shippori Mincho',serif;font-size:15px;letter-spacing:.08em;color:#1a0e04;margin-bottom:6px;}
+.dash-client{font-family:'Noto Sans JP',sans-serif;font-size:11px;color:#8b6820;margin-bottom:10px;}
+.dash-badges{display:flex;gap:6px;flex-wrap:wrap;}
+.dash-badge{font-family:'Noto Sans JP',sans-serif;font-size:10px;padding:3px 10px;border-radius:2px;letter-spacing:.05em;}
+.badge-urgent{background:#7a1a08;color:#f0b090;}
+.badge-soon{background:#7a5a08;color:#f0d890;}
+.badge-ok{background:#1a4a1a;color:#90d090;}
+.badge-done{background:#3a3a3a;color:#a0a0a0;}
+.badge-shoot{background:#1a3a6a;color:#90b8f0;}
+.phase-list{display:flex;flex-direction:column;gap:2px;}
+.phase-row{display:grid;grid-template-columns:180px 130px 1fr 110px;gap:2px;background:#b89848;}
+.phase-row>div{background:#f0e4cc;padding:10px 14px;display:flex;align-items:center;}
+.phase-row.phase-head>div{background:#150c02;color:#8b6820;font-family:'Noto Sans JP',sans-serif;font-size:10px;letter-spacing:.3em;}
+.phase-name{font-family:'Noto Sans JP',sans-serif;font-size:13px;color:#1a0e04;}
+.phase-status{padding:4px 0;}
+.phase-status select{font-size:12px;padding:5px 8px;}
+.status-done{color:#2a7a2a;font-weight:700;}
+.status-wip{color:#c8880a;font-weight:700;}
+.status-todo{color:#8b6820;}
+.phase-due input{font-size:12px;padding:5px 8px;}
+.phase-note input{font-size:12px;padding:5px 8px;}
+
 /* STORYBOARD */
 .sb-drop{border:2px dashed #b89848;background:#f0e4cc;padding:40px;text-align:center;cursor:pointer;transition:border-color .2s;}
 .sb-drop:hover,.sb-drop.drag-over{border-color:#c8880a;background:#f8f0e4;}
@@ -286,7 +314,8 @@ tr.shot-complete td{opacity:.5;}
 </div>
 
 <div class="tabs">
-  <div class="tab active" onclick="switchTab('shoot')">撮影</div>
+  <div class="tab active" onclick="switchTab('schedule')">スケジュール</div>
+  <div class="tab" onclick="switchTab('shoot')">撮影</div>
   <div class="tab" onclick="switchTab('edit')">編集</div>
   <div class="tab" onclick="switchTab('compress')">動画圧縮</div>
   <div class="tab" onclick="switchTab('organizer')">ファイル整理</div>
@@ -296,7 +325,78 @@ tr.shot-complete td{opacity:.5;}
 </div>
 
 <!-- ======================== SHOOT TAB ======================== -->
-<div class="tab-content active" id="tab-shoot">
+<div class="tab-content active" id="tab-schedule">
+  <!-- DASHBOARD -->
+  <div style="margin-bottom:48px;">
+    <div class="sec-head">
+      <div>
+        <div class="sec-eyebrow">ALL PROJECTS</div>
+        <div class="sec-title">案件ダッシュボード</div>
+      </div>
+    </div>
+    <div id="schDashboard"></div>
+  </div>
+
+  <!-- CURRENT PROJECT SCHEDULE -->
+  <div>
+    <div class="sec-head">
+      <div>
+        <div class="sec-eyebrow">PROJECT SCHEDULE</div>
+        <div class="sec-title" id="schProjTitle">—</div>
+      </div>
+      <button class="btn btn-ghost" onclick="saveSchedule()">保存</button>
+    </div>
+
+    <!-- 案件基本情報 -->
+    <div class="camera-grid" style="margin-bottom:24px;">
+      <div class="camera-cell">
+        <div class="camera-cell-label">クライアント名</div>
+        <input type="text" id="sch-client" placeholder="例：田中様">
+      </div>
+      <div class="camera-cell">
+        <div class="camera-cell-label">撮影日</div>
+        <input type="date" id="sch-shoot-date">
+      </div>
+      <div class="camera-cell">
+        <div class="camera-cell-label">納期</div>
+        <input type="date" id="sch-deadline">
+      </div>
+    </div>
+
+    <!-- カウントダウン -->
+    <div id="schCountdown" style="display:none;margin-bottom:32px;">
+      <div style="display:flex;gap:16px;flex-wrap:wrap;">
+        <div class="total-bar" style="flex:1;min-width:200px;">
+          <div class="total-item">
+            <div class="total-label">撮影まで</div>
+            <div class="total-value" id="schShootDays">—</div>
+          </div>
+        </div>
+        <div class="total-bar" style="flex:1;min-width:200px;" id="schDeadlineBar">
+          <div class="total-item">
+            <div class="total-label">納期まで</div>
+            <div class="total-value" id="schDeadlineDays">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 作業工程 -->
+    <div class="sec-eyebrow" style="margin-bottom:16px;">作業工程</div>
+    <div id="schPhases"></div>
+
+    <!-- メモ -->
+    <div style="margin-top:24px;">
+      <span class="field-label">案件メモ</span>
+      <textarea class="notes-area" id="sch-memo" placeholder="特記事項・クライアント要望など" style="min-height:80px;"></textarea>
+    </div>
+    <div style="margin-top:12px;">
+      <button class="btn btn-primary" onclick="saveSchedule()">保存</button>
+    </div>
+  </div>
+</div>
+
+<div class="tab-content" id="tab-shoot">
 
   <!-- CHECKLIST -->
   <div style="margin-bottom:56px;">
@@ -1084,6 +1184,7 @@ function switchTab(name){
   document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
   event.target.classList.add('active');
   document.getElementById('tab-' + name).classList.add('active');
+  if(name==='schedule'){ renderSchedule(); renderDashboard(); }
   if(name==='timeline') renderTimeline();
   if(name==='nd') initND();
   if(name==='storyboard') renderSB();
@@ -1370,6 +1471,8 @@ function renderAll(){
   renderTelop();
   renderEditNotes();
   renderSB();
+  renderSchedule();
+  renderDashboard();
 }
 
 // ─── ND FILTER ───────────────────────────────────────────────────────────────
@@ -1577,6 +1680,149 @@ function exportTimeline(){
   const lines = [`撮影タイムライン — ${proj().name}`, d.date||'', d.venue||'', ''];
   d.events.forEach(ev=>{ lines.push(`${ev.start}〜${ev.end}（${ev.dur}分）　${ev.name}`); });
   copyText(lines.join('\n'));
+}
+
+// ─── SCHEDULE ────────────────────────────────────────────────────────────────
+const PHASES = [
+  '事前打ち合わせ','撮影準備','撮影','素材整理・バックアップ','粗編集','本編集','クライアント確認','修正対応','最終書き出し','納品'
+];
+const STATUS_OPTS = ['未着手','進行中','完了','スキップ'];
+
+function defaultSchedule(){
+  return {
+    client:'', shootDate:'', deadline:'', memo:'',
+    phases: PHASES.map(name=>({name, status:'未着手', due:'', note:''}))
+  };
+}
+
+function schData(){ return proj().schedule || (proj().schedule = defaultSchedule()); }
+
+function saveSchedule(){
+  const s = schData();
+  s.client   = document.getElementById('sch-client').value;
+  s.shootDate= document.getElementById('sch-shoot-date').value;
+  s.deadline = document.getElementById('sch-deadline').value;
+  s.memo     = document.getElementById('sch-memo').value;
+  s.phases.forEach((p,i)=>{
+    p.status = document.getElementById(`ph-status-${i}`).value;
+    p.due    = document.getElementById(`ph-due-${i}`).value;
+    p.note   = document.getElementById(`ph-note-${i}`).value;
+  });
+  saveState();
+  renderSchedule();
+  renderDashboard();
+  showToast('保存しました');
+}
+
+function daysFrom(dateStr){
+  if(!dateStr) return null;
+  const diff = new Date(dateStr) - new Date(new Date().toDateString());
+  return Math.round(diff / 86400000);
+}
+
+function renderSchedule(){
+  const s = schData();
+  document.getElementById('schProjTitle').textContent = proj().name;
+  document.getElementById('sch-client').value    = s.client    || '';
+  document.getElementById('sch-shoot-date').value = s.shootDate || '';
+  document.getElementById('sch-deadline').value  = s.deadline  || '';
+  document.getElementById('sch-memo').value      = s.memo      || '';
+
+  // カウントダウン
+  const sd = daysFrom(s.shootDate), dd = daysFrom(s.deadline);
+  const cd = document.getElementById('schCountdown');
+  if(sd !== null || dd !== null){
+    cd.style.display = 'block';
+    if(sd !== null){
+      const el = document.getElementById('schShootDays');
+      el.innerHTML = sd < 0 ? `終了<span style="font-size:13px;">（${-sd}日前）</span>`
+        : sd === 0 ? '<span style="color:#c8880a;">本日</span>'
+        : `${sd}<span style="font-size:13px;">日後</span>`;
+    }
+    if(dd !== null){
+      const el = document.getElementById('schDeadlineDays');
+      const bar = document.getElementById('schDeadlineBar');
+      el.innerHTML = dd < 0 ? `<span style="color:#b43c14;">超過 ${-dd}日</span>`
+        : dd === 0 ? '<span style="color:#c8880a;">本日</span>'
+        : `${dd}<span style="font-size:13px;">日後</span>`;
+      bar.style.borderColor = dd <= 3 ? '#b43c14' : dd <= 7 ? '#c8880a' : '#5a3c18';
+    }
+  } else { cd.style.display = 'none'; }
+
+  // 工程
+  const container = document.getElementById('schPhases');
+  let html = `<div class="phase-list">
+    <div class="phase-row phase-head">
+      <div>工程</div><div>ステータス</div><div>期日</div><div>メモ</div>
+    </div>`;
+  s.phases.forEach((p,i)=>{
+    const cls = p.status==='完了'?'status-done':p.status==='進行中'?'status-wip':'status-todo';
+    html += `<div class="phase-row">
+      <div class="phase-name"><span class="${cls}">●</span> ${p.name}</div>
+      <div class="phase-status"><select id="ph-status-${i}">
+        ${STATUS_OPTS.map(o=>`<option ${o===p.status?'selected':''}>${o}</option>`).join('')}
+      </select></div>
+      <div class="phase-due"><input type="date" id="ph-due-${i}" value="${p.due||''}"></div>
+      <div class="phase-note"><input type="text" id="ph-note-${i}" value="${esc(p.note||'')}" placeholder="メモ"></div>
+    </div>`;
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function renderDashboard(){
+  const container = document.getElementById('schDashboard');
+  const entries = Object.entries(state).map(([id,p])=>({id, name:p.name, s: p.schedule||null}));
+  if(!entries.length){ container.innerHTML=''; return; }
+
+  entries.sort((a,b)=>{
+    const da = a.s?.deadline||'9999', db = b.s?.deadline||'9999';
+    return da.localeCompare(db);
+  });
+
+  let html = '<div class="dash-grid">';
+  entries.forEach(({id,name,s})=>{
+    const isActive = id === currentProject;
+    const dd = s?.deadline ? daysFrom(s.deadline) : null;
+    const sd = s?.shootDate ? daysFrom(s.shootDate) : null;
+    const done = s?.phases?.filter(p=>p.status==='完了').length || 0;
+    const total = s?.phases?.length || PHASES.length;
+    const pct = Math.round(done/total*100);
+
+    let badges = '';
+    if(dd !== null){
+      if(dd < 0) badges += `<span class="dash-badge badge-done">納品済み</span>`;
+      else if(dd <= 3) badges += `<span class="dash-badge badge-urgent">納期まで${dd}日</span>`;
+      else if(dd <= 7) badges += `<span class="dash-badge badge-soon">納期まで${dd}日</span>`;
+      else badges += `<span class="dash-badge badge-ok">納期まで${dd}日</span>`;
+    }
+    if(sd !== null && sd >= 0) badges += `<span class="dash-badge badge-shoot">撮影${sd===0?'本日':`${sd}日後`}</span>`;
+
+    html += `<div class="dash-card${isActive?' active-proj':''}" onclick="switchToProject('${id}')">
+      <div class="dash-name">${name}</div>
+      <div class="dash-client">${s?.client||'クライアント未設定'}</div>
+      <div class="dash-badges">${badges}</div>
+      <div style="margin-top:10px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+          <span style="font-family:'Noto Sans JP',sans-serif;font-size:10px;color:#8b6820;">進捗</span>
+          <span style="font-family:'Noto Sans JP',sans-serif;font-size:10px;color:#8b6820;">${done}/${total}</span>
+        </div>
+        <div style="height:3px;background:#d4c4a4;">
+          <div style="height:100%;background:#c8880a;width:${pct}%;"></div>
+        </div>
+      </div>
+    </div>`;
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function switchToProject(id){
+  currentProject = id;
+  document.getElementById('projectSelect').value = id;
+  renderAll();
+  renderSchedule();
+  renderDashboard();
 }
 
 // ─── STORYBOARD ──────────────────────────────────────────────────────────────
