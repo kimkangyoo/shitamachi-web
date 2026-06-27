@@ -862,8 +862,8 @@ function renderDashTodo(){
   el.innerHTML = html;
 }
 
-function toggleDashTodo(i){ G.manualTasks[i].done=!G.manualTasks[i].done; saveG(); renderDashTodo(); }
-function deleteDashTodo(i){ G.manualTasks.splice(i,1); saveG(); renderDashTodo(); }
+function toggleDashTodo(i){ G.manualTasks[i].done=!G.manualTasks[i].done; saveG(); renderDashTodo(); renderDashSchedule(); }
+function deleteDashTodo(i){ G.manualTasks.splice(i,1); saveG(); renderDashTodo(); renderDashSchedule(); }
 
 // ─── DASH SCHEDULE ────────────────────────────────────────────────────────────
 function renderDashSchedule(){
@@ -885,22 +885,46 @@ function renderDashSchedule(){
     else if(s.deadline===todayStr) items.push({type:'納品', name:p.name, time:s.deadline, client:s.client});
   });
 
+  // Calendar events for today
+  (G.calEvents||[]).forEach(ev=>{
+    if(ev.date===todayStr) items.push({type:ev.type, name:ev.title, time:ev.time, client:''});
+  });
+
   // Routines for today
   const dow2 = d.getDay();
   const routines = G.routines.filter(r=>!r.days||r.days.includes(dow2));
   const donelist = G.routineDone[todayStr]||[];
 
-  if(items.length===0 && routines.length===0){
+  // TODO items due today or overdue (not done)
+  const todos = G.manualTasks
+    .filter(t=>!t.done && t.dueDate && t.dueDate<=todayStr)
+    .sort((a,b)=>a.dueDate.localeCompare(b.dueDate));
+
+  if(items.length===0 && routines.length===0 && todos.length===0){
     el.innerHTML='<div style="color:#8b6820;font-size:12px;padding:8px 0;">今日の予定はありません。</div>';
     return;
   }
 
+  const badgeColor = {撮影:'badge-blue',納品:'badge-green',打ち合わせ:'badge-yellow',その他:'badge-gray'};
+
   el.innerHTML = [
     ...items.map(it=>`
       <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#fffdf5;border:1px solid #ddc890;border-radius:5px;margin-bottom:5px;">
-        <span class="badge ${it.type==='撮影'?'badge-blue':'badge-green'}" style="flex-shrink:0;">${it.type}</span>
-        <span style="font-size:12px;flex:1;">${esc(it.name)}${it.client?`<span style="color:#8b6820;"> / ${esc(it.client)}</span>`:''}</span>
+        <span class="badge ${badgeColor[it.type]||'badge-blue'}" style="flex-shrink:0;">${it.type}</span>
+        <span style="font-size:12px;flex:1;">${it.time?`<span style="color:#8b6820;">${it.time} </span>`:''}${esc(it.name)}${it.client?`<span style="color:#8b6820;"> / ${esc(it.client)}</span>`:''}</span>
       </div>`),
+    ...todos.map(t=>{
+      const idx = G.manualTasks.indexOf(t);
+      const overdue = t.dueDate < todayStr;
+      return `<div class="task-item" style="padding:8px 12px;margin-bottom:5px;">
+        <input type="checkbox" onchange="toggleDashTodo(${idx})">
+        <label onclick="toggleDashTodo(${idx})" style="font-size:12px;flex:1;cursor:pointer;">
+          <span class="badge badge-red" style="font-size:10px;">やること</span>
+          ${esc(t.text)}
+          ${overdue?`<span style="color:#c05010;font-size:10px;font-weight:700;"> （${fmtDate(t.dueDate)} 超過）</span>`:''}
+        </label>
+      </div>`;
+    }),
     ...routines.map(r=>{
       const done = donelist.includes(r.id);
       return `<div class="task-item ${done?'done':''}" style="padding:8px 12px;margin-bottom:5px;">
