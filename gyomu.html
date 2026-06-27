@@ -1149,6 +1149,9 @@ function runVoiceCheck(){
     .filter(p=>p.days!==null && p.days<=watchDays)
     .sort((a,b)=>a.days-b.days);
 
+  // Reset overdue message rotation each check
+  overdueIdx = 0;
+
   if(alerts.length===0){
     speak('現在、締切が近い案件はありません。順調です。');
     return;
@@ -1165,23 +1168,36 @@ function runVoiceCheck(){
   speakSequence(msgs);
 }
 
+const OVERDUE_MSGS = [
+  '納期を過ぎたら、生活できなくなりますよ！今すぐ動いてください！',
+  '待っているお客さんの気持ちを考えてください！信頼を失う前に今すぐ連絡を！',
+  'クライアントはずっと待っています！あなたの仕事を信じて待っているんです！早く！',
+  '締切を守れない仕事人は、次の仕事がなくなります！今すぐ対応してください！',
+  'お金をもらって仕事を引き受けたんです！責任を果たしてください！'
+];
+let overdueIdx = 0;
+
 function buildMsg(name, timeStr, level, strict){
   if(strict==='soft'){
-    if(level==='overdue') return `${name}の締切が${timeStr}。確認をお願いします。`;
-    if(level==='today')   return `${name}は${timeStr}。頑張ってください。`;
+    if(level==='overdue') return `${name}の締切が${timeStr}。早めに確認と連絡をお願いします。`;
+    if(level==='today')   return `${name}は${timeStr}。今日中に完成させましょう。`;
     if(level==='urgent')  return `${name}の${timeStr}。そろそろ仕上げましょう。`;
     return `${name}の${timeStr}。進めていきましょう。`;
   }
   if(strict==='normal'){
-    if(level==='overdue') return `警告！${name}の締切が${timeStr}！早急に対応してください。`;
-    if(level==='today')   return `${name}は${timeStr}！今日中に完成させてください。`;
-    if(level==='urgent')  return `${name}の${timeStr}！急いでください。`;
+    if(level==='overdue') return `警告！${name}の締切が${timeStr}！クライアントへの連絡と対応を急いでください！`;
+    if(level==='today')   return `${name}は${timeStr}！今日中に必ず完成させてください！`;
+    if(level==='urgent')  return `${name}の${timeStr}！急いでください！`;
     return `${name}の${timeStr}。対応を進めてください。`;
   }
   // strict
-  if(level==='overdue') return `緊急警告！${name}の締切が${timeStr}！今すぐ連絡と対応が必要です！`;
-  if(level==='today')   return `${name}は${timeStr}！絶対に今日中に終わらせてください！`;
-  if(level==='urgent')  return `${name}の${timeStr}！残り時間がありません！今すぐ取り掛かってください！`;
+  if(level==='overdue'){
+    const extra = OVERDUE_MSGS[overdueIdx % OVERDUE_MSGS.length];
+    overdueIdx++;
+    return `緊急警告！${name}の締切が${timeStr}！${extra}`;
+  }
+  if(level==='today') return `${name}は本日締切です！絶対に今日中に終わらせてください！待っているクライアントのことを考えてください！`;
+  if(level==='urgent') return `${name}の締切まであと${timeStr.replace('締切まであと','')}！残り時間がありません！今すぐ取り掛かってください！`;
   return `${name}の${timeStr}。余裕を持って進めてください。`;
 }
 
