@@ -196,6 +196,17 @@ tr:hover td{background:#fdf5e0;}
   <div class="sec-head" style="margin-top:8px;"><h2>締切が近い案件</h2></div>
   <div id="dashProjects"></div>
 
+  <!-- GOOGLE CALENDAR -->
+  <div class="sec-head" style="margin-top:24px;">
+    <h2>Googleカレンダー</h2>
+    <button class="btn btn-outline btn-sm" onclick="openGcalSetup()">設定</button>
+  </div>
+  <div id="gcalArea">
+    <div style="background:#1c0f02;border:1px solid #3a2208;border-radius:6px;padding:20px 24px;color:#a09070;font-size:13px;">
+      設定ボタンからGoogleアカウントのメールアドレスを入力するとカレンダーが表示されます。
+    </div>
+  </div>
+
   <div class="sec-head" style="margin-top:24px;"><h2>よく使うリンク</h2>
     <button class="btn btn-outline btn-sm" onclick="openLinkModal()">＋ 追加</button>
   </div>
@@ -372,6 +383,37 @@ tr:hover td{background:#fdf5e0;}
           <option value="normal">ふつう</option>
           <option value="strict" selected>厳しい</option>
         </select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GCAL SETUP MODAL -->
+<div class="modal-bg" id="gcalModal">
+  <div class="modal">
+    <div class="modal-head"><h3>Googleカレンダー設定</h3><button class="modal-close" onclick="closeModal('gcalModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grid one">
+        <div>
+          <label class="fl">GoogleアカウントのメールアドレスまたはカレンダーID</label>
+          <input type="text" id="gcalIdInput" placeholder="example@gmail.com">
+          <div style="font-size:11px;color:#8b6820;margin-top:6px;line-height:1.7;">
+            ※ Googleカレンダーの設定 → 「特定のユーザーと共有する」から「公開」にしておく必要があります。<br>
+            ※ 表示されない場合はカレンダーの共有設定をご確認ください。
+          </div>
+        </div>
+        <div>
+          <label class="fl">表示モード</label>
+          <select id="gcalModeInput">
+            <option value="AGENDA">今日の予定（リスト）</option>
+            <option value="WEEK">週間表示</option>
+            <option value="MONTH">月間表示</option>
+          </select>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-gold" onclick="saveGcal()">保存して反映</button>
+        <button class="btn btn-outline" onclick="closeModal('gcalModal')">キャンセル</button>
       </div>
     </div>
   </div>
@@ -606,6 +648,7 @@ function renderDashboard(){
   dp.innerHTML = near.map(p=>{
     const d=daysUntil(p.s.deadline);
     const meta=G.projectMeta[p.id]||{};
+    const gcalUrl = makeGcalAddUrl(p.name, p.s.deadline, p.s.client);
     return `<div class="list-item">
       <div class="list-item-body">
         <div class="list-item-title">${esc(p.name)}</div>
@@ -615,12 +658,60 @@ function renderDashboard(){
           ${p.s.client?`　／　${esc(p.s.client)}`:''}
         </div>
       </div>
-      <span class="badge ${meta.payment==='入金済'?'badge-green':meta.payment==='請求済'?'badge-yellow':'badge-gray'}">${meta.payment||'未請求'}</span>
+      <div style="display:flex;gap:8px;align-items:center;flex-shrink:0;">
+        <span class="badge ${meta.payment==='入金済'?'badge-green':meta.payment==='請求済'?'badge-yellow':'badge-gray'}">${meta.payment||'未請求'}</span>
+        <a href="${gcalUrl}" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="text-decoration:none;white-space:nowrap;">📅 カレンダーに追加</a>
+      </div>
     </div>`;
   }).join('');
 
+  // Google Calendar embed
+  renderGcal();
+
   // Links
   renderLinks();
+}
+
+// ─── GOOGLE CALENDAR ──────────────────────────────────────────────────────────
+function makeGcalAddUrl(title, date, client){
+  // Google Calendar "add event" URL
+  const d = date ? date.replace(/-/g,'') : '';
+  const nextDay = date ? (()=>{
+    const dt = new Date(date);
+    dt.setDate(dt.getDate()+1);
+    return dt.toISOString().slice(0,10).replace(/-/g,'');
+  })() : '';
+  const details = client ? `クライアント：${client}` : '';
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('【締切】'+title)}&dates=${d}/${nextDay}&details=${encodeURIComponent(details)}`;
+}
+
+function renderGcal(){
+  const gcalId = G.settings.gcalId||'';
+  const gcalMode = G.settings.gcalMode||'AGENDA';
+  const area = document.getElementById('gcalArea');
+  if(!gcalId){
+    area.innerHTML = `<div style="background:#1c0f02;border:1px solid #3a2208;border-radius:6px;padding:20px 24px;color:#a09070;font-size:13px;">
+      設定ボタンからGoogleアカウントのメールアドレスを入力するとカレンダーが表示されます。
+    </div>`;
+    return;
+  }
+  const src = `https://calendar.google.com/calendar/embed?src=${encodeURIComponent(gcalId)}&mode=${gcalMode}&hl=ja&wkst=1&bgcolor=%231c0f02&ctz=Asia%2FTokyo&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0`;
+  area.innerHTML = `<iframe src="${src}" style="border:none;width:100%;height:500px;border-radius:6px;" frameborder="0" scrolling="no"></iframe>`;
+}
+
+function openGcalSetup(){
+  document.getElementById('gcalIdInput').value = G.settings.gcalId||'';
+  document.getElementById('gcalModeInput').value = G.settings.gcalMode||'AGENDA';
+  document.getElementById('gcalModal').classList.add('open');
+}
+
+function saveGcal(){
+  G.settings.gcalId = document.getElementById('gcalIdInput').value.trim();
+  G.settings.gcalMode = document.getElementById('gcalModeInput').value;
+  saveG();
+  closeModal('gcalModal');
+  renderGcal();
+  showToast('Googleカレンダーを設定しました');
 }
 
 function renderLinks(){
