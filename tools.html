@@ -176,6 +176,42 @@ tr.shot-complete td{opacity:.5;}
 .script-output{background:#0d0700;border:1px solid #3a2208;padding:20px;font-family:monospace;font-size:11px;color:#8b9878;line-height:2;white-space:pre-wrap;word-break:break-all;max-height:240px;overflow-y:auto;margin:16px 0;}
 .dl-row{display:flex;gap:12px;flex-wrap:wrap;}
 
+/* ND FILTER */
+.nd-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px;}
+.nd-panel{background:#f0e4cc;border:1px solid rgba(184,152,72,.4);padding:24px;}
+.nd-panel-title{font-size:10px;letter-spacing:.5em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;margin-bottom:16px;}
+.nd-result{background:#1e1004;border:1px solid #5a3c18;padding:20px 24px;margin-top:16px;}
+.nd-result-main{font-family:'Shippori Mincho',serif;font-size:28px;color:#e8d090;margin-bottom:4px;}
+.nd-result-sub{font-family:'Noto Sans JP',sans-serif;font-size:11px;color:#8b6820;letter-spacing:.1em;}
+.nd-table{width:100%;border-collapse:collapse;margin-top:16px;}
+.nd-table th{background:#150c02;color:#8b6820;font-family:'Noto Sans JP',sans-serif;font-size:10px;letter-spacing:.3em;padding:8px 14px;text-align:left;}
+.nd-table td{padding:9px 14px;border-bottom:1px solid rgba(184,152,72,.2);font-family:'Noto Sans JP',sans-serif;font-size:12px;}
+.nd-table tr.nd-highlight td{background:rgba(200,136,10,.12);color:#c8880a;font-weight:700;}
+.nd-table tr:hover td{background:rgba(200,136,10,.06);}
+.rule180-box{background:#150c02;border-left:4px solid #c8880a;padding:14px 20px;margin-bottom:20px;display:flex;align-items:center;gap:16px;}
+.rule180-label{font-size:10px;letter-spacing:.4em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;}
+.rule180-value{font-family:'Shippori Mincho',serif;font-size:20px;color:#c8880a;}
+
+/* TIMELINE */
+.tl-date-row{display:flex;gap:12px;align-items:end;margin-bottom:24px;}
+.tl-add-row{display:grid;grid-template-columns:90px 1fr 80px 120px auto;gap:10px;align-items:end;background:#f0e4cc;border:1px solid rgba(184,152,72,.4);padding:16px 20px;margin-bottom:24px;}
+.tl-wrap{position:relative;margin-bottom:32px;}
+.tl-axis{display:flex;border-bottom:2px solid #b89848;margin-bottom:0;padding-bottom:0;}
+.tl-hour-label{font-family:monospace;font-size:10px;color:#8b6820;flex:1;text-align:left;padding-bottom:4px;}
+.tl-rows{position:relative;}
+.tl-grid-line{position:absolute;top:0;bottom:0;width:1px;background:rgba(184,152,72,.2);pointer-events:none;}
+.tl-item{position:absolute;height:44px;border-radius:2px;display:flex;align-items:center;padding:0 10px;font-family:'Noto Sans JP',sans-serif;font-size:11px;overflow:hidden;white-space:nowrap;cursor:default;box-sizing:border-box;}
+.tl-item:hover{z-index:10;overflow:visible;white-space:normal;}
+.tl-now-line{position:absolute;top:0;bottom:0;width:2px;background:#c8880a;z-index:20;pointer-events:none;}
+.tl-now-label{position:absolute;top:-18px;transform:translateX(-50%);font-family:monospace;font-size:10px;color:#c8880a;white-space:nowrap;}
+.tl-list{margin-top:16px;}
+.tl-list-row{display:grid;grid-template-columns:70px 70px 1fr 100px 100px 40px;gap:0;background:#b89848;margin-bottom:1px;}
+.tl-list-row>div{background:#f0e4cc;padding:9px 14px;font-family:'Noto Sans JP',sans-serif;font-size:12px;display:flex;align-items:center;}
+.tl-list-head>div{background:#150c02;color:#8b6820;font-size:10px;letter-spacing:.3em;}
+.tl-colors{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+.tl-color-chip{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;}
+.tl-color-chip.selected{border-color:#c8880a;}
+
 /* TOAST */
 .toast{position:fixed;bottom:32px;right:32px;background:#150c02;border:1px solid #c8880a;color:#e8d090;font-family:'Noto Sans JP',sans-serif;font-size:12px;letter-spacing:.1em;padding:14px 24px;z-index:10000;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;}
 .toast.show{opacity:1;transform:translateY(0);}
@@ -225,6 +261,8 @@ tr.shot-complete td{opacity:.5;}
   <div class="tab" onclick="switchTab('edit')">編集</div>
   <div class="tab" onclick="switchTab('compress')">動画圧縮</div>
   <div class="tab" onclick="switchTab('organizer')">ファイル整理</div>
+  <div class="tab" onclick="switchTab('nd')">NDフィルター</div>
+  <div class="tab" onclick="switchTab('timeline')">撮影タイムライン</div>
 </div>
 
 <!-- ======================== SHOOT TAB ======================== -->
@@ -671,6 +709,182 @@ tr.shot-complete td{opacity:.5;}
   </div>
 </div>
 
+<!-- ======================== ND FILTER TAB ======================== -->
+<div class="tab-content" id="tab-nd">
+  <div class="sec-head">
+    <div>
+      <div class="sec-eyebrow">ND FILTER CALCULATOR</div>
+      <div class="sec-title">NDフィルター計算</div>
+    </div>
+  </div>
+
+  <!-- 180度ルール -->
+  <div style="margin-bottom:32px;">
+    <div class="sec-eyebrow" style="margin-bottom:12px;">180度ルール — 推奨シャッタースピード</div>
+    <div style="display:flex;gap:12px;align-items:end;margin-bottom:12px;">
+      <div style="flex:1;">
+        <span class="field-label">フレームレート（fps）</span>
+        <select id="nd-fps" onchange="calcND()">
+          <option value="24">24fps（映画風）</option>
+          <option value="25">25fps</option>
+          <option value="30" selected>30fps</option>
+          <option value="50">50fps</option>
+          <option value="60">60fps</option>
+          <option value="120">120fps（スロー）</option>
+          <option value="240">240fps（超スロー）</option>
+        </select>
+      </div>
+    </div>
+    <div class="rule180-box">
+      <div><div class="rule180-label">推奨シャッタースピード</div><div class="rule180-value" id="rule180ss">1/60</div></div>
+      <div style="color:#5a3c18;font-size:12px;font-family:'Noto Sans JP',sans-serif;">→ fpsの2倍の分母（180度シャッター角）</div>
+    </div>
+  </div>
+
+  <div class="nd-grid">
+    <!-- 正引き：必要なND段数を計算 -->
+    <div class="nd-panel">
+      <div class="nd-panel-title">必要なNDを求める（現在の設定 → NDで暗くしたい）</div>
+      <div style="display:grid;gap:12px;">
+        <div>
+          <span class="field-label">現在のシャッタースピード</span>
+          <select id="nd-cur-ss" onchange="calcND()">
+            <option>1/30</option><option>1/50</option><option>1/60</option>
+            <option>1/100</option><option>1/125</option><option>1/200</option>
+            <option>1/250</option><option>1/500</option><option>1/1000</option>
+            <option>1/2000</option><option>1/4000</option>
+          </select>
+        </div>
+        <div>
+          <span class="field-label">目標シャッタースピード（180度ルール等）</span>
+          <select id="nd-target-ss" onchange="calcND()">
+            <option>1/30</option><option>1/50</option><option>1/60</option>
+            <option selected>1/60</option><option>1/100</option><option>1/125</option>
+            <option>1/200</option><option>1/250</option><option>1/500</option>
+          </select>
+        </div>
+      </div>
+      <div class="nd-result" id="nd-result-forward">
+        <div class="nd-result-sub">必要なND</div>
+        <div class="nd-result-main" id="nd-forward-main">—</div>
+        <div class="nd-result-sub" id="nd-forward-sub"></div>
+      </div>
+    </div>
+
+    <!-- 逆引き：手持ちNDで得られるSSを計算 -->
+    <div class="nd-panel">
+      <div class="nd-panel-title">手持ちNDから得られるSSを計算（逆引き）</div>
+      <div style="display:grid;gap:12px;">
+        <div>
+          <span class="field-label">NDなしのシャッタースピード</span>
+          <select id="nd-base-ss" onchange="calcNDReverse()">
+            <option>1/500</option><option>1/1000</option><option>1/2000</option>
+            <option selected>1/2000</option><option>1/4000</option>
+          </select>
+        </div>
+        <div>
+          <span class="field-label">使用するNDフィルター</span>
+          <select id="nd-filter-select" onchange="calcNDReverse()">
+            <option value="2">ND2（1段）</option>
+            <option value="4">ND4（2段）</option>
+            <option value="8">ND8（3段）</option>
+            <option value="16">ND16（4段）</option>
+            <option value="64">ND64（6段）</option>
+            <option value="128">ND128（7段）</option>
+            <option value="400">ND400（≒9段）</option>
+            <option value="1000">ND1000（10段）</option>
+            <option value="4000">ND4000（12段）</option>
+          </select>
+        </div>
+      </div>
+      <div class="nd-result">
+        <div class="nd-result-sub">得られるシャッタースピード</div>
+        <div class="nd-result-main" id="nd-reverse-main">—</div>
+        <div class="nd-result-sub" id="nd-reverse-sub"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NDフィルター一覧表 -->
+  <div>
+    <div class="sec-eyebrow" style="margin-bottom:12px;">NDフィルター早見表</div>
+    <table class="nd-table" id="ndTable">
+      <thead><tr><th>フィルター名</th><th>段数</th><th>光量</th><th>例：1/2000→</th><th>例：1/1000→</th><th>例：1/500→</th></tr></thead>
+      <tbody id="ndTableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ======================== TIMELINE TAB ======================== -->
+<div class="tab-content" id="tab-timeline">
+  <div class="sec-head">
+    <div>
+      <div class="sec-eyebrow">SHOOTING TIMELINE</div>
+      <div class="sec-title">撮影タイムライン</div>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-ghost" onclick="exportTimeline()">テキスト出力</button>
+      <button class="btn btn-ghost" onclick="clearTimeline()">クリア</button>
+    </div>
+  </div>
+
+  <!-- DATE & TIME RANGE -->
+  <div class="tl-date-row">
+    <div>
+      <span class="field-label">撮影日</span>
+      <input type="date" id="tl-date" style="width:160px;" onchange="saveTL();renderTimeline()">
+    </div>
+    <div>
+      <span class="field-label">開始時刻</span>
+      <input type="time" id="tl-start" value="08:00" style="width:110px;" onchange="saveTL();renderTimeline()">
+    </div>
+    <div>
+      <span class="field-label">終了時刻</span>
+      <input type="time" id="tl-end" value="18:00" style="width:110px;" onchange="saveTL();renderTimeline()">
+    </div>
+    <div>
+      <span class="field-label">場所メモ</span>
+      <input type="text" id="tl-venue" placeholder="例：渋谷区民会館" style="width:220px;" onchange="saveTL()">
+    </div>
+  </div>
+
+  <!-- ADD EVENT -->
+  <div class="tl-add-row">
+    <div>
+      <span class="field-label">開始時刻</span>
+      <input type="time" id="tl-ev-start" value="09:00">
+    </div>
+    <div>
+      <span class="field-label">シーン・内容</span>
+      <input type="text" id="tl-ev-name" placeholder="例：会場セットアップ" onkeydown="if(event.key==='Enter')addTLEvent()">
+    </div>
+    <div>
+      <span class="field-label">所要時間(分)</span>
+      <input type="number" id="tl-ev-dur" value="30" min="5" step="5">
+    </div>
+    <div>
+      <span class="field-label">種別</span>
+      <select id="tl-ev-type">
+        <option value="#4a7c3f">撮影</option>
+        <option value="#7a3c10">移動</option>
+        <option value="#1a4a7a">準備・セットアップ</option>
+        <option value="#6a3a7a">インタビュー</option>
+        <option value="#7a6a1a">休憩</option>
+        <option value="#3a6a7a">その他</option>
+      </select>
+    </div>
+    <div style="display:flex;align-items:flex-end;">
+      <button class="btn btn-primary" onclick="addTLEvent()">追加</button>
+    </div>
+  </div>
+
+  <!-- VISUAL TIMELINE -->
+  <div id="tlVisual" style="margin-bottom:24px;overflow-x:auto;"></div>
+
+  <!-- LIST -->
+  <div class="tl-list" id="tlList"></div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -753,6 +967,8 @@ function switchTab(name){
   document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
   event.target.classList.add('active');
   document.getElementById('tab-' + name).classList.add('active');
+  if(name==='timeline') renderTimeline();
+  if(name==='nd') initND();
 }
 
 // ─── CHECKLIST ───────────────────────────────────────────────────────────────
@@ -1037,6 +1253,213 @@ function renderAll(){
   renderEditNotes();
 }
 
+// ─── ND FILTER ───────────────────────────────────────────────────────────────
+const ND_FILTERS = [
+  {name:'ND2',  stops:1,  factor:2},
+  {name:'ND4',  stops:2,  factor:4},
+  {name:'ND8',  stops:3,  factor:8},
+  {name:'ND16', stops:4,  factor:16},
+  {name:'ND64', stops:6,  factor:64},
+  {name:'ND128',stops:7,  factor:128},
+  {name:'ND400',stops:8.6,factor:400},
+  {name:'ND1000',stops:10,factor:1000},
+  {name:'ND4000',stops:12,factor:4000},
+];
+
+const SS_VALS = [1/4,1/8,1/15,1/20,1/25,1/30,1/40,1/50,1/60,1/80,1/100,1/125,1/160,1/200,1/250,1/320,1/400,1/500,1/640,1/800,1/1000,1/1250,1/1600,1/2000,1/2500,1/3200,1/4000,1/6400,1/8000];
+const SS_LABELS=['1/4','1/8','1/15','1/20','1/25','1/30','1/40','1/50','1/60','1/80','1/100','1/125','1/160','1/200','1/250','1/320','1/400','1/500','1/640','1/800','1/1000','1/1250','1/1600','1/2000','1/2500','1/3200','1/4000','1/6400','1/8000'];
+
+function parseSS(str){ const p=str.split('/'); return p.length===2?1/parseInt(p[1]):parseFloat(p[0]); }
+
+function closestSS(val){
+  let best=0, bestDiff=Infinity;
+  SS_VALS.forEach((v,i)=>{ const d=Math.abs(v-val); if(d<bestDiff){bestDiff=d;best=i;} });
+  return SS_LABELS[best];
+}
+
+function calcND(){
+  const fps = parseInt(document.getElementById('nd-fps').value);
+  const recSS = 1/(fps*2);
+  document.getElementById('rule180ss').textContent = '1/' + (fps*2);
+
+  const curSS = parseSS(document.getElementById('nd-cur-ss').value);
+  const tgtSS = parseSS(document.getElementById('nd-target-ss').value);
+  if(curSS <= tgtSS){
+    document.getElementById('nd-forward-main').textContent = 'NDは不要';
+    document.getElementById('nd-forward-sub').textContent = '現在のSSはすでに目標以下です';
+    return;
+  }
+  const ratio = curSS / tgtSS;
+  const stops = Math.log2(ratio);
+  const best = ND_FILTERS.reduce((a,b)=> Math.abs(b.stops-stops)<Math.abs(a.stops-stops)?b:a);
+  document.getElementById('nd-forward-main').textContent = best.name + ' （' + best.stops.toFixed(0) + '段）';
+  document.getElementById('nd-forward-sub').textContent = `必要な減光: ${stops.toFixed(1)}段 → ${best.name}（${best.stops}段）が最適`;
+
+  renderNDTable(curSS);
+}
+
+function calcNDReverse(){
+  const baseSS = parseSS(document.getElementById('nd-base-ss').value);
+  const factor = parseInt(document.getElementById('nd-filter-select').value);
+  const resultSS = baseSS * factor;
+  const label = closestSS(resultSS);
+  document.getElementById('nd-reverse-main').textContent = label;
+  const nd = ND_FILTERS.find(f=>f.factor===factor);
+  document.getElementById('nd-reverse-sub').textContent = nd ? `${nd.name}（${nd.stops}段）を装着した場合` : '';
+}
+
+function renderNDTable(highlightBase){
+  const examples = [1/2000, 1/1000, 1/500];
+  const tbody = document.getElementById('ndTableBody');
+  tbody.innerHTML = '';
+  ND_FILTERS.forEach(f=>{
+    const tr = document.createElement('tr');
+    if(highlightBase && Math.abs(highlightBase/(1/f.factor) - (highlightBase*f.factor)) < 0.0001) tr.className='nd-highlight';
+    tr.innerHTML = `<td><strong>${f.name}</strong></td><td>${f.stops % 1 === 0 ? f.stops : f.stops.toFixed(1)}段</td><td>1/${f.factor}に減光</td>`
+      + examples.map(ss=>`<td>${closestSS(ss*f.factor)}</td>`).join('');
+    tbody.appendChild(tr);
+  });
+}
+
+function initND(){
+  calcND();
+  calcNDReverse();
+  renderNDTable();
+}
+
+// ─── TIMELINE ────────────────────────────────────────────────────────────────
+const TL_COLORS = {
+  '#4a7c3f':'撮影','#7a3c10':'移動','#1a4a7a':'準備','#6a3a7a':'インタビュー','#7a6a1a':'休憩','#3a6a7a':'その他'
+};
+
+function tlKey(){ return 'tl_' + currentProject; }
+function tlData(){
+  const d = JSON.parse(localStorage.getItem(tlKey()) || 'null');
+  return d || {date:'',start:'08:00',end:'18:00',venue:'',events:[]};
+}
+function saveTL(){
+  const d = tlData();
+  d.date = document.getElementById('tl-date').value;
+  d.start = document.getElementById('tl-start').value;
+  d.end = document.getElementById('tl-end').value;
+  d.venue = document.getElementById('tl-venue').value;
+  localStorage.setItem(tlKey(), JSON.stringify(d));
+}
+function loadTL(){
+  const d = tlData();
+  document.getElementById('tl-date').value = d.date || new Date().toISOString().split('T')[0];
+  document.getElementById('tl-start').value = d.start || '08:00';
+  document.getElementById('tl-end').value = d.end || '18:00';
+  document.getElementById('tl-venue').value = d.venue || '';
+  renderTimeline();
+}
+
+function timeToMin(t){ const [h,m]=t.split(':').map(Number); return h*60+m; }
+function minToTime(m){ return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0'); }
+
+function addTLEvent(){
+  const name = document.getElementById('tl-ev-name').value.trim();
+  if(!name){ showToast('シーン名を入力してください'); return; }
+  const d = tlData();
+  const start = document.getElementById('tl-ev-start').value;
+  const dur = parseInt(document.getElementById('tl-ev-dur').value) || 30;
+  const color = document.getElementById('tl-ev-type').value;
+  const endMin = timeToMin(start) + dur;
+  d.events.push({start, end: minToTime(endMin), dur, name, color});
+  d.events.sort((a,b)=>timeToMin(a.start)-timeToMin(b.start));
+  localStorage.setItem(tlKey(), JSON.stringify(d));
+  document.getElementById('tl-ev-name').value = '';
+  document.getElementById('tl-ev-start').value = minToTime(endMin);
+  renderTimeline();
+}
+
+function delTLEvent(i){
+  const d = tlData(); d.events.splice(i,1);
+  localStorage.setItem(tlKey(), JSON.stringify(d));
+  renderTimeline();
+}
+
+function renderTimeline(){
+  const d = tlData();
+  const startMin = timeToMin(d.start||'08:00');
+  const endMin = timeToMin(d.end||'18:00');
+  const totalMin = Math.max(endMin - startMin, 60);
+  const W = 900;
+
+  // Visual
+  const vis = document.getElementById('tlVisual');
+  const now = new Date();
+  const nowMin = now.getHours()*60 + now.getMinutes();
+  const pct = p => ((p - startMin) / totalMin * W).toFixed(1);
+
+  let html = `<div style="position:relative;width:${W}px;min-width:${W}px;">`;
+  // hour labels
+  html += '<div class="tl-axis">';
+  for(let m=startMin; m<=endMin; m+=60){
+    const w = Math.min(60/totalMin*100, (endMin-m)/totalMin*100);
+    html += `<div style="width:${60/totalMin*W}px;font-family:monospace;font-size:10px;color:#8b6820;padding-bottom:4px;flex-shrink:0;">${minToTime(m)}</div>`;
+  }
+  html += '</div>';
+
+  // grid + events
+  const rowH = (d.events.length+1)*48 + 16;
+  html += `<div style="position:relative;height:${rowH}px;background:#f0e4cc;border:1px solid rgba(184,152,72,.3);">`;
+  for(let m=startMin; m<=endMin; m+=60){
+    const x = pct(m);
+    html += `<div style="position:absolute;left:${x}px;top:0;bottom:0;width:1px;background:rgba(184,152,72,.25);"></div>`;
+  }
+
+  d.events.forEach((ev,i)=>{
+    const x = Math.max(0, pct(timeToMin(ev.start)));
+    const w = Math.max(2, (ev.dur / totalMin * W).toFixed(1));
+    const label = ev.name + ' ' + ev.start + '〜' + ev.end;
+    html += `<div class="tl-item" style="left:${x}px;width:${w}px;top:${8+i*48}px;background:${ev.color};color:#fff;font-size:11px;" title="${label}">${ev.name}</div>`;
+  });
+
+  // now line
+  if(nowMin >= startMin && nowMin <= endMin){
+    const x = pct(nowMin);
+    html += `<div class="tl-now-line" style="left:${x}px;"><div class="tl-now-label">${minToTime(nowMin)}</div></div>`;
+  }
+  html += '</div></div>';
+  vis.innerHTML = html;
+
+  // List
+  const list = document.getElementById('tlList');
+  if(!d.events.length){ list.innerHTML=''; return; }
+  let lhtml = '<div class="tl-list-row tl-list-head"><div>開始</div><div>終了</div><div>シーン・内容</div><div>所要時間</div><div>種別</div><div></div></div>';
+  d.events.forEach((ev,i)=>{
+    const typeName = TL_COLORS[ev.color] || '';
+    lhtml += `<div class="tl-list-row">
+      <div>${ev.start}</div><div>${ev.end}</div>
+      <div><input type="text" value="${esc(ev.name)}" onchange="updateTLEvent(${i},'name',this.value)" style="padding:4px 8px;font-size:12px;"></div>
+      <div>${ev.dur}分</div>
+      <div><span style="display:inline-block;width:10px;height:10px;background:${ev.color};border-radius:50%;margin-right:6px;"></span>${typeName}</div>
+      <div><button class="btn-danger" style="padding:4px 10px;" onclick="delTLEvent(${i})">×</button></div>
+    </div>`;
+  });
+  list.innerHTML = lhtml;
+}
+
+function updateTLEvent(i,k,v){
+  const d = tlData(); d.events[i][k]=v;
+  localStorage.setItem(tlKey(), JSON.stringify(d));
+}
+
+function clearTimeline(){
+  if(!confirm('タイムラインをクリアしますか？')) return;
+  const d = tlData(); d.events=[];
+  localStorage.setItem(tlKey(), JSON.stringify(d));
+  renderTimeline();
+}
+
+function exportTimeline(){
+  const d = tlData();
+  const lines = [`撮影タイムライン — ${proj().name}`, d.date||'', d.venue||'', ''];
+  d.events.forEach(ev=>{ lines.push(`${ev.start}〜${ev.end}（${ev.dur}分）　${ev.name}`); });
+  copyText(lines.join('\n'));
+}
+
 // ─── FILE ORGANIZER ──────────────────────────────────────────────────────────
 const VIDEO_EXTS = new Set(['mp4','mov','avi','mkv','mxf','m2ts','mts','webm','m4v','3gp']);
 let orgFiles = [];   // {file, date, dateStr, ext, newName}
@@ -1197,6 +1620,8 @@ function copyScript(){
 loadState();
 renderProjectSelect(Object.keys(state)[0]);
 renderAll();
+initND();
+loadTL();
 
 // ─── VIDEO COMPRESSOR ────────────────────────────────────────────────────────
 let ffmpegLoaded = false;
