@@ -375,6 +375,19 @@ tr:hover td{background:#fdf5e0;}
 <!-- SETTINGS -->
 <div class="tab-content" id="tab-settings">
   <div class="sec-head"><h2>設定</h2></div>
+
+  <div class="card" style="margin-bottom:24px;">
+    <div class="card-label">データのバックアップ・復元</div>
+    <p style="font-size:12px;color:#5a3a10;margin:10px 0 16px;line-height:1.8;">ブラウザの閲覧データを消去するとデータが消えます。定期的にバックアップを保存してください。</p>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      <button class="btn btn-gold" onclick="exportData()">💾 バックアップを保存（JSONファイル）</button>
+      <label class="btn btn-outline" style="cursor:pointer;">
+        📂 バックアップから復元
+        <input type="file" accept=".json" onchange="importData(event)" style="display:none;">
+      </label>
+    </div>
+    <div id="backupStatus" style="font-size:12px;color:#2f6040;margin-top:10px;"></div>
+  </div>
   <div class="card">
     <div class="card-label">事業者情報（帳票に使用）</div>
     <div class="form-grid" style="margin-top:12px;">
@@ -1365,6 +1378,46 @@ function speakSequence(msgs){
     u.pitch = G.settings.voiceStrict==='strict' ? 1.2 : 1.0;
     window.speechSynthesis.speak(u);
   });
+}
+
+// ─── BACKUP / RESTORE ─────────────────────────────────────────────────────────
+function exportData(){
+  const data = {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    gyomuData: G,
+    videoTools: videoState
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const d = new Date();
+  const fname = `gyomu_backup_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.json`;
+  a.href = url; a.download = fname; a.click();
+  URL.revokeObjectURL(url);
+  showToast('バックアップを保存しました');
+}
+
+function importData(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if(!data.gyomuData) throw new Error('無効なファイルです');
+      if(!confirm('現在のデータをバックアップファイルで上書きします。よろしいですか？')) return;
+      localStorage.setItem(GYOMU_KEY, JSON.stringify(data.gyomuData));
+      if(data.videoTools) localStorage.setItem(VIDEO_KEY, JSON.stringify(data.videoTools));
+      loadG(); loadVideo();
+      document.getElementById('backupStatus').textContent = `✓ 復元完了：${data.exportedAt ? new Date(data.exportedAt).toLocaleString('ja-JP') + ' のバックアップ' : 'バックアップ'}`;
+      showToast('データを復元しました');
+    } catch(err) {
+      alert('ファイルの読み込みに失敗しました。正しいバックアップファイルを選んでください。');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
