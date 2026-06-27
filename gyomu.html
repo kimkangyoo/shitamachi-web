@@ -142,6 +142,28 @@ tr:hover td{background:#fdf5e0;}
 #toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:#1c0f02;color:#f0ddb0;font-size:12px;letter-spacing:.1em;padding:10px 24px;border-radius:20px;border:1px solid #c8880a;opacity:0;transition:opacity .3s;z-index:9999;pointer-events:none;}
 #toast.show{opacity:1;}
 
+/* CALENDAR */
+.cal-head{display:grid;grid-template-columns:repeat(7,1fr);background:#1c0f02;}
+.cal-dow{text-align:center;font-size:11px;letter-spacing:.1em;color:#c8a860;padding:10px 4px;}
+.cal-dow:first-child{color:#e05050;}
+.cal-dow:last-child{color:#6090d0;}
+.cal-body{display:grid;grid-template-columns:repeat(7,1fr);}
+.cal-cell{min-height:90px;border-right:1px solid #e8dcc8;border-bottom:1px solid #e8dcc8;padding:6px 4px;cursor:pointer;background:#fffdf5;transition:background .15s;vertical-align:top;}
+.cal-cell:hover{background:#f5ead0;}
+.cal-cell.today{background:#fff8e0;border:2px solid #c8880a;}
+.cal-cell.other-month{background:#f0ebe0;opacity:.6;}
+.cal-cell.selected{background:#f5ead0;outline:2px solid #c8880a;}
+.cal-cell:nth-child(7n+1) .cal-date{color:#e05050;}
+.cal-cell:nth-child(7n) .cal-date{color:#6090d0;}
+.cal-date{font-size:13px;font-weight:700;color:#1c0f02;margin-bottom:4px;display:block;}
+.cal-event{font-size:10px;padding:2px 5px;border-radius:3px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;}
+.cal-event.撮影{background:#c8880a;color:#fff;}
+.cal-event.納品{background:#8b2010;color:#fff;}
+.cal-event.打ち合わせ{background:#1f4a7a;color:#fff;}
+.cal-event.その他{background:#2f6040;color:#fff;}
+.cal-event.project-shoot{background:#c8880a;color:#fff;}
+.cal-event.project-deadline{background:#8b2010;color:#fff;}
+
 /* PRINT */
 @media print {
   nav,  .tabs, .tab-content:not(.active), .btn, .btn-row, .modal-bg, #toast{display:none!important;}
@@ -177,6 +199,7 @@ tr:hover td{background:#fdf5e0;}
   <div class="tab" onclick="switchTab('clients')">顧客</div>
   <div class="tab" onclick="switchTab('expenses')">経費</div>
   <div class="tab" onclick="switchTab('docs')">帳票作成</div>
+  <div class="tab" onclick="switchTab('calendar')">カレンダー</div>
   <div class="tab" onclick="switchTab('memos')">メモ</div>
   <div class="tab" onclick="switchTab('settings')">設定</div>
 </div>
@@ -360,6 +383,73 @@ tr:hover td{background:#fdf5e0;}
     </div>
     <div>
       <div class="doc-preview" id="docPreview"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CALENDAR -->
+<div class="tab-content" id="tab-calendar">
+  <div class="sec-head">
+    <h2>カレンダー</h2>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="btn btn-outline btn-sm" onclick="calPrev()">◀</button>
+      <span id="calTitle" style="font-family:'Shippori Mincho',serif;font-size:16px;min-width:120px;text-align:center;"></span>
+      <button class="btn btn-outline btn-sm" onclick="calNext()">▶</button>
+      <button class="btn btn-gold btn-sm" onclick="calToday()">今月</button>
+    </div>
+  </div>
+
+  <!-- 凡例 -->
+  <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;font-size:11px;">
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#c8880a;margin-right:4px;vertical-align:middle;"></span>撮影</span>
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#8b2010;margin-right:4px;vertical-align:middle;"></span>納品・締切</span>
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#1f4a7a;margin-right:4px;vertical-align:middle;"></span>打ち合わせ</span>
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#2f6040;margin-right:4px;vertical-align:middle;"></span>その他</span>
+  </div>
+
+  <!-- カレンダーグリッド -->
+  <div id="calGrid" style="border:1px solid #d4b870;border-radius:6px;overflow:hidden;"></div>
+
+  <!-- 選択日の予定 -->
+  <div id="calDayPanel" style="display:none;margin-top:24px;">
+    <div class="sec-head">
+      <h2 id="calDayTitle" style="font-size:16px;"></h2>
+      <button class="btn btn-gold btn-sm" onclick="openCalEventModal(null)">＋ 予定を追加</button>
+    </div>
+    <div id="calDayEvents"></div>
+  </div>
+</div>
+
+<!-- CALENDAR EVENT MODAL -->
+<div class="modal-bg" id="calEventModal">
+  <div class="modal">
+    <div class="modal-head"><h3 id="calEventModalTitle">予定を追加</h3><button class="modal-close" onclick="closeModal('calEventModal')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="calEventEditId">
+      <div class="form-grid">
+        <div class="span2"><label class="fl">タイトル</label><input type="text" id="ce-title" placeholder="例：山田様 打ち合わせ" required></div>
+        <div><label class="fl">日付</label><input type="date" id="ce-date" required></div>
+        <div><label class="fl">終了日（任意）</label><input type="date" id="ce-endDate"></div>
+        <div><label class="fl">開始時刻（任意）</label><input type="time" id="ce-time"></div>
+        <div><label class="fl">終了時刻（任意）</label><input type="time" id="ce-endTime"></div>
+        <div><label class="fl">種別</label>
+          <select id="ce-type">
+            <option value="撮影">撮影</option>
+            <option value="納品">納品・締切</option>
+            <option value="打ち合わせ" selected>打ち合わせ</option>
+            <option value="その他">その他</option>
+          </select>
+        </div>
+        <div><label class="fl">関連案件（任意）</label>
+          <select id="ce-project"><option value="">— なし —</option></select>
+        </div>
+        <div class="span2"><label class="fl">メモ</label><input type="text" id="ce-memo" placeholder="備考など"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-gold" onclick="saveCalEvent()">保存</button>
+        <button class="btn btn-outline" onclick="closeModal('calEventModal')">キャンセル</button>
+        <button class="btn btn-danger" id="calEventDeleteBtn" onclick="deleteCalEvent()" style="display:none;">削除</button>
+      </div>
     </div>
   </div>
 </div>
@@ -613,6 +703,7 @@ function switchTab(name){
   if(name==='clients') renderClients();
   if(name==='expenses') renderExpenses();
   if(name==='docs') renderDocTab();
+  if(name==='calendar'){ if(!G.calEvents) G.calEvents=[]; renderCalendar(); }
   if(name==='memos') renderMemos();
   if(name==='settings') renderSettings();
 }
@@ -1396,6 +1487,195 @@ function speakSequence(msgs){
     u.pitch = G.settings.voiceStrict==='strict' ? 1.2 : 1.0;
     window.speechSynthesis.speak(u);
   });
+}
+
+// ─── CALENDAR ─────────────────────────────────────────────────────────────────
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth();
+let calSelectedDate = null;
+
+const CAL_COLORS = {撮影:'#c8880a',納品:'#8b2010',打ち合わせ:'#1f4a7a',その他:'#2f6040'};
+
+function switchTab_calendar(){
+  if(!G.calEvents) G.calEvents = [];
+  renderCalendar();
+}
+
+function calPrev(){ calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCalendar(); }
+function calNext(){ calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCalendar(); }
+function calToday(){ calYear=new Date().getFullYear(); calMonth=new Date().getMonth(); renderCalendar(); }
+
+function renderCalendar(){
+  if(!G.calEvents) G.calEvents = [];
+  document.getElementById('calTitle').textContent = `${calYear}年${calMonth+1}月`;
+
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const lastDate = new Date(calYear, calMonth+1, 0).getDate();
+  const prevLast = new Date(calYear, calMonth, 0).getDate();
+
+  // Gather all events for this month
+  const eventsMap = {}; // date string -> [{...}]
+
+  // User-created events
+  (G.calEvents||[]).forEach(ev => {
+    const d = ev.date;
+    if(!eventsMap[d]) eventsMap[d] = [];
+    eventsMap[d].push({...ev, src:'user'});
+  });
+
+  // From tools.html projects
+  loadVideo();
+  Object.entries(videoState).forEach(([id,p]) => {
+    const s = p.schedule||{};
+    if(s.shootDate){
+      if(!eventsMap[s.shootDate]) eventsMap[s.shootDate]=[];
+      eventsMap[s.shootDate].push({id:'proj_shoot_'+id, title:'📷 '+p.name, type:'撮影', src:'project', projectId:id});
+    }
+    if(s.deadline){
+      if(!eventsMap[s.deadline]) eventsMap[s.deadline]=[];
+      eventsMap[s.deadline].push({id:'proj_dl_'+id, title:'🔴 '+p.name+' 締切', type:'納品', src:'project', projectId:id});
+    }
+  });
+
+  const todayStr = today();
+  const DOW = ['日','月','火','水','木','金','土'];
+
+  let html = `<div class="cal-head">${DOW.map(d=>`<div class="cal-dow">${d}</div>`).join('')}</div><div class="cal-body">`;
+
+  // Prev month cells
+  for(let i=0; i<firstDay; i++){
+    const d = prevLast - firstDay + i + 1;
+    html += `<div class="cal-cell other-month"><span class="cal-date">${d}</span></div>`;
+  }
+
+  // This month
+  for(let d=1; d<=lastDate; d++){
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = dateStr===todayStr;
+    const isSelected = dateStr===calSelectedDate;
+    const evs = eventsMap[dateStr]||[];
+    html += `<div class="cal-cell${isToday?' today':''}${isSelected?' selected':''}" onclick="selectCalDay('${dateStr}')">
+      <span class="cal-date">${d}</span>
+      ${evs.slice(0,3).map(ev=>`<div class="cal-event ${ev.type}" onclick="event.stopPropagation();${ev.src==='user'?`openCalEventModal('${ev.id}')`:`selectCalDay('${dateStr}')`}">${ev.title}</div>`).join('')}
+      ${evs.length>3?`<div style="font-size:9px;color:#8b6820;">＋${evs.length-3}件</div>`:''}
+    </div>`;
+  }
+
+  // Next month cells
+  const total = firstDay + lastDate;
+  const remaining = total % 7 === 0 ? 0 : 7 - (total % 7);
+  for(let i=1; i<=remaining; i++){
+    html += `<div class="cal-cell other-month"><span class="cal-date">${i}</span></div>`;
+  }
+
+  html += '</div>';
+  document.getElementById('calGrid').innerHTML = html;
+
+  if(calSelectedDate) showCalDay(calSelectedDate, eventsMap);
+}
+
+function selectCalDay(dateStr){
+  calSelectedDate = dateStr;
+  renderCalendar();
+}
+
+function showCalDay(dateStr, eventsMap){
+  const panel = document.getElementById('calDayPanel');
+  const d = new Date(dateStr);
+  const dow = ['日','月','火','水','木','金','土'][d.getDay()];
+  document.getElementById('calDayTitle').textContent = `${d.getMonth()+1}月${d.getDate()}日（${dow}）`;
+  panel.style.display = 'block';
+
+  const evs = eventsMap[dateStr]||[];
+  if(evs.length===0){
+    document.getElementById('calDayEvents').innerHTML = '<div style="color:#8b6820;font-size:13px;">予定がありません。「＋ 予定を追加」から追加してください。</div>';
+    return;
+  }
+  document.getElementById('calDayEvents').innerHTML = evs.map(ev=>`
+    <div class="list-item" style="border-left:4px solid ${CAL_COLORS[ev.type]||'#c8880a'};">
+      <div class="list-item-body">
+        <div class="list-item-title">${esc(ev.title)}</div>
+        <div class="list-item-meta">
+          ${ev.time?ev.time+(ev.endTime?'〜'+ev.endTime:'')+'　':''}
+          <span class="badge" style="background:${CAL_COLORS[ev.type]||'#c8880a'};color:#fff;">${ev.type}</span>
+          ${ev.memo?`　${esc(ev.memo)}`:''}
+          ${ev.src==='project'?'<span style="font-size:10px;color:#8b6820;"> （制作ツールから）</span>':''}
+        </div>
+      </div>
+      ${ev.src==='user'?`<button class="btn btn-outline btn-sm" onclick="openCalEventModal('${ev.id}')">編集</button>`:''}
+    </div>
+  `).join('');
+}
+
+function openCalEventModal(id){
+  loadVideo();
+  // Fill project select
+  const sel = document.getElementById('ce-project');
+  sel.innerHTML = '<option value="">— なし —</option>' +
+    Object.entries(videoState).map(([pid,p])=>`<option value="${pid}">${esc(p.name)}</option>`).join('');
+
+  if(id){
+    const ev = (G.calEvents||[]).find(e=>e.id===id);
+    if(!ev) return;
+    document.getElementById('calEventModalTitle').textContent = '予定を編集';
+    document.getElementById('calEventEditId').value = id;
+    document.getElementById('ce-title').value = ev.title;
+    document.getElementById('ce-date').value = ev.date;
+    document.getElementById('ce-endDate').value = ev.endDate||'';
+    document.getElementById('ce-time').value = ev.time||'';
+    document.getElementById('ce-endTime').value = ev.endTime||'';
+    document.getElementById('ce-type').value = ev.type;
+    document.getElementById('ce-project').value = ev.projectId||'';
+    document.getElementById('ce-memo').value = ev.memo||'';
+    document.getElementById('calEventDeleteBtn').style.display = 'block';
+  } else {
+    document.getElementById('calEventModalTitle').textContent = '予定を追加';
+    document.getElementById('calEventEditId').value = '';
+    document.getElementById('ce-title').value = '';
+    document.getElementById('ce-date').value = calSelectedDate||today();
+    document.getElementById('ce-endDate').value = '';
+    document.getElementById('ce-time').value = '';
+    document.getElementById('ce-endTime').value = '';
+    document.getElementById('ce-type').value = '打ち合わせ';
+    document.getElementById('ce-project').value = '';
+    document.getElementById('ce-memo').value = '';
+    document.getElementById('calEventDeleteBtn').style.display = 'none';
+  }
+  document.getElementById('calEventModal').classList.add('open');
+}
+
+function saveCalEvent(){
+  if(!G.calEvents) G.calEvents = [];
+  const id = document.getElementById('calEventEditId').value;
+  const obj = {
+    id: id || uid(),
+    title: document.getElementById('ce-title').value,
+    date: document.getElementById('ce-date').value,
+    endDate: document.getElementById('ce-endDate').value,
+    time: document.getElementById('ce-time').value,
+    endTime: document.getElementById('ce-endTime').value,
+    type: document.getElementById('ce-type').value,
+    projectId: document.getElementById('ce-project').value,
+    memo: document.getElementById('ce-memo').value
+  };
+  if(!obj.title||!obj.date){ showToast('タイトルと日付を入力してください'); return; }
+  if(id){
+    const idx = G.calEvents.findIndex(e=>e.id===id);
+    if(idx>=0) G.calEvents[idx]=obj;
+  } else {
+    G.calEvents.push(obj);
+  }
+  calSelectedDate = obj.date;
+  saveG(); closeModal('calEventModal'); renderCalendar();
+  showToast('予定を保存しました');
+}
+
+function deleteCalEvent(){
+  const id = document.getElementById('calEventEditId').value;
+  if(!confirm('この予定を削除しますか？')) return;
+  G.calEvents = (G.calEvents||[]).filter(e=>e.id!==id);
+  saveG(); closeModal('calEventModal'); renderCalendar();
+  showToast('予定を削除しました');
 }
 
 // ─── BACKUP / RESTORE ─────────────────────────────────────────────────────────
