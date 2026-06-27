@@ -183,6 +183,14 @@ tr:hover td{background:#fdf5e0;}
 <!-- DASHBOARD -->
 <div class="tab-content active" id="tab-dashboard">
   <div class="sec-head"><h2>ダッシュボード</h2><span class="sec-sub" id="clockDisplay"></span></div>
+
+  <!-- VOICE BAR -->
+  <div id="voiceBar" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:#1c0f02;border:1px solid #7a5218;border-radius:6px;padding:12px 18px;margin-bottom:24px;">
+    <button class="btn btn-gold btn-sm" id="voiceEnableBtn" onclick="enableVoice()">🔊 音声アラートを有効にする</button>
+    <span id="voiceStatus" style="font-size:12px;color:#a09070;">音声：未有効（ボタンを押すまで鳴りません）</span>
+    <button class="btn btn-outline btn-sm" onclick="manualVoiceCheck()" style="margin-left:auto;">今すぐ確認</button>
+  </div>
+
   <div class="dash-grid" id="dashCards"></div>
 
   <div class="sec-head" style="margin-top:8px;"><h2>締切が近い案件</h2></div>
@@ -344,10 +352,26 @@ tr:hover td{background:#fdf5e0;}
   </div>
 
   <div class="card" style="margin-top:16px;">
-    <div class="card-label">アラート設定</div>
+    <div class="card-label">音声アラート設定</div>
     <div class="form-grid" style="margin-top:12px;">
       <div><label class="fl">「締切が近い」と見なす日数</label>
         <select id="s-watchDays"><option value="3">3日以内</option><option value="5" selected>5日以内</option><option value="7">7日以内</option><option value="14">14日以内</option></select>
+      </div>
+      <div><label class="fl">自動チェックの間隔</label>
+        <select id="s-voiceInterval">
+          <option value="0">自動チェックしない（手動のみ）</option>
+          <option value="5">5分ごと</option>
+          <option value="15" selected>15分ごと</option>
+          <option value="30">30分ごと</option>
+          <option value="60">60分ごと</option>
+        </select>
+      </div>
+      <div><label class="fl">口調（厳しさ）</label>
+        <select id="s-voiceStrict">
+          <option value="soft">やさしめ</option>
+          <option value="normal">ふつう</option>
+          <option value="strict" selected>厳しい</option>
+        </select>
       </div>
     </div>
   </div>
@@ -1058,6 +1082,8 @@ function renderSettings(){
   document.getElementById('s-bizEmail').value=s.bizEmail||'';
   document.getElementById('s-bizBank').value=s.bizBank||'';
   document.getElementById('s-watchDays').value=s.watchDays||5;
+  document.getElementById('s-voiceInterval').value=s.voiceInterval!==undefined?s.voiceInterval:15;
+  document.getElementById('s-voiceStrict').value=s.voiceStrict||'strict';
 }
 function saveSettings(){
   G.settings={
@@ -1067,9 +1093,118 @@ function saveSettings(){
     bizTel:document.getElementById('s-bizTel').value,
     bizEmail:document.getElementById('s-bizEmail').value,
     bizBank:document.getElementById('s-bizBank').value,
-    watchDays:Number(document.getElementById('s-watchDays').value)
+    watchDays:Number(document.getElementById('s-watchDays').value),
+    voiceInterval:Number(document.getElementById('s-voiceInterval').value),
+    voiceStrict:document.getElementById('s-voiceStrict').value
   };
-  saveG(); showToast('設定を保存しました');
+  saveG();
+  resetVoiceTimer();
+  showToast('設定を保存しました');
+}
+
+// ─── VOICE ALERT ──────────────────────────────────────────────────────────────
+let voiceEnabled = false;
+let voiceTimer = null;
+
+function enableVoice(){
+  // Trigger speech synthesis user gesture requirement
+  const u = new SpeechSynthesisUtterance('音声アラートを有効にしました');
+  u.lang = 'ja-JP';
+  u.volume = 0.5;
+  window.speechSynthesis.speak(u);
+  voiceEnabled = true;
+  document.getElementById('voiceEnableBtn').textContent = '🔊 音声：有効';
+  document.getElementById('voiceEnableBtn').className = 'btn btn-outline btn-sm';
+  document.getElementById('voiceStatus').textContent = '音声アラート：有効';
+  document.getElementById('voiceStatus').style.color = '#2f6040';
+  resetVoiceTimer();
+}
+
+function resetVoiceTimer(){
+  if(voiceTimer) clearInterval(voiceTimer);
+  const mins = Number(G.settings.voiceInterval||15);
+  if(!voiceEnabled || mins===0) return;
+  voiceTimer = setInterval(()=>{ if(voiceEnabled) runVoiceCheck(); }, mins*60*1000);
+}
+
+function manualVoiceCheck(){
+  if(!voiceEnabled){
+    // First time - enable voice
+    enableVoice();
+    setTimeout(()=>runVoiceCheck(), 1000);
+    return;
+  }
+  runVoiceCheck();
+}
+
+function runVoiceCheck(){
+  loadVideo();
+  const projects = Object.entries(videoState).map(([id,p])=>({id,name:p.name,s:p.schedule||null}));
+  const watchDays = Number(G.settings.watchDays)||5;
+  const strict = G.settings.voiceStrict||'strict';
+
+  const alerts = projects
+    .filter(p=>p.s&&p.s.deadline)
+    .map(p=>({name:p.name, days:daysUntil(p.s.deadline)}))
+    .filter(p=>p.days!==null && p.days<=watchDays)
+    .sort((a,b)=>a.days-b.days);
+
+  if(alerts.length===0){
+    speak('現在、締切が近い案件はありません。順調です。');
+    return;
+  }
+
+  const msgs = alerts.map(p=>{
+    const d = p.days;
+    if(d<0) return buildMsg(p.name, `すでに${Math.abs(d)}日超過しています`, 'overdue', strict);
+    if(d===0) return buildMsg(p.name, '本日が締切です', 'today', strict);
+    if(d<=3)  return buildMsg(p.name, `締切まであと${d}日です`, 'urgent', strict);
+    return buildMsg(p.name, `締切まであと${d}日です`, 'near', strict);
+  });
+
+  speakSequence(msgs);
+}
+
+function buildMsg(name, timeStr, level, strict){
+  if(strict==='soft'){
+    if(level==='overdue') return `${name}の締切が${timeStr}。確認をお願いします。`;
+    if(level==='today')   return `${name}は${timeStr}。頑張ってください。`;
+    if(level==='urgent')  return `${name}の${timeStr}。そろそろ仕上げましょう。`;
+    return `${name}の${timeStr}。進めていきましょう。`;
+  }
+  if(strict==='normal'){
+    if(level==='overdue') return `警告！${name}の締切が${timeStr}！早急に対応してください。`;
+    if(level==='today')   return `${name}は${timeStr}！今日中に完成させてください。`;
+    if(level==='urgent')  return `${name}の${timeStr}！急いでください。`;
+    return `${name}の${timeStr}。対応を進めてください。`;
+  }
+  // strict
+  if(level==='overdue') return `緊急警告！${name}の締切が${timeStr}！今すぐ連絡と対応が必要です！`;
+  if(level==='today')   return `${name}は${timeStr}！絶対に今日中に終わらせてください！`;
+  if(level==='urgent')  return `${name}の${timeStr}！残り時間がありません！今すぐ取り掛かってください！`;
+  return `${name}の${timeStr}。余裕を持って進めてください。`;
+}
+
+function speak(text){
+  if(!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'ja-JP';
+  u.rate = 1.0;
+  u.pitch = 1.0;
+  window.speechSynthesis.speak(u);
+}
+
+function speakSequence(msgs){
+  if(!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  msgs.forEach((msg, i)=>{
+    const u = new SpeechSynthesisUtterance(msg);
+    u.lang = 'ja-JP';
+    u.rate = G.settings.voiceStrict==='strict' ? 1.1 : 1.0;
+    u.pitch = G.settings.voiceStrict==='strict' ? 1.2 : 1.0;
+    window.speechSynthesis.speak(u);
+  });
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
