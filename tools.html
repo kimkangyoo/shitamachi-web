@@ -389,7 +389,7 @@ tr.shot-complete td{opacity:.5;}
     </div>
 
     <!-- 案件基本情報 -->
-    <div class="camera-grid" style="margin-bottom:24px;">
+    <div class="camera-grid" style="margin-bottom:2px;">
       <div class="camera-cell">
         <div class="camera-cell-label">クライアント名</div>
         <input type="text" id="sch-client" placeholder="例：田中様">
@@ -401,6 +401,20 @@ tr.shot-complete td{opacity:.5;}
       <div class="camera-cell">
         <div class="camera-cell-label">納期</div>
         <input type="date" id="sch-deadline">
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;background:#b89848;margin-bottom:24px;">
+      <div class="camera-cell" style="grid-column:1/-1;">
+        <div class="camera-cell-label">案件内容</div>
+        <input type="text" id="sch-content" placeholder="例：結婚式の記録映像・本編5分＋ハイライト90秒">
+      </div>
+      <div class="camera-cell">
+        <div class="camera-cell-label">目的・ゴール</div>
+        <textarea id="sch-goal" style="min-height:72px;font-size:13px;" placeholder="例：新郎新婦の思い出として残す&#10;参列できなかった親族へ届ける&#10;SNS投稿用のショートムービーも制作"></textarea>
+      </div>
+      <div class="camera-cell">
+        <div class="camera-cell-label">ターゲット・視聴者</div>
+        <textarea id="sch-target" style="min-height:72px;font-size:13px;" placeholder="例：新郎新婦・両家の家族&#10;YouTube公開予定（一般視聴者）"></textarea>
       </div>
     </div>
 
@@ -1876,6 +1890,9 @@ function saveSchedule(){
   s.client   = document.getElementById('sch-client').value;
   s.shootDate= document.getElementById('sch-shoot-date').value;
   s.deadline = document.getElementById('sch-deadline').value;
+  s.content  = document.getElementById('sch-content').value;
+  s.goal     = document.getElementById('sch-goal').value;
+  s.target   = document.getElementById('sch-target').value;
   s.memo     = document.getElementById('sch-memo').value;
   s.phases.forEach((p,i)=>{
     p.status = document.getElementById(`ph-status-${i}`).value;
@@ -1900,6 +1917,9 @@ function renderSchedule(){
   document.getElementById('sch-client').value    = s.client    || '';
   document.getElementById('sch-shoot-date').value = s.shootDate || '';
   document.getElementById('sch-deadline').value  = s.deadline  || '';
+  document.getElementById('sch-content').value   = s.content   || '';
+  document.getElementById('sch-goal').value      = s.goal      || '';
+  document.getElementById('sch-target').value    = s.target    || '';
   document.getElementById('sch-memo').value      = s.memo      || '';
 
   // カウントダウン
@@ -1975,6 +1995,8 @@ function renderDashboard(){
     html += `<div class="dash-card${isActive?' active-proj':''}" onclick="switchToProject('${id}')">
       <div class="dash-name">${name}</div>
       <div class="dash-client">${s?.client||'クライアント未設定'}</div>
+      ${s?.content?`<div style="font-family:'Noto Sans JP',sans-serif;font-size:11px;color:#5a3c18;margin-bottom:6px;line-height:1.6;">${esc(s.content)}</div>`:''}
+
       <div class="dash-badges">${badges}</div>
       <div style="margin-top:10px;">
         <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
