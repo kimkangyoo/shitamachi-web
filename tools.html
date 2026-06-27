@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>制作ツール — 下町きろくの動画屋</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;700&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Shippori Mincho',serif;background:#e8dcc8;color:#2a1a08;min-height:100vh;}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.6;}
+
+nav{background:#150c02;padding:22px 64px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #7a5218;}
+.nav-logo{font-family:'Shippori Mincho',serif;font-size:20px;letter-spacing:.25em;color:#e8d090;text-decoration:none;}
+.nav-logo span{color:#c8880a;}
+.nav-links{display:flex;gap:36px;}
+.nav-links a{font-size:14px;letter-spacing:.15em;color:rgba(232,208,144,.7);text-decoration:none;font-family:'Shippori Mincho',serif;}
+.nav-links a:hover{color:#c8880a;}
+
+.page-header{background:#150c02;border-bottom:1px solid #3a2208;padding:40px 64px 32px;}
+.page-eyebrow{font-size:9px;letter-spacing:.6em;color:#8b6820;margin-bottom:10px;font-family:'Noto Sans JP',sans-serif;font-weight:300;}
+.page-title{font-family:'Shippori Mincho',serif;font-size:26px;font-weight:400;letter-spacing:.2em;color:#e8d090;}
+.page-title span{color:#c8880a;}
+
+/* PROJECT SELECTOR */
+.project-bar{background:#1e1004;border-bottom:1px solid #3a2208;padding:16px 64px;display:flex;align-items:center;gap:20px;}
+.project-bar label{font-size:11px;letter-spacing:.3em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;white-space:nowrap;}
+.project-select{background:#0d0700;border:1px solid #5a3c18;color:#e8d090;font-family:'Shippori Mincho',serif;font-size:14px;padding:8px 14px;letter-spacing:.1em;cursor:pointer;min-width:200px;}
+.btn-new-project{background:transparent;border:1px solid rgba(200,136,10,.5);color:#c8880a;font-family:'Shippori Mincho',serif;font-size:11px;letter-spacing:.25em;padding:8px 20px;cursor:pointer;}
+.btn-new-project:hover{background:rgba(200,136,10,.1);}
+.btn-del-project{background:transparent;border:1px solid rgba(120,48,16,.5);color:#7a3010;font-family:'Noto Sans JP',sans-serif;font-size:11px;padding:8px 16px;cursor:pointer;letter-spacing:.05em;}
+.btn-del-project:hover{background:rgba(120,48,16,.1);}
+
+/* TABS */
+.tabs{display:flex;border-bottom:2px solid #b89848;background:#f0e4cc;padding:0 64px;}
+.tab{padding:18px 32px;font-family:'Shippori Mincho',serif;font-size:15px;letter-spacing:.2em;color:#8b6820;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:color .2s;}
+.tab:hover{color:#c8880a;}
+.tab.active{color:#c8880a;border-bottom-color:#c8880a;}
+
+.tab-content{display:none;padding:48px 64px;max-width:1100px;}
+.tab-content.active{display:block;}
+
+/* SECTION HEADS */
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:28px;padding-bottom:16px;border-bottom:1px solid #b89848;}
+.sec-title{font-family:'Shippori Mincho',serif;font-size:18px;font-weight:400;letter-spacing:.15em;color:#1a0e04;}
+.sec-eyebrow{font-size:9px;letter-spacing:.5em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;font-weight:300;margin-bottom:6px;}
+
+/* BUTTONS */
+.btn{font-family:'Shippori Mincho',serif;font-size:12px;letter-spacing:.2em;padding:10px 24px;cursor:pointer;border:none;transition:background .2s;}
+.btn-primary{background:#c8880a;color:#0d0700;}
+.btn-primary:hover{background:#e09a10;}
+.btn-ghost{background:transparent;border:1px solid rgba(200,136,10,.5);color:#c8880a;}
+.btn-ghost:hover{background:rgba(200,136,10,.1);}
+.btn-danger{background:transparent;border:1px solid rgba(180,60,20,.4);color:#b43c14;font-family:'Noto Sans JP',sans-serif;font-size:11px;padding:6px 14px;}
+.btn-danger:hover{background:rgba(180,60,20,.08);}
+
+/* FORMS */
+input[type=text],input[type=number],textarea,select{background:#f8f0e4;border:1px solid #c8a850;color:#1a0e04;font-family:'Noto Sans JP',sans-serif;font-size:13px;padding:10px 14px;width:100%;}
+input[type=text]:focus,input[type=number]:focus,textarea:focus{outline:none;border-color:#c8880a;background:#fff8ec;}
+textarea{resize:vertical;line-height:1.8;}
+select{cursor:pointer;}
+
+/* CHECKLIST */
+.checklist-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-bottom:32px;}
+.checklist-col-title{font-size:11px;letter-spacing:.4em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;margin-bottom:14px;}
+.check-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid rgba(184,152,72,.3);}
+.check-item:last-child{border-bottom:none;}
+.check-item input[type=checkbox]{width:18px;height:18px;accent-color:#c8880a;margin-top:2px;flex-shrink:0;cursor:pointer;}
+.check-item label{font-size:13px;letter-spacing:.05em;color:#2a1a08;line-height:1.6;cursor:pointer;font-family:'Noto Sans JP',sans-serif;}
+.check-item label.checked{color:#8b6820;text-decoration:line-through;}
+.check-item .del-check{margin-left:auto;background:none;border:none;color:#c8a050;cursor:pointer;font-size:14px;padding:0 4px;flex-shrink:0;}
+.check-item .del-check:hover{color:#b43c14;}
+.add-check-row{display:flex;gap:10px;margin-top:16px;}
+.add-check-row input{flex:1;}
+
+/* SHOT LIST */
+.shot-table{width:100%;border-collapse:collapse;margin-bottom:24px;}
+.shot-table th{background:#150c02;color:#e8d090;font-family:'Noto Sans JP',sans-serif;font-size:11px;font-weight:300;letter-spacing:.3em;padding:12px 14px;text-align:left;}
+.shot-table td{padding:10px 14px;border-bottom:1px solid rgba(184,152,72,.3);vertical-align:top;}
+.shot-table tr:hover td{background:rgba(200,136,10,.04);}
+.shot-table input[type=text],.shot-table select,.shot-table textarea{padding:6px 10px;font-size:12px;}
+.shot-table textarea{height:56px;}
+.shot-num{font-family:'Shippori Mincho',serif;font-size:13px;color:#8b6820;text-align:center;}
+.shot-done input[type=checkbox]{width:18px;height:18px;accent-color:#c8880a;}
+tr.shot-complete td{opacity:.5;}
+.add-shot-row{display:flex;gap:12px;align-items:flex-end;}
+.add-shot-row .field{display:flex;flex-direction:column;gap:6px;}
+.add-shot-row .field label{font-size:10px;letter-spacing:.3em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;}
+
+/* CUT LIST */
+.cut-table{width:100%;border-collapse:collapse;margin-bottom:24px;}
+.cut-table th{background:#150c02;color:#e8d090;font-family:'Noto Sans JP',sans-serif;font-size:11px;font-weight:300;letter-spacing:.3em;padding:12px 14px;text-align:left;}
+.cut-table td{padding:8px 14px;border-bottom:1px solid rgba(184,152,72,.3);vertical-align:middle;}
+.cut-table tr:hover td{background:rgba(200,136,10,.04);}
+.cut-table input[type=text],.cut-table input[type=number],.cut-table textarea{padding:6px 10px;font-size:12px;}
+.cut-table textarea{height:48px;}
+.timecode{font-family:monospace;font-size:13px;color:#8b6820;letter-spacing:.05em;}
+.duration-input{width:80px;}
+.total-bar{background:#1e1004;border:1px solid #5a3c18;padding:18px 28px;display:flex;align-items:center;gap:32px;margin-bottom:24px;}
+.total-item{display:flex;flex-direction:column;gap:4px;}
+.total-label{font-size:9px;letter-spacing:.5em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;}
+.total-value{font-family:'Shippori Mincho',serif;font-size:22px;color:#e8d090;}
+.total-value span{font-size:13px;color:#8b6820;margin-left:4px;}
+
+/* TELOP */
+.telop-list{display:flex;flex-direction:column;gap:12px;margin-bottom:24px;}
+.telop-item{background:#f0e4cc;border:1px solid rgba(184,152,72,.4);padding:16px 20px;display:grid;grid-template-columns:140px 1fr auto;gap:16px;align-items:start;}
+.telop-tc{font-family:monospace;font-size:12px;color:#8b6820;}
+.telop-tc input{font-family:monospace;letter-spacing:.05em;}
+.telop-del{background:none;border:none;color:#c8a050;cursor:pointer;font-size:18px;padding:4px;}
+.telop-del:hover{color:#b43c14;}
+.add-telop-row{display:grid;grid-template-columns:140px 1fr auto;gap:16px;align-items:end;}
+.field-label{font-size:10px;letter-spacing:.3em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;margin-bottom:6px;display:block;}
+
+/* NOTES */
+.notes-area{background:#f8f0e4;border:1px solid #c8a850;color:#1a0e04;font-family:'Noto Sans JP',sans-serif;font-size:13px;padding:16px;width:100%;min-height:160px;resize:vertical;line-height:2;}
+.notes-area:focus{outline:none;border-color:#c8880a;}
+
+/* CAMERA SETTINGS */
+.camera-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:#b89848;margin-bottom:24px;}
+.camera-cell{background:#f0e4cc;padding:20px 18px;}
+.camera-cell-label{font-size:9px;letter-spacing:.5em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;margin-bottom:8px;}
+.camera-cell input,.camera-cell select{font-size:14px;font-family:'Shippori Mincho',serif;letter-spacing:.08em;}
+.camera-presets{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+.preset-chip{background:#150c02;color:#e8d090;font-family:'Noto Sans JP',sans-serif;font-size:11px;padding:6px 16px;cursor:pointer;letter-spacing:.1em;border:1px solid #3a2208;}
+.preset-chip:hover{border-color:#c8880a;color:#c8880a;}
+
+/* TOAST */
+.toast{position:fixed;bottom:32px;right:32px;background:#150c02;border:1px solid #c8880a;color:#e8d090;font-family:'Noto Sans JP',sans-serif;font-size:12px;letter-spacing:.1em;padding:14px 24px;z-index:10000;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;}
+.toast.show{opacity:1;transform:translateY(0);}
+
+/* PROGRESS BAR */
+.progress-wrap{display:flex;align-items:center;gap:16px;margin-bottom:32px;}
+.progress-track{flex:1;height:4px;background:#d4c4a4;position:relative;}
+.progress-fill{height:100%;background:#c8880a;transition:width .4s;}
+.progress-label{font-size:11px;letter-spacing:.2em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;white-space:nowrap;}
+
+@media(max-width:768px){
+  nav{padding:16px 24px;}
+  .project-bar,.page-header,.tabs,.tab-content{padding-left:24px;padding-right:24px;}
+  .checklist-grid{grid-template-columns:1fr;}
+  .camera-grid{grid-template-columns:1fr 1fr;}
+  .tab{padding:14px 16px;font-size:13px;}
+  .add-shot-row{flex-wrap:wrap;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">下町<span>きろく</span>の動画屋</a>
+  <div class="nav-links">
+    <a href="index.html">ホーム</a>
+    <a href="menu.html">メニュー</a>
+    <a href="about.html">制作者</a>
+    <a href="contact.php">お問い合わせ</a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="page-eyebrow">PRODUCTION TOOLS</div>
+  <div class="page-title">制作<span>ツール</span></div>
+</div>
+
+<div class="project-bar">
+  <label>案件</label>
+  <select class="project-select" id="projectSelect" onchange="switchProject()"></select>
+  <button class="btn-new-project" onclick="newProject()">＋ 新しい案件</button>
+  <button class="btn-del-project" onclick="deleteProject()">削除</button>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('shoot')">撮影</div>
+  <div class="tab" onclick="switchTab('edit')">編集</div>
+</div>
+
+<!-- ======================== SHOOT TAB ======================== -->
+<div class="tab-content active" id="tab-shoot">
+
+  <!-- CHECKLIST -->
+  <div style="margin-bottom:56px;">
+    <div class="sec-head">
+      <div>
+        <div class="sec-eyebrow">CHECKLIST</div>
+        <div class="sec-title">撮影チェックリスト</div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <div class="progress-label" id="checkProgress">0 / 0</div>
+        <button class="btn btn-ghost" onclick="resetChecks()">リセット</button>
+      </div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+    <div class="checklist-grid">
+      <div>
+        <div class="checklist-col-title">機材・カメラ</div>
+        <div id="checkList-gear"></div>
+        <div class="add-check-row">
+          <input type="text" id="newGear" placeholder="アイテムを追加" onkeydown="if(event.key==='Enter')addCheck('gear')">
+          <button class="btn btn-ghost" onclick="addCheck('gear')" style="white-space:nowrap;">追加</button>
+        </div>
+      </div>
+      <div>
+        <div class="checklist-col-title">ロケ・準備</div>
+        <div id="checkList-location"></div>
+        <div class="add-check-row">
+          <input type="text" id="newLocation" placeholder="アイテムを追加" onkeydown="if(event.key==='Enter')addCheck('location')">
+          <button class="btn btn-ghost" onclick="addCheck('location')" style="white-space:nowrap;">追加</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHOT LIST -->
+  <div style="margin-bottom:56px;">
+    <div class="sec-head">
+      <div>
+        <div class="sec-eyebrow">SHOT LIST</div>
+        <div class="sec-title">ショットリスト</div>
+      </div>
+      <button class="btn btn-ghost" onclick="exportShots()">テキスト出力</button>
+    </div>
+    <table class="shot-table" id="shotTable">
+      <thead>
+        <tr>
+          <th style="width:48px;">#</th>
+          <th style="width:80px;">完了</th>
+          <th>シーン・内容</th>
+          <th style="width:130px;">ショット種別</th>
+          <th style="width:100px;">カメラ角度</th>
+          <th>メモ</th>
+          <th style="width:48px;"></th>
+        </tr>
+      </thead>
+      <tbody id="shotBody"></tbody>
+    </table>
+    <div class="add-shot-row">
+      <div class="field" style="flex:2;">
+        <label>シーン・内容</label>
+        <input type="text" id="shotScene" placeholder="例：挨拶シーン">
+      </div>
+      <div class="field" style="width:130px;">
+        <label>ショット種別</label>
+        <select id="shotType">
+          <option>WS（ワイド）</option>
+          <option>MS（ミディアム）</option>
+          <option>CU（クローズアップ）</option>
+          <option>ECU（超クローズアップ）</option>
+          <option>バストアップ</option>
+          <option>ローアングル</option>
+          <option>ハイアングル</option>
+          <option>ドローン</option>
+          <option>インサート</option>
+          <option>その他</option>
+        </select>
+      </div>
+      <div class="field" style="width:100px;">
+        <label>カメラ角度</label>
+        <select id="shotAngle">
+          <option>正面</option>
+          <option>斜め</option>
+          <option>横</option>
+          <option>背面</option>
+          <option>俯瞰</option>
+          <option>アオリ</option>
+        </select>
+      </div>
+      <div class="field" style="flex:2;">
+        <label>メモ</label>
+        <input type="text" id="shotNote" placeholder="任意メモ">
+      </div>
+      <button class="btn btn-primary" onclick="addShot()" style="align-self:flex-end;white-space:nowrap;">追加</button>
+    </div>
+  </div>
+
+  <!-- CAMERA SETTINGS -->
+  <div>
+    <div class="sec-head">
+      <div>
+        <div class="sec-eyebrow">CAMERA SETTINGS</div>
+        <div class="sec-title">カメラ設定メモ</div>
+      </div>
+    </div>
+    <div style="margin-bottom:16px;">
+      <div style="font-size:11px;letter-spacing:.3em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;margin-bottom:10px;">プリセット呼び出し</div>
+      <div class="camera-presets">
+        <div class="preset-chip" onclick="applyPreset('outdoor-day')">屋外・昼</div>
+        <div class="preset-chip" onclick="applyPreset('indoor')">屋内</div>
+        <div class="preset-chip" onclick="applyPreset('night')">夜景</div>
+        <div class="preset-chip" onclick="applyPreset('interview')">インタビュー</div>
+        <div class="preset-chip" onclick="applyPreset('event')">イベント</div>
+      </div>
+    </div>
+    <div class="camera-grid">
+      <div class="camera-cell">
+        <div class="camera-cell-label">ISO</div>
+        <input type="text" id="cam-iso" placeholder="例：400">
+      </div>
+      <div class="camera-cell">
+        <div class="camera-cell-label">シャッタースピード</div>
+        <input type="text" id="cam-ss" placeholder="例：1/200">
+      </div>
+      <div class="camera-cell">
+        <div class="camera-cell-label">絞り（F値）</div>
+        <input type="text" id="cam-fstop" placeholder="例：2.8">
+      </div>
+      <div class="camera-cell">
+        <div class="camera-cell-label">ホワイトバランス</div>
+        <select id="cam-wb">
+          <option value="">—</option>
+          <option>オート（AWB）</option>
+          <option>太陽光 5500K</option>
+          <option>曇り 6500K</option>
+          <option>蛍光灯 4000K</option>
+          <option>タングステン 3200K</option>
+          <option>マニュアル</option>
+        </select>
+      </div>
+      <div class="camera-cell">
+        <div class="camera-cell-label">フォーカス</div>
+        <select id="cam-focus">
+          <option value="">—</option>
+          <option>MF（マニュアル）</option>
+          <option>AF-S（シングル）</option>
+          <option>AF-C（コンティニュアス）</option>
+        </select>
+      </div>
+      <div class="camera-cell">
+        <div class="camera-cell-label">ピクチャープロファイル</div>
+        <input type="text" id="cam-pp" placeholder="例：S-Log2, Cine4">
+      </div>
+    </div>
+    <div style="margin-top:8px;">
+      <span class="field-label">その他メモ</span>
+      <textarea id="cam-note" class="notes-area" style="min-height:80px;" placeholder="レンズ・フィルター・ND値など"></textarea>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:14px;">
+      <button class="btn btn-primary" onclick="saveCameraSettings()">保存</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ======================== EDIT TAB ======================== -->
+<div class="tab-content" id="tab-edit">
+
+  <!-- CUT LIST -->
+  <div style="margin-bottom:56px;">
+    <div class="sec-head">
+      <div>
+        <div class="sec-eyebrow">CUT STRUCTURE</div>
+        <div class="sec-title">カット構成・尺管理</div>
+      </div>
+      <button class="btn btn-ghost" onclick="exportCuts()">テキスト出力</button>
+    </div>
+    <div class="total-bar">
+      <div class="total-item">
+        <div class="total-label">合計尺</div>
+        <div class="total-value" id="totalDuration">0<span>秒</span></div>
+      </div>
+      <div class="total-item">
+        <div class="total-label">分換算</div>
+        <div class="total-value" id="totalMin">0:00</div>
+      </div>
+      <div class="total-item">
+        <div class="total-label">カット数</div>
+        <div class="total-value" id="totalCuts">0<span>カット</span></div>
+      </div>
+    </div>
+    <table class="cut-table" id="cutTable">
+      <thead>
+        <tr>
+          <th style="width:48px;">#</th>
+          <th>シーン名</th>
+          <th style="width:90px;">尺（秒）</th>
+          <th style="width:90px;">累計</th>
+          <th style="width:100px;">種別</th>
+          <th>メモ・テキスト</th>
+          <th style="width:48px;"></th>
+        </tr>
+      </thead>
+      <tbody id="cutBody"></tbody>
+    </table>
+    <div class="add-shot-row">
+      <div class="field" style="flex:2;">
+        <label>シーン名</label>
+        <input type="text" id="cutScene" placeholder="例：オープニング">
+      </div>
+      <div class="field" style="width:90px;">
+        <label>尺（秒）</label>
+        <input type="number" id="cutDur" placeholder="5" min="0" step="0.5">
+      </div>
+      <div class="field" style="width:110px;">
+        <label>種別</label>
+        <select id="cutType">
+          <option>映像</option>
+          <option>テロップ</option>
+          <option>タイトル</option>
+          <option>BGM転換</option>
+          <option>SE</option>
+          <option>暗転</option>
+          <option>その他</option>
+        </select>
+      </div>
+      <div class="field" style="flex:2;">
+        <label>メモ</label>
+        <input type="text" id="cutNote" placeholder="任意メモ">
+      </div>
+      <button class="btn btn-primary" onclick="addCut()" style="align-self:flex-end;white-space:nowrap;">追加</button>
+    </div>
+  </div>
+
+  <!-- TELOP -->
+  <div style="margin-bottom:56px;">
+    <div class="sec-head">
+      <div>
+        <div class="sec-eyebrow">TELOP / CAPTION</div>
+        <div class="sec-title">テロップメモ</div>
+      </div>
+      <button class="btn btn-ghost" onclick="exportTelop()">テキスト出力</button>
+    </div>
+    <div class="telop-list" id="telopList"></div>
+    <div class="add-telop-row">
+      <div>
+        <span class="field-label">タイムコード</span>
+        <input type="text" id="telopTc" placeholder="00:00:00">
+      </div>
+      <div>
+        <span class="field-label">テロップ文字</span>
+        <input type="text" id="telopText" placeholder="テロップ内容を入力" onkeydown="if(event.key==='Enter')addTelop()">
+      </div>
+      <div style="display:flex;align-items:flex-end;">
+        <button class="btn btn-primary" onclick="addTelop()" style="white-space:nowrap;">追加</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT NOTES -->
+  <div>
+    <div class="sec-head">
+      <div>
+        <div class="sec-eyebrow">EDIT NOTES</div>
+        <div class="sec-title">編集メモ</div>
+      </div>
+      <button class="btn btn-ghost" onclick="saveEditNotes()">保存</button>
+    </div>
+    <textarea class="notes-area" id="editNotes" placeholder="BGMのタイミング・カラーグレーディング方針・クライアント要望など"></textarea>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let state = {};
+let currentProject = null;
+
+const DEFAULT_GEAR = ['カメラ本体','バッテリー（予備含む）','メモリーカード（予備含む）','レンズ','三脚','マイク','ケーブル類','充電器'];
+const DEFAULT_LOCATION = ['ロケ地確認・許可','駐車場確認','天気確認','クライアントへの最終連絡','当日タイムスケジュール'];
+
+// ─── PROJECT ─────────────────────────────────────────────────────────────────
+function loadState(){
+  state = JSON.parse(localStorage.getItem('videoTools') || '{}');
+  if(Object.keys(state).length === 0) newProject(true);
+}
+
+function saveState(){
+  localStorage.setItem('videoTools', JSON.stringify(state));
+}
+
+function initProject(name){
+  return {
+    name,
+    checks: {
+      gear: DEFAULT_GEAR.map(t => ({text:t, done:false})),
+      location: DEFAULT_LOCATION.map(t => ({text:t, done:false}))
+    },
+    shots: [],
+    camera: {iso:'',ss:'',fstop:'',wb:'',focus:'',pp:'',note:''},
+    cuts: [],
+    telop: [],
+    editNotes: ''
+  };
+}
+
+function newProject(silent=false){
+  const name = silent ? '新規案件' : prompt('案件名を入力してください', '新規案件 ' + (Object.keys(state).length + 1));
+  if(!name) return;
+  const id = 'p_' + Date.now();
+  state[id] = initProject(name);
+  saveState();
+  renderProjectSelect(id);
+  switchProject();
+  if(!silent) showToast('案件「' + name + '」を作成しました');
+}
+
+function deleteProject(){
+  const keys = Object.keys(state);
+  if(keys.length <= 1){ showToast('最後の案件は削除できません'); return; }
+  if(!confirm('この案件を削除しますか？')) return;
+  delete state[currentProject];
+  saveState();
+  renderProjectSelect(Object.keys(state)[0]);
+  switchProject();
+}
+
+function renderProjectSelect(selectId){
+  const sel = document.getElementById('projectSelect');
+  sel.innerHTML = '';
+  for(const id in state){
+    const opt = document.createElement('option');
+    opt.value = id;
+    opt.textContent = state[id].name;
+    if(id === selectId) opt.selected = true;
+    sel.appendChild(opt);
+  }
+  currentProject = sel.value;
+}
+
+function switchProject(){
+  currentProject = document.getElementById('projectSelect').value;
+  renderAll();
+}
+
+function proj(){ return state[currentProject]; }
+
+// ─── TABS ─────────────────────────────────────────────────────────────────────
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+// ─── CHECKLIST ───────────────────────────────────────────────────────────────
+function renderChecks(){
+  ['gear','location'].forEach(cat => {
+    const el = document.getElementById('checkList-' + cat);
+    el.innerHTML = '';
+    (proj().checks[cat] || []).forEach((item, i) => {
+      const div = document.createElement('div');
+      div.className = 'check-item';
+      div.innerHTML = `
+        <input type="checkbox" ${item.done?'checked':''} id="chk-${cat}-${i}" onchange="toggleCheck('${cat}',${i})">
+        <label for="chk-${cat}-${i}" class="${item.done?'checked':''}">${item.text}</label>
+        <button class="del-check" onclick="delCheck('${cat}',${i})">×</button>`;
+      el.appendChild(div);
+    });
+  });
+  updateProgress();
+}
+
+function updateProgress(){
+  const all = [...(proj().checks.gear||[]), ...(proj().checks.location||[])];
+  const done = all.filter(i=>i.done).length;
+  document.getElementById('checkProgress').textContent = `${done} / ${all.length}`;
+  document.getElementById('progressFill').style.width = all.length ? (done/all.length*100)+'%' : '0%';
+}
+
+function toggleCheck(cat, i){
+  proj().checks[cat][i].done = !proj().checks[cat][i].done;
+  saveState();
+  renderChecks();
+}
+
+function addCheck(cat){
+  const inp = document.getElementById('new' + cat.charAt(0).toUpperCase() + cat.slice(1));
+  const text = inp.value.trim();
+  if(!text) return;
+  proj().checks[cat].push({text, done:false});
+  inp.value = '';
+  saveState();
+  renderChecks();
+}
+
+function delCheck(cat, i){
+  proj().checks[cat].splice(i, 1);
+  saveState();
+  renderChecks();
+}
+
+function resetChecks(){
+  proj().checks.gear.forEach(i=>i.done=false);
+  proj().checks.location.forEach(i=>i.done=false);
+  saveState();
+  renderChecks();
+  showToast('チェックをリセットしました');
+}
+
+// ─── SHOT LIST ────────────────────────────────────────────────────────────────
+function renderShots(){
+  const tbody = document.getElementById('shotBody');
+  tbody.innerHTML = '';
+  (proj().shots||[]).forEach((s,i) => {
+    const tr = document.createElement('tr');
+    if(s.done) tr.className = 'shot-complete';
+    tr.innerHTML = `
+      <td class="shot-num">${i+1}</td>
+      <td class="shot-done" style="text-align:center;"><input type="checkbox" ${s.done?'checked':''} onchange="toggleShot(${i})"></td>
+      <td><input type="text" value="${esc(s.scene)}" onchange="updateShot(${i},'scene',this.value)"></td>
+      <td><select onchange="updateShot(${i},'type',this.value)">${shotTypeOpts(s.type)}</select></td>
+      <td><select onchange="updateShot(${i},'angle',this.value)">${shotAngleOpts(s.angle)}</select></td>
+      <td><input type="text" value="${esc(s.note)}" onchange="updateShot(${i},'note',this.value)"></td>
+      <td><button class="btn-danger" onclick="delShot(${i})">×</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+const SHOT_TYPES = ['WS（ワイド）','MS（ミディアム）','CU（クローズアップ）','ECU（超クローズアップ）','バストアップ','ローアングル','ハイアングル','ドローン','インサート','その他'];
+const SHOT_ANGLES = ['正面','斜め','横','背面','俯瞰','アオリ'];
+
+function shotTypeOpts(sel){ return SHOT_TYPES.map(t=>`<option ${t===sel?'selected':''}>${t}</option>`).join(''); }
+function shotAngleOpts(sel){ return SHOT_ANGLES.map(t=>`<option ${t===sel?'selected':''}>${t}</option>`).join(''); }
+
+function addShot(){
+  const scene = document.getElementById('shotScene').value.trim();
+  if(!scene){ showToast('シーン・内容を入力してください'); return; }
+  proj().shots.push({
+    scene,
+    type: document.getElementById('shotType').value,
+    angle: document.getElementById('shotAngle').value,
+    note: document.getElementById('shotNote').value,
+    done: false
+  });
+  document.getElementById('shotScene').value = '';
+  document.getElementById('shotNote').value = '';
+  saveState();
+  renderShots();
+}
+
+function toggleShot(i){ proj().shots[i].done=!proj().shots[i].done; saveState(); renderShots(); }
+function updateShot(i,k,v){ proj().shots[i][k]=v; saveState(); }
+function delShot(i){ proj().shots.splice(i,1); saveState(); renderShots(); }
+
+function exportShots(){
+  const lines = ['ショットリスト — ' + proj().name, ''];
+  (proj().shots||[]).forEach((s,i)=>{
+    lines.push(`#${i+1} [${s.done?'✓':'　'}] ${s.scene}　${s.type}　${s.angle}　${s.note}`);
+  });
+  copyText(lines.join('\n'));
+}
+
+// ─── CAMERA SETTINGS ─────────────────────────────────────────────────────────
+const PRESETS = {
+  'outdoor-day': {iso:'200',ss:'1/500',fstop:'5.6',wb:'太陽光 5500K',focus:'AF-S（シングル）',pp:''},
+  'indoor':      {iso:'800',ss:'1/100',fstop:'2.8',wb:'蛍光灯 4000K',focus:'MF（マニュアル）',pp:'Cine4'},
+  'night':       {iso:'3200',ss:'1/60',fstop:'1.8',wb:'タングステン 3200K',focus:'MF（マニュアル）',pp:'S-Log2'},
+  'interview':   {iso:'400',ss:'1/100',fstop:'2.8',wb:'オート（AWB）',focus:'MF（マニュアル）',pp:'Cine4'},
+  'event':       {iso:'1600',ss:'1/200',fstop:'4',wb:'オート（AWB）',focus:'AF-C（コンティニュアス）',pp:''},
+};
+
+function applyPreset(key){
+  const p = PRESETS[key];
+  ['iso','ss','fstop','note'].forEach(f=>{ const el=document.getElementById('cam-'+f); if(p[f]!==undefined) el.value=p[f]; });
+  document.getElementById('cam-wb').value = p.wb;
+  document.getElementById('cam-focus').value = p.focus;
+  document.getElementById('cam-pp').value = p.pp||'';
+  showToast('プリセットを適用しました');
+}
+
+function renderCamera(){
+  const c = proj().camera || {};
+  ['iso','ss','fstop','pp','note'].forEach(f=>{ document.getElementById('cam-'+f).value = c[f]||''; });
+  document.getElementById('cam-wb').value = c.wb||'';
+  document.getElementById('cam-focus').value = c.focus||'';
+}
+
+function saveCameraSettings(){
+  proj().camera = {
+    iso: document.getElementById('cam-iso').value,
+    ss: document.getElementById('cam-ss').value,
+    fstop: document.getElementById('cam-fstop').value,
+    wb: document.getElementById('cam-wb').value,
+    focus: document.getElementById('cam-focus').value,
+    pp: document.getElementById('cam-pp').value,
+    note: document.getElementById('cam-note').value,
+  };
+  saveState();
+  showToast('カメラ設定を保存しました');
+}
+
+// ─── CUT LIST ────────────────────────────────────────────────────────────────
+function renderCuts(){
+  const tbody = document.getElementById('cutBody');
+  tbody.innerHTML = '';
+  let cum = 0;
+  const cuts = proj().cuts || [];
+  cuts.forEach((c,i) => {
+    const dur = parseFloat(c.dur)||0;
+    cum += dur;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="shot-num">${i+1}</td>
+      <td><input type="text" value="${esc(c.scene)}" onchange="updateCut(${i},'scene',this.value)"></td>
+      <td><input type="number" class="duration-input" value="${c.dur}" min="0" step="0.5" onchange="updateCut(${i},'dur',this.value);renderCuts()"></td>
+      <td class="timecode">${fmtTime(cum)}</td>
+      <td><select onchange="updateCut(${i},'type',this.value)">${cutTypeOpts(c.type)}</select></td>
+      <td><input type="text" value="${esc(c.note)}" onchange="updateCut(${i},'note',this.value)"></td>
+      <td><button class="btn-danger" onclick="delCut(${i})">×</button></td>`;
+    tbody.appendChild(tr);
+  });
+  const total = cuts.reduce((s,c)=>s+(parseFloat(c.dur)||0),0);
+  document.getElementById('totalDuration').innerHTML = total.toFixed(1) + '<span>秒</span>';
+  document.getElementById('totalMin').textContent = fmtTime(total);
+  document.getElementById('totalCuts').innerHTML = cuts.length + '<span>カット</span>';
+}
+
+const CUT_TYPES = ['映像','テロップ','タイトル','BGM転換','SE','暗転','その他'];
+function cutTypeOpts(sel){ return CUT_TYPES.map(t=>`<option ${t===sel?'selected':''}>${t}</option>`).join(''); }
+
+function fmtTime(sec){
+  const s = Math.round(sec);
+  const m = Math.floor(s/60);
+  return m + ':' + String(s%60).padStart(2,'0');
+}
+
+function addCut(){
+  const scene = document.getElementById('cutScene').value.trim();
+  if(!scene){ showToast('シーン名を入力してください'); return; }
+  proj().cuts.push({
+    scene,
+    dur: document.getElementById('cutDur').value || '0',
+    type: document.getElementById('cutType').value,
+    note: document.getElementById('cutNote').value,
+  });
+  document.getElementById('cutScene').value = '';
+  document.getElementById('cutDur').value = '';
+  document.getElementById('cutNote').value = '';
+  saveState();
+  renderCuts();
+}
+
+function updateCut(i,k,v){ proj().cuts[i][k]=v; saveState(); }
+function delCut(i){ proj().cuts.splice(i,1); saveState(); renderCuts(); }
+
+function exportCuts(){
+  const lines = ['カット構成 — ' + proj().name, ''];
+  let cum = 0;
+  (proj().cuts||[]).forEach((c,i)=>{
+    const dur = parseFloat(c.dur)||0; cum += dur;
+    lines.push(`#${i+1} [${fmtTime(cum)}] ${c.scene}　${c.dur}秒　${c.type}　${c.note}`);
+  });
+  lines.push('', `合計：${(proj().cuts||[]).reduce((s,c)=>s+(parseFloat(c.dur)||0),0).toFixed(1)}秒`);
+  copyText(lines.join('\n'));
+}
+
+// ─── TELOP ───────────────────────────────────────────────────────────────────
+function renderTelop(){
+  const list = document.getElementById('telopList');
+  list.innerHTML = '';
+  (proj().telop||[]).forEach((t,i) => {
+    const div = document.createElement('div');
+    div.className = 'telop-item';
+    div.innerHTML = `
+      <div class="telop-tc"><span class="field-label">タイムコード</span><input type="text" value="${esc(t.tc)}" onchange="updateTelop(${i},'tc',this.value)" style="font-family:monospace;"></div>
+      <div><span class="field-label">テロップ</span><input type="text" value="${esc(t.text)}" onchange="updateTelop(${i},'text',this.value)"></div>
+      <div><button class="telop-del" onclick="delTelop(${i})">×</button></div>`;
+    list.appendChild(div);
+  });
+}
+
+function addTelop(){
+  const tc = document.getElementById('telopTc').value.trim();
+  const text = document.getElementById('telopText').value.trim();
+  if(!text){ showToast('テロップ文字を入力してください'); return; }
+  proj().telop.push({tc, text});
+  document.getElementById('telopTc').value = '';
+  document.getElementById('telopText').value = '';
+  saveState();
+  renderTelop();
+}
+
+function updateTelop(i,k,v){ proj().telop[i][k]=v; saveState(); }
+function delTelop(i){ proj().telop.splice(i,1); saveState(); renderTelop(); }
+
+function exportTelop(){
+  const lines = ['テロップ一覧 — ' + proj().name, ''];
+  (proj().telop||[]).forEach((t,i)=>{ lines.push(`${t.tc}\t${t.text}`); });
+  copyText(lines.join('\n'));
+}
+
+// ─── EDIT NOTES ──────────────────────────────────────────────────────────────
+function renderEditNotes(){ document.getElementById('editNotes').value = proj().editNotes || ''; }
+function saveEditNotes(){
+  proj().editNotes = document.getElementById('editNotes').value;
+  saveState();
+  showToast('編集メモを保存しました');
+}
+
+// ─── UTILS ───────────────────────────────────────────────────────────────────
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+function copyText(text){
+  navigator.clipboard.writeText(text).then(()=>showToast('クリップボードにコピーしました')).catch(()=>{
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    showToast('クリップボードにコピーしました');
+  });
+}
+
+function showToast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 2500);
+}
+
+// ─── RENDER ALL ──────────────────────────────────────────────────────────────
+function renderAll(){
+  renderChecks();
+  renderShots();
+  renderCamera();
+  renderCuts();
+  renderTelop();
+  renderEditNotes();
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+loadState();
+renderProjectSelect(Object.keys(state)[0]);
+renderAll();
+</script>
+</body>
+</html>
