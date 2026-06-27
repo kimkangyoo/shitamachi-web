@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>取材ノート｜下町きろくの動画屋</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;700&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans JP',sans-serif;background:#f7f0e2;color:#1e1006;min-height:100vh;}
+
+nav{background:#150c02;padding:18px 48px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #7a5218;position:sticky;top:0;z-index:100;}
+.nav-logo{font-family:'Shippori Mincho',serif;font-size:16px;letter-spacing:.22em;color:#f0ddb0;text-decoration:none;}
+.nav-logo span{color:#d4920a;}
+.nav-links{display:flex;gap:24px;align-items:center;}
+.nav-links a{font-size:11px;letter-spacing:.2em;color:rgba(240,221,176,.5);text-decoration:none;}
+.nav-links a:hover{color:#d4920a;}
+.nav-links a.active{color:#d4920a;}
+
+.tabs{background:#1e1204;border-bottom:1px solid #3a2208;padding:0 48px;display:flex;overflow-x:auto;}
+.tab{padding:14px 20px;font-size:11px;letter-spacing:.18em;color:rgba(240,221,176,.4);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;}
+.tab:hover{color:rgba(240,221,176,.7);}
+.tab.active{color:#d4920a;border-bottom-color:#d4920a;}
+
+.tab-content{display:none;padding:40px 48px;max-width:1000px;}
+.tab-content.active{display:block;}
+
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:24px;padding-bottom:12px;border-bottom:1px solid #b89848;}
+.sec-head h2{font-family:'Shippori Mincho',serif;font-size:18px;font-weight:400;letter-spacing:.1em;}
+.sec-sub{font-size:11px;color:#8b6820;letter-spacing:.08em;}
+
+.card{background:#fff9ee;border:1px solid #d4b870;border-radius:6px;padding:20px;margin-bottom:16px;}
+.card-label{font-size:10px;letter-spacing:.3em;color:#8b6820;margin-bottom:6px;}
+
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;margin-bottom:16px;}
+.form-grid.one{grid-template-columns:1fr;}
+label.fl{font-size:11px;letter-spacing:.15em;color:#5a3a10;display:block;margin-bottom:4px;}
+input[type=text],input[type=date],input[type=tel],input[type=email],textarea,select{
+  font-family:'Noto Sans JP',sans-serif;font-size:13px;padding:8px 10px;border:1px solid #c8a860;
+  border-radius:4px;background:#fffdf5;color:#1e1006;width:100%;}
+textarea{resize:vertical;min-height:72px;line-height:1.8;}
+input:focus,textarea:focus,select:focus{outline:2px solid #c8880a;border-color:#c8880a;}
+.span2{grid-column:span 2;}
+
+.btn{font-family:'Noto Sans JP',sans-serif;font-size:12px;letter-spacing:.1em;padding:9px 20px;border:none;border-radius:4px;cursor:pointer;transition:opacity .15s;}
+.btn:hover{opacity:.85;}
+.btn-gold{background:#c8880a;color:#fff8e8;}
+.btn-outline{background:transparent;border:1px solid #c8880a;color:#c8880a;}
+.btn-sm{padding:5px 12px;font-size:11px;}
+.btn-rec{background:#8b2010;color:#fff;}
+.btn-rec.recording{background:#c02020;animation:pulse 1.2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.6;}}
+.btn-danger{background:transparent;border:1px solid #c05010;color:#c05010;font-size:11px;padding:4px 10px;border-radius:4px;cursor:pointer;}
+.btn-danger:hover{background:#c05010;color:#fff;}
+.btn-row{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+
+.list-item{background:#fffdf5;border:1px solid #ddc890;border-radius:5px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px;}
+.list-item:hover{border-color:#c8880a;}
+.list-item-body{flex:1;}
+.list-item-title{font-size:14px;font-weight:700;color:#1c0f02;margin-bottom:3px;}
+.list-item-meta{font-size:11px;color:#8b6820;line-height:1.8;}
+.list-item-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+
+.badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;letter-spacing:.05em;}
+.badge-gray{background:#ede8dd;color:#6b5840;}
+.badge-blue{background:#e0eaf5;color:#1f4a7a;}
+.badge-yellow{background:#fdf3e0;color:#8b5e0a;}
+.badge-green{background:#e4f0e8;color:#2f6040;}
+.badge-purple{background:#ece0f0;color:#5a2f7a;}
+
+/* RECORDER */
+.rec-status{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+.rec-time{font-family:'Shippori Mincho',serif;font-size:24px;color:#1c0f02;min-width:80px;}
+.rec-dot{width:12px;height:12px;border-radius:50%;background:#ccc;}
+.rec-dot.on{background:#c02020;animation:pulse 1.2s infinite;}
+.transcript-box{background:#fffdf5;border:1px solid #c8a860;border-radius:6px;padding:16px;min-height:200px;max-height:400px;overflow-y:auto;font-size:14px;line-height:2;white-space:pre-wrap;}
+.transcript-box .interim{color:#a09080;}
+
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;align-items:center;justify-content:center;padding:20px;}
+.modal-bg.open{display:flex;}
+.modal{background:#f7f0e2;border:1px solid #b89848;border-radius:8px;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;}
+.modal-head{background:#150c02;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;border-radius:8px 8px 0 0;}
+.modal-head h3{font-family:'Shippori Mincho',serif;font-size:16px;color:#f0ddb0;font-weight:400;}
+.modal-close{background:none;border:none;color:#a09080;font-size:20px;cursor:pointer;line-height:1;}
+.modal-body{padding:24px;}
+
+/* AI bar */
+.ai-bar{padding:12px 16px;background:#1c0f02;border:1px solid #3a2208;border-radius:6px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:14px;}
+
+#toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:#1c0f02;color:#f0ddb0;font-size:12px;letter-spacing:.1em;padding:10px 24px;border-radius:20px;border:1px solid #c8880a;opacity:0;transition:opacity .3s;z-index:9999;pointer-events:none;}
+#toast.show{opacity:1;}
+
+@media(max-width:700px){
+  nav,.tabs,.tab-content{padding-left:16px;padding-right:16px;}
+  .form-grid{grid-template-columns:1fr;}
+  .span2{grid-column:span 1;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">下町きろくの<span>動画屋</span></a>
+  <div class="nav-links">
+    <a href="tools.html">制作ツール</a>
+    <a href="gyomu.html">業務管理</a>
+    <a href="shuzai.html" class="active">取材ノート</a>
+  </div>
+</nav>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('leads')">取材先・ネタ</div>
+  <div class="tab" onclick="switchTab('record')">録音・文字起こし</div>
+  <div class="tab" onclick="switchTab('interviews')">取材記録</div>
+  <div class="tab" onclick="switchTab('articles')">記事</div>
+  <div class="tab" onclick="switchTab('settings')">設定</div>
+</div>
+
+<!-- LEADS -->
+<div class="tab-content active" id="tab-leads">
+  <div class="sec-head"><h2>取材先・ネタ</h2>
+    <button class="btn btn-gold btn-sm" onclick="openLeadModal(null)">＋ 取材先を追加</button>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+    <select id="leadFilter" onchange="renderLeads()" style="width:auto;font-size:12px;padding:5px 8px;">
+      <option value="">すべての状況</option>
+      <option value="候補">候補</option>
+      <option value="連絡済">連絡済</option>
+      <option value="取材予定">取材予定</option>
+      <option value="取材済">取材済</option>
+      <option value="記事化済">記事化済</option>
+      <option value="見送り">見送り</option>
+    </select>
+  </div>
+  <div id="leadList"></div>
+</div>
+
+<!-- RECORD -->
+<div class="tab-content" id="tab-record">
+  <div class="sec-head"><h2>録音・文字起こし</h2>
+    <span class="sec-sub">Chrome推奨・日本語対応</span>
+  </div>
+
+  <div class="card">
+    <div class="form-grid">
+      <div><label class="fl">取材タイトル</label><input type="text" id="rec-title" placeholder="例：〇〇さん 子ども食堂の取材"></div>
+      <div><label class="fl">取材先（任意）</label><select id="rec-lead"><option value="">— 選択しない —</option></select></div>
+      <div><label class="fl">取材日</label><input type="date" id="rec-date"></div>
+    </div>
+
+    <div class="rec-status">
+      <span class="rec-dot" id="recDot"></span>
+      <span class="rec-time" id="recTime">00:00</span>
+      <button class="btn btn-rec" id="recBtn" onclick="toggleRecord()">🎙 録音開始</button>
+      <button class="btn btn-outline btn-sm" id="recClearBtn" onclick="clearTranscript()">クリア</button>
+      <span id="recHint" style="font-size:11px;color:#8b6820;">※ マイクの使用許可を求められたら「許可」してください</span>
+    </div>
+
+    <label class="fl">文字起こし（話すと自動で文字になります・直接編集も可能）</label>
+    <div class="transcript-box" id="transcriptBox" contenteditable="true" oninput="onTranscriptEdit()"></div>
+
+    <div class="ai-bar">
+      <span style="font-size:11px;color:#a09070;">要約・記事化：</span>
+      <button class="btn btn-gold btn-sm" onclick="copyTranscript()">📋 文字起こしをコピー</button>
+      <a href="https://claude.ai/new" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="text-decoration:none;">🤖 Claudeで要約</a>
+      <a href="https://gemini.google.com/app" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="text-decoration:none;">✦ Geminiで要約</a>
+      <a href="https://chatgpt.com/" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="text-decoration:none;">💬 ChatGPT</a>
+    </div>
+    <p style="font-size:11px;color:#8b6820;margin-top:8px;line-height:1.7;">
+      使い方：「コピー」を押して、AIサイトに貼り付け「この取材内容を要点をまとめて」「記事の下書きにして」などと頼めます。
+    </p>
+
+    <div class="btn-row">
+      <button class="btn btn-gold" onclick="saveInterview()">💾 取材記録として保存</button>
+      <button class="btn btn-outline" onclick="downloadTranscript()">📄 テキストで保存(.txt)</button>
+      <button class="btn btn-outline" id="dlAudioBtn" onclick="downloadAudio()" style="display:none;">🎵 録音を保存</button>
+    </div>
+    <audio id="audioPreview" controls style="width:100%;margin-top:14px;display:none;"></audio>
+  </div>
+
+  <div id="recWarning" style="display:none;background:#f5dede;border:1px solid #c05010;border-radius:6px;padding:14px 18px;font-size:12px;color:#8c2f2f;line-height:1.8;">
+    ⚠ お使いのブラウザは音声認識（文字起こし）に対応していません。<strong>Google Chrome</strong> でお使いください。録音だけは利用できます。
+  </div>
+</div>
+
+<!-- INTERVIEWS -->
+<div class="tab-content" id="tab-interviews">
+  <div class="sec-head"><h2>取材記録</h2>
+    <span class="sec-sub">保存した取材の一覧</span>
+  </div>
+  <div id="interviewList"></div>
+</div>
+
+<!-- ARTICLES -->
+<div class="tab-content" id="tab-articles">
+  <div class="sec-head"><h2>記事</h2>
+    <button class="btn btn-gold btn-sm" onclick="openArticleModal(null)">＋ 記事を書く</button>
+  </div>
+  <div id="articleList"></div>
+</div>
+
+<!-- SETTINGS -->
+<div class="tab-content" id="tab-settings">
+  <div class="sec-head"><h2>設定</h2></div>
+  <div class="card">
+    <div class="card-label">データのバックアップ・復元</div>
+    <p style="font-size:12px;color:#5a3a10;margin:10px 0 16px;line-height:1.8;">取材先・記事・文字起こしテキストを保存します。<br>※ 録音した音声ファイルは大きいため、必要なものは個別に「🎵 録音を保存」でダウンロードしてください。</p>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      <button class="btn btn-gold" onclick="exportData()">💾 バックアップを保存</button>
+      <label class="btn btn-outline" style="cursor:pointer;">📂 バックアップから復元
+        <input type="file" accept=".json" onchange="importData(event)" style="display:none;">
+      </label>
+    </div>
+    <div id="backupStatus" style="font-size:12px;color:#2f6040;margin-top:10px;"></div>
+  </div>
+</div>
+
+<!-- LEAD MODAL -->
+<div class="modal-bg" id="leadModal">
+  <div class="modal">
+    <div class="modal-head"><h3 id="leadModalTitle">取材先を追加</h3><button class="modal-close" onclick="closeModal('leadModal')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="leadEditId">
+      <div class="form-grid">
+        <div><label class="fl">名前・団体名</label><input type="text" id="l-name" placeholder="例：山田 花子 / 〇〇子ども食堂" required></div>
+        <div><label class="fl">活動分野</label><input type="text" id="l-activity" placeholder="例：子ども支援、環境、防災"></div>
+        <div><label class="fl">状況</label>
+          <select id="l-status">
+            <option value="候補">候補</option>
+            <option value="連絡済">連絡済</option>
+            <option value="取材予定">取材予定</option>
+            <option value="取材済">取材済</option>
+            <option value="記事化済">記事化済</option>
+            <option value="見送り">見送り</option>
+          </select>
+        </div>
+        <div><label class="fl">取材予定日（任意）</label><input type="date" id="l-date"></div>
+        <div><label class="fl">電話</label><input type="tel" id="l-tel"></div>
+        <div><label class="fl">メール</label><input type="email" id="l-email"></div>
+        <div class="span2"><label class="fl">きっかけ・情報源</label><input type="text" id="l-source" placeholder="例：SNSで見かけた、知人の紹介、イベントで"></div>
+        <div class="span2"><label class="fl">メモ（活動内容・取材したいこと）</label><textarea id="l-notes"></textarea></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-gold" onclick="saveLead()">保存</button>
+        <button class="btn btn-outline" onclick="closeModal('leadModal')">キャンセル</button>
+        <button class="btn btn-danger" id="leadDeleteBtn" onclick="deleteLead()" style="display:none;">削除</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- INTERVIEW VIEW MODAL -->
+<div class="modal-bg" id="interviewModal">
+  <div class="modal" style="max-width:760px;">
+    <div class="modal-head"><h3 id="interviewModalTitle">取材記録</h3><button class="modal-close" onclick="closeModal('interviewModal')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="interviewViewId">
+      <div id="interviewMeta" style="font-size:12px;color:#8b6820;margin-bottom:14px;"></div>
+      <audio id="interviewAudio" controls style="width:100%;margin-bottom:14px;display:none;"></audio>
+      <label class="fl">文字起こし（編集できます）</label>
+      <textarea id="interviewTranscript" style="min-height:280px;"></textarea>
+      <div class="ai-bar">
+        <button class="btn btn-gold btn-sm" onclick="copyInterviewTranscript()">📋 コピー</button>
+        <a href="https://claude.ai/new" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="text-decoration:none;">🤖 Claudeで要約</a>
+        <a href="https://gemini.google.com/app" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="text-decoration:none;">✦ Gemini</a>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-gold" onclick="updateInterview()">保存</button>
+        <button class="btn btn-outline" onclick="downloadInterviewAudio()" id="ivDlAudioBtn" style="display:none;">🎵 録音を保存</button>
+        <button class="btn btn-outline" onclick="makeArticleFromInterview()">📝 この取材で記事を書く</button>
+        <button class="btn btn-danger" onclick="deleteInterview()">削除</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ARTICLE MODAL -->
+<div class="modal-bg" id="articleModal">
+  <div class="modal" style="max-width:760px;">
+    <div class="modal-head"><h3 id="articleModalTitle">記事を書く</h3><button class="modal-close" onclick="closeModal('articleModal')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="articleEditId">
+      <div class="form-grid">
+        <div class="span2"><label class="fl">見出し（タイトル）</label><input type="text" id="a-title" placeholder="例：地域を支える子ども食堂、10年目の挑戦"></div>
+        <div><label class="fl">状況</label>
+          <select id="a-status"><option value="下書き">下書き</option><option value="執筆中">執筆中</option><option value="確認中">確認中</option><option value="公開済">公開済</option></select>
+        </div>
+        <div><label class="fl">取材先（任意）</label><select id="a-lead"><option value="">— 選択しない —</option></select></div>
+        <div class="span2"><label class="fl">リード文（導入）</label><textarea id="a-lead-text" style="min-height:60px;"></textarea></div>
+        <div class="span2"><label class="fl">本文</label><textarea id="a-body" style="min-height:240px;"></textarea></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-gold" onclick="saveArticle()">保存</button>
+        <button class="btn btn-outline" onclick="copyArticle()">📋 全文コピー</button>
+        <button class="btn btn-outline" onclick="downloadArticle()">📄 テキストで保存</button>
+        <button class="btn btn-danger" id="articleDeleteBtn" onclick="deleteArticle()" style="display:none;">削除</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let S = {};
+const KEY = 'shuzaiData';
+
+function loadS(){
+  S = JSON.parse(localStorage.getItem(KEY) || '{}');
+  if(!S.leads) S.leads = [];
+  if(!S.interviews) S.interviews = [];
+  if(!S.articles) S.articles = [];
+}
+function saveS(){ localStorage.setItem(KEY, JSON.stringify(S)); }
+
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function today(){ return new Date().toISOString().slice(0,10); }
+function fmtDate(d){ if(!d) return ''; const p=d.split('-'); return `${p[0]}年${p[1]}月${p[2]}日`; }
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+function uid(){ return 'id_'+Date.now()+'_'+Math.random().toString(36).slice(2,7); }
+
+const STATUS_BADGE = {候補:'badge-gray',連絡済:'badge-blue',取材予定:'badge-yellow',取材済:'badge-green',記事化済:'badge-purple',見送り:'badge-gray'};
+const ART_BADGE = {下書き:'badge-gray',執筆中:'badge-yellow',確認中:'badge-blue',公開済:'badge-green'};
+
+// ─── IndexedDB for audio ──────────────────────────────────────────────────────
+let db = null;
+function openDB(){
+  return new Promise((resolve)=>{
+    const req = indexedDB.open('shuzaiAudio', 1);
+    req.onupgradeneeded = e => e.target.result.createObjectStore('audio', {keyPath:'id'});
+    req.onsuccess = e => { db = e.target.result; resolve(db); };
+    req.onerror = () => resolve(null);
+  });
+}
+function saveAudioBlob(id, blob){
+  return new Promise((resolve)=>{
+    if(!db){ resolve(false); return; }
+    const tx = db.transaction('audio','readwrite');
+    tx.objectStore('audio').put({id, blob});
+    tx.oncomplete = ()=>resolve(true);
+    tx.onerror = ()=>resolve(false);
+  });
+}
+function getAudioBlob(id){
+  return new Promise((resolve)=>{
+    if(!db){ resolve(null); return; }
+    const tx = db.transaction('audio','readonly');
+    const req = tx.objectStore('audio').get(id);
+    req.onsuccess = ()=>resolve(req.result?req.result.blob:null);
+    req.onerror = ()=>resolve(null);
+  });
+}
+function deleteAudioBlob(id){
+  if(!db) return;
+  const tx = db.transaction('audio','readwrite');
+  tx.objectStore('audio').delete(id);
+}
+
+// ─── TABS ─────────────────────────────────────────────────────────────────────
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+  if(name==='leads') renderLeads();
+  if(name==='record') initRecordTab();
+  if(name==='interviews') renderInterviews();
+  if(name==='articles') renderArticles();
+}
+
+// ─── LEADS ────────────────────────────────────────────────────────────────────
+function renderLeads(){
+  const filter = document.getElementById('leadFilter').value;
+  let list = S.leads;
+  if(filter) list = list.filter(l=>l.status===filter);
+  // sort: 取材予定日 asc, then by status
+  list = [...list].sort((a,b)=>{
+    const da=a.date||'9999', db2=b.date||'9999';
+    return da.localeCompare(db2);
+  });
+  document.getElementById('leadList').innerHTML = list.length===0
+    ? '<div style="color:#8b6820;font-size:13px;">取材先がありません。「＋ 取材先を追加」から登録してください。</div>'
+    : list.map(l=>{
+        const i = S.leads.indexOf(l);
+        return `<div class="list-item">
+          <div class="list-item-body">
+            <div class="list-item-title">${esc(l.name)} <span class="badge ${STATUS_BADGE[l.status]||'badge-gray'}">${l.status}</span></div>
+            <div class="list-item-meta">
+              ${l.activity?`分野：${esc(l.activity)}　`:''}${l.date?`取材予定：${fmtDate(l.date)}　`:''}
+              ${l.tel?`📞 ${esc(l.tel)}　`:''}${l.email?`✉ ${esc(l.email)}`:''}
+              ${l.source?`<br>きっかけ：${esc(l.source)}`:''}
+              ${l.notes?`<br>${esc(l.notes)}`:''}
+            </div>
+          </div>
+          <div class="list-item-actions">
+            <button class="btn btn-outline btn-sm" onclick="openLeadModal(${i})">編集</button>
+          </div>
+        </div>`;
+      }).join('');
+}
+
+function openLeadModal(i){
+  const l = i!==null ? S.leads[i] : null;
+  document.getElementById('leadModalTitle').textContent = l?'取材先を編集':'取材先を追加';
+  document.getElementById('leadEditId').value = i!==null ? i : '';
+  document.getElementById('l-name').value = l?.name||'';
+  document.getElementById('l-activity').value = l?.activity||'';
+  document.getElementById('l-status').value = l?.status||'候補';
+  document.getElementById('l-date').value = l?.date||'';
+  document.getElementById('l-tel').value = l?.tel||'';
+  document.getElementById('l-email').value = l?.email||'';
+  document.getElementById('l-source').value = l?.source||'';
+  document.getElementById('l-notes').value = l?.notes||'';
+  document.getElementById('leadDeleteBtn').style.display = l?'block':'none';
+  document.getElementById('leadModal').classList.add('open');
+}
+function saveLead(){
+  const i = document.getElementById('leadEditId').value;
+  const obj = {
+    id: i!=='' ? S.leads[Number(i)].id : uid(),
+    name:document.getElementById('l-name').value,
+    activity:document.getElementById('l-activity').value,
+    status:document.getElementById('l-status').value,
+    date:document.getElementById('l-date').value,
+    tel:document.getElementById('l-tel').value,
+    email:document.getElementById('l-email').value,
+    source:document.getElementById('l-source').value,
+    notes:document.getElementById('l-notes').value
+  };
+  if(!obj.name){ showToast('名前を入力してください'); return; }
+  if(i!=='') S.leads[Number(i)]=obj; else S.leads.push(obj);
+  saveS(); closeModal('leadModal'); renderLeads();
+  showToast('保存しました');
+}
+function deleteLead(){
+  const i = Number(document.getElementById('leadEditId').value);
+  if(!confirm('この取材先を削除しますか？')) return;
+  S.leads.splice(i,1); saveS(); closeModal('leadModal'); renderLeads();
+}
+
+// ─── RECORD / TRANSCRIBE ──────────────────────────────────────────────────────
+let recognition = null;
+let recognizing = false;
+let finalTranscript = '';
+let mediaRecorder = null;
+let audioChunks = [];
+let recordedBlob = null;
+let recTimer = null;
+let recSeconds = 0;
+let wantRecording = false;
+
+function initRecordTab(){
+  // Fill lead select
+  const sel = document.getElementById('rec-lead');
+  sel.innerHTML = '<option value="">— 選択しない —</option>' +
+    S.leads.map((l,i)=>`<option value="${l.id}">${esc(l.name)}</option>`).join('');
+  if(!document.getElementById('rec-date').value) document.getElementById('rec-date').value = today();
+
+  // Check support
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ document.getElementById('recWarning').style.display='block'; }
+}
+
+function setupRecognition(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR) return null;
+  const r = new SR();
+  r.lang = 'ja-JP';
+  r.continuous = true;
+  r.interimResults = true;
+  r.onresult = (e)=>{
+    let interim = '';
+    for(let i=e.resultIndex; i<e.results.length; i++){
+      const txt = e.results[i][0].transcript;
+      if(e.results[i].isFinal){ finalTranscript += txt + '\n'; }
+      else { interim += txt; }
+    }
+    const box = document.getElementById('transcriptBox');
+    box.innerHTML = esc(finalTranscript) + '<span class="interim">' + esc(interim) + '</span>';
+    box.scrollTop = box.scrollHeight;
+  };
+  r.onend = ()=>{ if(wantRecording){ try{ r.start(); }catch(e){} } };
+  r.onerror = (e)=>{ if(e.error==='not-allowed'){ showToast('マイクの使用が許可されていません'); } };
+  return r;
+}
+
+async function toggleRecord(){
+  if(recognizing || wantRecording){ stopRecord(); return; }
+  // Start
+  wantRecording = true;
+  finalTranscript = document.getElementById('transcriptBox').innerText || '';
+  if(finalTranscript && !finalTranscript.endsWith('\n')) finalTranscript += '\n';
+
+  // Audio recording
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    audioChunks = [];
+    mediaRecorder = new MediaRecorder(stream);
+    mediaRecorder.ondataavailable = e=>{ if(e.data.size>0) audioChunks.push(e.data); };
+    mediaRecorder.onstop = ()=>{
+      recordedBlob = new Blob(audioChunks, {type:'audio/webm'});
+      const url = URL.createObjectURL(recordedBlob);
+      const a = document.getElementById('audioPreview');
+      a.src = url; a.style.display='block';
+      document.getElementById('dlAudioBtn').style.display='inline-block';
+      stream.getTracks().forEach(t=>t.stop());
+    };
+    mediaRecorder.start();
+  }catch(e){ showToast('マイクにアクセスできませんでした'); }
+
+  // Speech recognition
+  recognition = setupRecognition();
+  if(recognition){ try{ recognition.start(); recognizing=true; }catch(e){} }
+
+  // Timer
+  recSeconds = 0; updateRecTime();
+  recTimer = setInterval(()=>{ recSeconds++; updateRecTime(); }, 1000);
+
+  document.getElementById('recBtn').textContent = '■ 停止';
+  document.getElementById('recBtn').classList.add('recording');
+  document.getElementById('recDot').classList.add('on');
+}
+
+function stopRecord(){
+  wantRecording = false;
+  if(recognition){ try{ recognition.stop(); }catch(e){} recognizing=false; }
+  if(mediaRecorder && mediaRecorder.state!=='inactive'){ mediaRecorder.stop(); }
+  if(recTimer){ clearInterval(recTimer); recTimer=null; }
+  // commit interim
+  const box = document.getElementById('transcriptBox');
+  box.innerHTML = esc(box.innerText);
+  document.getElementById('recBtn').textContent = '🎙 録音開始';
+  document.getElementById('recBtn').classList.remove('recording');
+  document.getElementById('recDot').classList.remove('on');
+}
+
+function updateRecTime(){
+  const m = String(Math.floor(recSeconds/60)).padStart(2,'0');
+  const s = String(recSeconds%60).padStart(2,'0');
+  document.getElementById('recTime').textContent = `${m}:${s}`;
+}
+
+function onTranscriptEdit(){
+  if(!recognizing) finalTranscript = document.getElementById('transcriptBox').innerText;
+}
+
+function clearTranscript(){
+  if(recognizing||wantRecording){ showToast('録音を停止してからクリアしてください'); return; }
+  if(!confirm('文字起こしをクリアしますか？')) return;
+  finalTranscript=''; document.getElementById('transcriptBox').innerHTML='';
+  recordedBlob=null; document.getElementById('audioPreview').style.display='none';
+  document.getElementById('dlAudioBtn').style.display='none';
+  document.getElementById('recTime').textContent='00:00';
+}
+
+function copyTranscript(){
+  const text = document.getElementById('transcriptBox').innerText;
+  if(!text){ showToast('文字起こしがありません'); return; }
+  navigator.clipboard.writeText(text).then(()=>showToast('コピーしました')).catch(()=>showToast('コピーに失敗しました'));
+}
+
+function downloadTranscript(){
+  const text = document.getElementById('transcriptBox').innerText;
+  if(!text){ showToast('文字起こしがありません'); return; }
+  const title = document.getElementById('rec-title').value || '取材';
+  const blob = new Blob([text], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${title}_${today()}.txt`;
+  a.click();
+}
+
+function downloadAudio(){
+  if(!recordedBlob){ showToast('録音がありません'); return; }
+  const title = document.getElementById('rec-title').value || '取材';
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(recordedBlob);
+  a.download = `${title}_${today()}.webm`;
+  a.click();
+}
+
+async function saveInterview(){
+  if(recognizing||wantRecording){ stopRecord(); }
+  const text = document.getElementById('transcriptBox').innerText;
+  const title = document.getElementById('rec-title').value || '無題の取材';
+  if(!text && !recordedBlob){ showToast('録音または文字起こしがありません'); return; }
+  const id = uid();
+  let hasAudio = false;
+  if(recordedBlob){ hasAudio = await saveAudioBlob(id, recordedBlob); }
+  S.interviews.unshift({
+    id, title,
+    leadId: document.getElementById('rec-lead').value,
+    date: document.getElementById('rec-date').value || today(),
+    transcript: text,
+    hasAudio,
+    duration: recSeconds,
+    createdAt: new Date().toISOString()
+  });
+  saveS();
+  // Mark lead as 取材済
+  const lid = document.getElementById('rec-lead').value;
+  if(lid){ const l=S.leads.find(x=>x.id===lid); if(l && (l.status==='候補'||l.status==='連絡済'||l.status==='取材予定')){ l.status='取材済'; saveS(); } }
+  showToast('取材記録を保存しました');
+  // reset
+  finalTranscript=''; recordedBlob=null;
+  document.getElementById('transcriptBox').innerHTML='';
+  document.getElementById('rec-title').value='';
+  document.getElementById('audioPreview').style.display='none';
+  document.getElementById('dlAudioBtn').style.display='none';
+  document.getElementById('recTime').textContent='00:00';
+}
+
+// ─── INTERVIEWS ───────────────────────────────────────────────────────────────
+function renderInterviews(){
+  document.getElementById('interviewList').innerHTML = S.interviews.length===0
+    ? '<div style="color:#8b6820;font-size:13px;">取材記録がありません。「録音・文字起こし」タブで取材を保存してください。</div>'
+    : S.interviews.map(iv=>{
+        const lead = S.leads.find(l=>l.id===iv.leadId);
+        const m = Math.floor((iv.duration||0)/60), s=(iv.duration||0)%60;
+        const preview = (iv.transcript||'').slice(0,80);
+        return `<div class="list-item">
+          <div class="list-item-body">
+            <div class="list-item-title">${esc(iv.title)} ${iv.hasAudio?'<span class="badge badge-blue">🎵 録音あり</span>':''}</div>
+            <div class="list-item-meta">
+              ${fmtDate(iv.date)}${lead?`　／　${esc(lead.name)}`:''}${iv.duration?`　／　${m}分${s}秒`:''}
+              ${preview?`<br>${esc(preview)}${iv.transcript.length>80?'…':''}`:''}
+            </div>
+          </div>
+          <div class="list-item-actions">
+            <button class="btn btn-outline btn-sm" onclick="openInterview('${iv.id}')">開く</button>
+          </div>
+        </div>`;
+      }).join('');
+}
+
+async function openInterview(id){
+  const iv = S.interviews.find(x=>x.id===id);
+  if(!iv) return;
+  document.getElementById('interviewViewId').value = id;
+  document.getElementById('interviewModalTitle').textContent = iv.title;
+  const lead = S.leads.find(l=>l.id===iv.leadId);
+  document.getElementById('interviewMeta').textContent = `${fmtDate(iv.date)}${lead?'　／　'+lead.name:''}`;
+  document.getElementById('interviewTranscript').value = iv.transcript||'';
+
+  const audioEl = document.getElementById('interviewAudio');
+  const dlBtn = document.getElementById('ivDlAudioBtn');
+  if(iv.hasAudio){
+    const blob = await getAudioBlob(id);
+    if(blob){ audioEl.src = URL.createObjectURL(blob); audioEl.style.display='block'; dlBtn.style.display='inline-block'; }
+    else { audioEl.style.display='none'; dlBtn.style.display='none'; }
+  } else { audioEl.style.display='none'; dlBtn.style.display='none'; }
+
+  document.getElementById('interviewModal').classList.add('open');
+}
+
+function updateInterview(){
+  const id = document.getElementById('interviewViewId').value;
+  const iv = S.interviews.find(x=>x.id===id);
+  if(!iv) return;
+  iv.transcript = document.getElementById('interviewTranscript').value;
+  saveS(); closeModal('interviewModal'); renderInterviews();
+  showToast('保存しました');
+}
+
+function copyInterviewTranscript(){
+  const text = document.getElementById('interviewTranscript').value;
+  navigator.clipboard.writeText(text).then(()=>showToast('コピーしました')).catch(()=>showToast('失敗しました'));
+}
+
+async function downloadInterviewAudio(){
+  const id = document.getElementById('interviewViewId').value;
+  const iv = S.interviews.find(x=>x.id===id);
+  const blob = await getAudioBlob(id);
+  if(!blob){ showToast('録音がありません'); return; }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${iv.title}_${iv.date}.webm`;
+  a.click();
+}
+
+function deleteInterview(){
+  const id = document.getElementById('interviewViewId').value;
+  if(!confirm('この取材記録を削除しますか？（録音も削除されます）')) return;
+  deleteAudioBlob(id);
+  S.interviews = S.interviews.filter(x=>x.id!==id);
+  saveS(); closeModal('interviewModal'); renderInterviews();
+}
+
+function makeArticleFromInterview(){
+  const id = document.getElementById('interviewViewId').value;
+  const iv = S.interviews.find(x=>x.id===id);
+  closeModal('interviewModal');
+  openArticleModal(null);
+  document.getElementById('a-title').value = iv.title;
+  document.getElementById('a-lead').value = iv.leadId||'';
+  document.getElementById('a-body').value = '【取材メモ】\n' + (iv.transcript||'');
+}
+
+// ─── ARTICLES ─────────────────────────────────────────────────────────────────
+function renderArticles(){
+  document.getElementById('articleList').innerHTML = S.articles.length===0
+    ? '<div style="color:#8b6820;font-size:13px;">記事がありません。「＋ 記事を書く」から作成してください。</div>'
+    : S.articles.map((a,i)=>{
+        const lead = S.leads.find(l=>l.id===a.leadId);
+        return `<div class="list-item">
+          <div class="list-item-body">
+            <div class="list-item-title">${esc(a.title||'無題')} <span class="badge ${ART_BADGE[a.status]||'badge-gray'}">${a.status}</span></div>
+            <div class="list-item-meta">
+              ${lead?`取材先：${esc(lead.name)}　`:''}${a.updatedAt?`更新：${fmtDate(a.updatedAt.slice(0,10))}`:''}
+              ${a.leadText?`<br>${esc(a.leadText.slice(0,80))}`:''}
+            </div>
+          </div>
+          <div class="list-item-actions">
+            <button class="btn btn-outline btn-sm" onclick="openArticleModal(${i})">編集</button>
+          </div>
+        </div>`;
+      }).join('');
+}
+
+function openArticleModal(i){
+  const a = i!==null ? S.articles[i] : null;
+  document.getElementById('articleModalTitle').textContent = a?'記事を編集':'記事を書く';
+  document.getElementById('articleEditId').value = i!==null ? i : '';
+  // lead select
+  const sel = document.getElementById('a-lead');
+  sel.innerHTML = '<option value="">— 選択しない —</option>' + S.leads.map(l=>`<option value="${l.id}">${esc(l.name)}</option>`).join('');
+  document.getElementById('a-title').value = a?.title||'';
+  document.getElementById('a-status').value = a?.status||'下書き';
+  document.getElementById('a-lead').value = a?.leadId||'';
+  document.getElementById('a-lead-text').value = a?.leadText||'';
+  document.getElementById('a-body').value = a?.body||'';
+  document.getElementById('articleDeleteBtn').style.display = a?'block':'none';
+  document.getElementById('articleModal').classList.add('open');
+}
+function saveArticle(){
+  const i = document.getElementById('articleEditId').value;
+  const obj = {
+    id: i!=='' ? S.articles[Number(i)].id : uid(),
+    title:document.getElementById('a-title').value,
+    status:document.getElementById('a-status').value,
+    leadId:document.getElementById('a-lead').value,
+    leadText:document.getElementById('a-lead-text').value,
+    body:document.getElementById('a-body').value,
+    updatedAt:new Date().toISOString()
+  };
+  if(i!=='') S.articles[Number(i)]=obj; else S.articles.unshift(obj);
+  saveS(); closeModal('articleModal'); renderArticles();
+  showToast('保存しました');
+}
+function deleteArticle(){
+  const i = Number(document.getElementById('articleEditId').value);
+  if(!confirm('この記事を削除しますか？')) return;
+  S.articles.splice(i,1); saveS(); closeModal('articleModal'); renderArticles();
+}
+function articleFullText(){
+  const t = document.getElementById('a-title').value;
+  const lead = document.getElementById('a-lead-text').value;
+  const body = document.getElementById('a-body').value;
+  return `${t}\n\n${lead}\n\n${body}`;
+}
+function copyArticle(){
+  navigator.clipboard.writeText(articleFullText()).then(()=>showToast('全文をコピーしました')).catch(()=>showToast('失敗しました'));
+}
+function downloadArticle(){
+  const t = document.getElementById('a-title').value || '記事';
+  const blob = new Blob([articleFullText()], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${t}_${today()}.txt`;
+  a.click();
+}
+
+// ─── BACKUP ───────────────────────────────────────────────────────────────────
+function exportData(){
+  const data = {version:1, exportedAt:new Date().toISOString(), shuzaiData:S};
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  const a = document.createElement('a');
+  const d = new Date();
+  a.href = URL.createObjectURL(blob);
+  a.download = `shuzai_backup_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.json`;
+  a.click();
+  showToast('バックアップを保存しました');
+}
+function importData(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try{
+      const data = JSON.parse(ev.target.result);
+      if(!data.shuzaiData) throw new Error('無効');
+      if(!confirm('現在のデータを上書きします。よろしいですか？（録音音声は復元されません）')) return;
+      localStorage.setItem(KEY, JSON.stringify(data.shuzaiData));
+      loadS();
+      document.getElementById('backupStatus').textContent = '✓ 復元しました';
+      renderLeads();
+      showToast('復元しました');
+    }catch(err){ alert('ファイルの読み込みに失敗しました。'); }
+  };
+  reader.readAsText(file);
+  e.target.value='';
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+loadS();
+openDB();
+renderLeads();
+document.querySelectorAll('.modal-bg').forEach(bg=>{
+  bg.addEventListener('click', e=>{ if(e.target===bg) bg.classList.remove('open'); });
+});
+window.addEventListener('beforeunload', e=>{
+  if(recognizing||wantRecording){ e.preventDefault(); e.returnValue=''; }
+});
+</script>
+</body>
+</html>
