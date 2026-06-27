@@ -246,14 +246,36 @@ tr:hover td{background:#fdf5e0;}
   <div class="sec-head" style="margin-top:16px;"><h2>締切が近い案件</h2></div>
   <div id="dashProjects"></div>
 
-  <!-- GOOGLE CALENDAR LINK -->
+  <!-- MINI CALENDAR ON DASHBOARD -->
   <div class="sec-head" style="margin-top:24px;">
-    <h2>Googleカレンダー</h2>
+    <h2>カレンダー</h2>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <button class="btn btn-outline btn-sm" onclick="dashCalPrev()">◀</button>
+      <span id="dashCalTitle" style="font-family:'Shippori Mincho',serif;font-size:14px;min-width:100px;text-align:center;"></span>
+      <button class="btn btn-outline btn-sm" onclick="dashCalNext()">▶</button>
+      <button class="btn btn-gold btn-sm" onclick="dashCalGoToday()">今月</button>
+    </div>
   </div>
-  <div style="padding:16px 20px;background:#1c0f02;border:1px solid #3a2208;border-radius:6px;display:flex;align-items:center;gap:16px;">
-    <a href="https://calendar.google.com/calendar/r/day" target="_blank" rel="noopener" class="btn btn-gold" style="text-decoration:none;">📅 今日の予定を開く</a>
-    <a href="https://calendar.google.com/calendar/r/week" target="_blank" rel="noopener" class="btn btn-outline" style="text-decoration:none;">📅 週間表示で開く</a>
-    <span style="font-size:11px;color:#a09070;margin-left:auto;">Googleカレンダーが新しいタブで開きます</span>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;font-size:11px;margin-bottom:10px;">
+    <span><span style="display:inline-block;width:8px;height:8px;border-radius:1px;background:#c8880a;margin-right:3px;vertical-align:middle;"></span>撮影</span>
+    <span><span style="display:inline-block;width:8px;height:8px;border-radius:1px;background:#8b2010;margin-right:3px;vertical-align:middle;"></span>納品・締切</span>
+    <span><span style="display:inline-block;width:8px;height:8px;border-radius:1px;background:#1f4a7a;margin-right:3px;vertical-align:middle;"></span>打ち合わせ</span>
+    <span><span style="display:inline-block;width:8px;height:8px;border-radius:1px;background:#2f6040;margin-right:3px;vertical-align:middle;"></span>その他</span>
+  </div>
+  <div id="dashCalGrid" style="border:1px solid #d4b870;border-radius:6px;overflow:hidden;margin-bottom:12px;"></div>
+  <div id="dashCalDayPanel" style="display:none;margin-bottom:16px;">
+    <div style="font-family:'Shippori Mincho',serif;font-size:14px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid #d4b870;display:flex;justify-content:space-between;align-items:center;">
+      <span id="dashCalDayTitle"></span>
+      <button class="btn btn-gold btn-sm" onclick="openCalEventModalFromDash()">＋ 予定を追加</button>
+    </div>
+    <div id="dashCalDayEvents"></div>
+  </div>
+
+  <!-- GOOGLE CALENDAR LINK -->
+  <div style="padding:12px 16px;background:#1c0f02;border:1px solid #3a2208;border-radius:6px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:24px;">
+    <span style="font-size:11px;color:#a09070;">Googleカレンダー：</span>
+    <a href="https://calendar.google.com/calendar/r/day" target="_blank" rel="noopener" class="btn btn-gold btn-sm" style="text-decoration:none;">📅 今日</a>
+    <a href="https://calendar.google.com/calendar/r/week" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="text-decoration:none;">📅 週間</a>
   </div>
 
   <div class="sec-head" style="margin-top:24px;"><h2>よく使うリンク</h2>
@@ -767,6 +789,9 @@ function renderDashboard(){
   // Today schedule & todo
   renderDashSchedule();
   renderDashTodo();
+
+  // Mini calendar
+  renderDashCal();
 
   // Links
   renderLinks();
@@ -1493,6 +1518,9 @@ function speakSequence(msgs){
 let calYear = new Date().getFullYear();
 let calMonth = new Date().getMonth();
 let calSelectedDate = null;
+let dashCalYear = new Date().getFullYear();
+let dashCalMonth = new Date().getMonth();
+let dashCalSelectedDate = null;
 
 const CAL_COLORS = {撮影:'#c8880a',納品:'#8b2010',打ち合わせ:'#1f4a7a',その他:'#2f6040'};
 
@@ -1591,8 +1619,9 @@ function showCalDay(dateStr, eventsMap){
     document.getElementById('calDayEvents').innerHTML = '<div style="color:#8b6820;font-size:13px;">予定がありません。「＋ 予定を追加」から追加してください。</div>';
     return;
   }
-  document.getElementById('calDayEvents').innerHTML = evs.map(ev=>`
-    <div class="list-item" style="border-left:4px solid ${CAL_COLORS[ev.type]||'#c8880a'};">
+  document.getElementById('calDayEvents').innerHTML = evs.map(ev=>{
+    const gcalUrl=makeGcalAddUrl(ev.title, ev.date||dateStr, ev.memo||'');
+    return `<div class="list-item" style="border-left:4px solid ${CAL_COLORS[ev.type]||'#c8880a'};">
       <div class="list-item-body">
         <div class="list-item-title">${esc(ev.title)}</div>
         <div class="list-item-meta">
@@ -1602,9 +1631,12 @@ function showCalDay(dateStr, eventsMap){
           ${ev.src==='project'?'<span style="font-size:10px;color:#8b6820;"> （制作ツールから）</span>':''}
         </div>
       </div>
-      ${ev.src==='user'?`<button class="btn btn-outline btn-sm" onclick="openCalEventModal('${ev.id}')">編集</button>`:''}
-    </div>
-  `).join('');
+      <div style="display:flex;gap:6px;align-items:center;">
+        <a href="${gcalUrl}" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="text-decoration:none;white-space:nowrap;">📅 Googleに追加</a>
+        ${ev.src==='user'?`<button class="btn btn-outline btn-sm" onclick="openCalEventModal('${ev.id}')">編集</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function openCalEventModal(id){
@@ -1676,6 +1708,92 @@ function deleteCalEvent(){
   G.calEvents = (G.calEvents||[]).filter(e=>e.id!==id);
   saveG(); closeModal('calEventModal'); renderCalendar();
   showToast('予定を削除しました');
+}
+
+// ─── DASHBOARD MINI CALENDAR ──────────────────────────────────────────────────
+function dashCalPrev(){ dashCalMonth--; if(dashCalMonth<0){dashCalMonth=11;dashCalYear--;} renderDashCal(); }
+function dashCalNext(){ dashCalMonth++; if(dashCalMonth>11){dashCalMonth=0;dashCalYear++;} renderDashCal(); }
+function dashCalGoToday(){ dashCalYear=new Date().getFullYear(); dashCalMonth=new Date().getMonth(); renderDashCal(); }
+
+function renderDashCal(){
+  if(!G.calEvents) G.calEvents=[];
+  document.getElementById('dashCalTitle').textContent=`${dashCalYear}年${dashCalMonth+1}月`;
+
+  const firstDay=new Date(dashCalYear,dashCalMonth,1).getDay();
+  const lastDate=new Date(dashCalYear,dashCalMonth+1,0).getDate();
+  const prevLast=new Date(dashCalYear,dashCalMonth,0).getDate();
+  const todayStr=today();
+
+  // Build events map
+  const evMap={};
+  (G.calEvents||[]).forEach(ev=>{ if(!evMap[ev.date]) evMap[ev.date]=[]; evMap[ev.date].push(ev); });
+  loadVideo();
+  Object.entries(videoState).forEach(([id,p])=>{
+    const s=p.schedule||{};
+    if(s.shootDate){if(!evMap[s.shootDate])evMap[s.shootDate]=[];evMap[s.shootDate].push({id:'ps_'+id,title:'📷 '+p.name,type:'撮影',src:'project'});}
+    if(s.deadline){if(!evMap[s.deadline])evMap[s.deadline]=[];evMap[s.deadline].push({id:'pd_'+id,title:'🔴 '+p.name,type:'納品',src:'project'});}
+  });
+
+  const DOW=['日','月','火','水','木','金','土'];
+  let html=`<div class="cal-head">${DOW.map(d=>`<div class="cal-dow">${d}</div>`).join('')}</div><div class="cal-body">`;
+
+  for(let i=0;i<firstDay;i++){
+    html+=`<div class="cal-cell other-month" style="min-height:60px;"><span class="cal-date" style="font-size:11px;">${prevLast-firstDay+i+1}</span></div>`;
+  }
+  for(let d=1;d<=lastDate;d++){
+    const ds=`${dashCalYear}-${String(dashCalMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday=ds===todayStr;
+    const isSel=ds===dashCalSelectedDate;
+    const evs=evMap[ds]||[];
+    html+=`<div class="cal-cell${isToday?' today':''}${isSel?' selected':''}" style="min-height:60px;" onclick="selectDashCalDay('${ds}')">
+      <span class="cal-date" style="font-size:12px;">${d}</span>
+      ${evs.slice(0,2).map(ev=>`<div class="cal-event ${ev.type}" style="font-size:9px;">${ev.title}</div>`).join('')}
+      ${evs.length>2?`<div style="font-size:9px;color:#8b6820;">＋${evs.length-2}</div>`:''}
+    </div>`;
+  }
+  const total=firstDay+lastDate;
+  const rem=total%7===0?0:7-(total%7);
+  for(let i=1;i<=rem;i++) html+=`<div class="cal-cell other-month" style="min-height:60px;"><span class="cal-date" style="font-size:11px;">${i}</span></div>`;
+  html+='</div>';
+  document.getElementById('dashCalGrid').innerHTML=html;
+
+  if(dashCalSelectedDate) showDashCalDay(dashCalSelectedDate, evMap);
+}
+
+function selectDashCalDay(ds){
+  dashCalSelectedDate=ds;
+  renderDashCal();
+}
+
+function showDashCalDay(ds, evMap){
+  const panel=document.getElementById('dashCalDayPanel');
+  const d=new Date(ds);
+  const dow=['日','月','火','水','木','金','土'][d.getDay()];
+  document.getElementById('dashCalDayTitle').textContent=`${d.getMonth()+1}月${d.getDate()}日（${dow}）`;
+  panel.style.display='block';
+  const evs=evMap[ds]||[];
+  if(evs.length===0){
+    document.getElementById('dashCalDayEvents').innerHTML='<div style="color:#8b6820;font-size:12px;">予定がありません。</div>';
+    return;
+  }
+  document.getElementById('dashCalDayEvents').innerHTML=evs.map(ev=>{
+    const gcalUrl=makeGcalAddUrl(ev.title, ds, '');
+    return `<div class="list-item" style="border-left:3px solid ${CAL_COLORS[ev.type]||'#c8880a'};padding:10px 14px;">
+      <div class="list-item-body">
+        <div style="font-size:13px;font-weight:700;">${esc(ev.title)}</div>
+        <div style="font-size:11px;color:#8b6820;">${ev.time?ev.time+' ':''}<span class="badge" style="background:${CAL_COLORS[ev.type]||'#c8880a'};color:#fff;font-size:10px;">${ev.type}</span>${ev.memo?` ${esc(ev.memo)}`:''}</div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;">
+        <a href="${gcalUrl}" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="text-decoration:none;white-space:nowrap;font-size:10px;">📅 Googleに追加</a>
+        ${ev.src==='user'?`<button class="btn btn-outline btn-sm" onclick="openCalEventModal('${ev.id}');return false;" style="font-size:10px;">編集</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openCalEventModalFromDash(){
+  openCalEventModal(null);
+  if(dashCalSelectedDate) document.getElementById('ce-date').value=dashCalSelectedDate;
 }
 
 // ─── BACKUP / RESTORE ─────────────────────────────────────────────────────────
