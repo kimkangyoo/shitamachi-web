@@ -233,8 +233,9 @@ tr:hover td{background:#fdf5e0;}
     <div>
       <div class="sec-head" style="margin-top:0;">
         <h2>TODOリスト</h2>
-        <form id="dashTodoForm" onsubmit="addDashTodo(event)" style="display:flex;gap:6px;">
-          <input type="text" id="dashTodoInput" placeholder="今日やること" style="font-size:12px;padding:5px 8px;flex:1;">
+        <form id="dashTodoForm" onsubmit="addDashTodo(event)" style="display:flex;gap:6px;flex-wrap:wrap;">
+          <input type="text" id="dashTodoInput" placeholder="やること" style="font-size:12px;padding:5px 8px;flex:1;min-width:120px;">
+          <input type="date" id="dashTodoDate" style="font-size:12px;padding:5px 8px;width:140px;">
           <button class="btn btn-gold btn-sm" type="submit">追加</button>
         </form>
       </div>
@@ -802,9 +803,11 @@ function addDashTodo(e){
   e.preventDefault();
   const v = document.getElementById('dashTodoInput').value.trim();
   if(!v) return;
-  G.manualTasks.push({id:uid(), text:v, done:false});
+  const d = document.getElementById('dashTodoDate').value;
+  G.manualTasks.push({id:uid(), text:v, done:false, dueDate:d||''});
   saveG(); renderDashTodo();
   document.getElementById('dashTodoInput').value = '';
+  document.getElementById('dashTodoDate').value = '';
 }
 
 function renderDashTodo(){
@@ -818,12 +821,25 @@ function renderDashTodo(){
     return;
   }
   let html = '<ul style="list-style:none;padding:0;margin:0;">';
+  // Sort undone by dueDate
+  undone.sort((a,b)=>{
+    if(!a.dueDate && !b.dueDate) return 0;
+    if(!a.dueDate) return 1;
+    if(!b.dueDate) return -1;
+    return a.dueDate.localeCompare(b.dueDate);
+  });
+
   if(undone.length>0){
     html += undone.map(t=>{
       const idx = G.manualTasks.indexOf(t);
+      const days = t.dueDate ? daysUntil(t.dueDate) : null;
+      const duLabel = days===null ? '' : days<0 ? `<span style="color:#c05010;font-size:10px;font-weight:700;">${Math.abs(days)}日超過</span>` : days===0 ? `<span style="color:#c05010;font-size:10px;font-weight:700;">今日</span>` : `<span style="color:#8b6820;font-size:10px;">あと${days}日</span>`;
       return `<li style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:#fffdf5;border:1px solid #ddc890;border-radius:5px;margin-bottom:6px;">
         <input type="checkbox" style="width:17px;height:17px;accent-color:#c8880a;cursor:pointer;flex-shrink:0;" onchange="toggleDashTodo(${idx})">
-        <span style="flex:1;font-size:13px;cursor:pointer;" onclick="toggleDashTodo(${idx})">${esc(t.text)}</span>
+        <div style="flex:1;cursor:pointer;" onclick="toggleDashTodo(${idx})">
+          <div style="font-size:13px;">${esc(t.text)}</div>
+          ${t.dueDate?`<div style="font-size:10px;color:#8b6820;margin-top:2px;">📅 ${fmtDate(t.dueDate)}　${duLabel}</div>`:''}
+        </div>
         <button onclick="deleteDashTodo(${idx})" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:15px;line-height:1;padding:0;">✕</button>
       </li>`;
     }).join('');
@@ -834,7 +850,10 @@ function renderDashTodo(){
       const idx = G.manualTasks.indexOf(t);
       return `<li style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:#f5f0e8;border:1px solid #e8dcc8;border-radius:5px;margin-bottom:6px;opacity:.7;">
         <input type="checkbox" checked style="width:17px;height:17px;accent-color:#c8880a;cursor:pointer;flex-shrink:0;" onchange="toggleDashTodo(${idx})">
-        <span style="flex:1;font-size:13px;text-decoration:line-through;color:#a09080;cursor:pointer;" onclick="toggleDashTodo(${idx})">${esc(t.text)}</span>
+        <div style="flex:1;cursor:pointer;" onclick="toggleDashTodo(${idx})">
+          <div style="font-size:13px;text-decoration:line-through;color:#a09080;">${esc(t.text)}</div>
+          ${t.dueDate?`<div style="font-size:10px;color:#c0b090;margin-top:2px;">📅 ${fmtDate(t.dueDate)}</div>`:''}
+        </div>
         <button onclick="deleteDashTodo(${idx})" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:15px;line-height:1;padding:0;">✕</button>
       </li>`;
     }).join('');
