@@ -811,6 +811,12 @@ function saveG(){ localStorage.setItem(GYOMU_KEY, JSON.stringify(G)); }
 function loadVideo(){
   videoState = JSON.parse(localStorage.getItem(VIDEO_KEY) || '{}');
 }
+// 撮影日（複数対応・旧データの単一shootDateにも対応）
+function getShootDates(s){
+  if(!s) return [];
+  if(s.shootDates && s.shootDates.length) return s.shootDates.filter(d=>d);
+  return s.shootDate ? [s.shootDate] : [];
+}
 
 // 取材ノート（shuzai.html）の取材予定を読み込む
 let shuzaiData = {};
@@ -1061,8 +1067,8 @@ function renderDashSchedule(){
   const items = [];
   Object.entries(videoState).forEach(([id,p])=>{
     const s = p.schedule||{};
-    if(s.shootDate===todayStr) items.push({type:'撮影', name:p.name, time:s.shootDate, client:s.client});
-    else if(s.deadline===todayStr) items.push({type:'納品', name:p.name, time:s.deadline, client:s.client});
+    if(getShootDates(s).includes(todayStr)) items.push({type:'撮影', name:p.name, time:'', client:s.client});
+    if(s.deadline===todayStr) items.push({type:'納品', name:p.name, time:s.deadline, client:s.client});
   });
 
   // Calendar events for today
@@ -1841,10 +1847,10 @@ function renderCalendar(){
   loadVideo();
   Object.entries(videoState).forEach(([id,p]) => {
     const s = p.schedule||{};
-    if(s.shootDate){
-      if(!eventsMap[s.shootDate]) eventsMap[s.shootDate]=[];
-      eventsMap[s.shootDate].push({id:'proj_shoot_'+id, title:'📷 '+p.name, type:'撮影', src:'project', projectId:id});
-    }
+    getShootDates(s).forEach(sd=>{
+      if(!eventsMap[sd]) eventsMap[sd]=[];
+      eventsMap[sd].push({id:'proj_shoot_'+id+'_'+sd, title:'📷 '+p.name, type:'撮影', src:'project', projectId:id});
+    });
     if(s.deadline){
       if(!eventsMap[s.deadline]) eventsMap[s.deadline]=[];
       eventsMap[s.deadline].push({id:'proj_dl_'+id, title:'🔴 '+p.name+' 締切', type:'納品', src:'project', projectId:id});
@@ -2022,7 +2028,7 @@ function renderDashCal(){
   loadVideo();
   Object.entries(videoState).forEach(([id,p])=>{
     const s=p.schedule||{};
-    if(s.shootDate){if(!evMap[s.shootDate])evMap[s.shootDate]=[];evMap[s.shootDate].push({id:'ps_'+id,title:'📷 '+p.name,type:'撮影',src:'project'});}
+    getShootDates(s).forEach(sd=>{if(!evMap[sd])evMap[sd]=[];evMap[sd].push({id:'ps_'+id+'_'+sd,title:'📷 '+p.name,type:'撮影',src:'project'});});
     if(s.deadline){if(!evMap[s.deadline])evMap[s.deadline]=[];evMap[s.deadline].push({id:'pd_'+id,title:'🔴 '+p.name,type:'納品',src:'project'});}
   });
   getShuzaiEvents().forEach(ev=>{ if(!evMap[ev.date])evMap[ev.date]=[]; evMap[ev.date].push(ev); });
