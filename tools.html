@@ -388,7 +388,10 @@ tr.shot-complete td{opacity:.5;}
         <div class="sec-eyebrow">PROJECT SCHEDULE</div>
         <div class="sec-title" id="schProjTitle">—</div>
       </div>
-      <button class="btn btn-ghost" onclick="saveSchedule()">保存</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost" onclick="saveSchedule()">保存</button>
+        <button class="btn btn-ghost" onclick="saveAndNextProject()">保存して次の案件 ＋</button>
+      </div>
     </div>
 
     <!-- 案件基本情報 -->
@@ -1906,6 +1909,11 @@ function saveSchedule(){
   renderSchedule();
   renderDashboard();
   showToast('保存しました');
+}
+
+function saveAndNextProject(){
+  saveSchedule();
+  newProject();
 }
 
 function daysFrom(dateStr){

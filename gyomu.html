@@ -239,7 +239,8 @@ tr:hover td{background:#fdf5e0;}
         <h2>TODOリスト</h2>
         <form id="dashTodoForm" onsubmit="addDashTodo(event)" style="display:flex;gap:6px;flex-wrap:wrap;">
           <input type="text" id="dashTodoInput" placeholder="やること" style="font-size:12px;padding:5px 8px;flex:1;min-width:120px;">
-          <input type="date" id="dashTodoDate" style="font-size:12px;padding:5px 8px;width:140px;">
+          <input type="date" id="dashTodoDate" style="font-size:12px;padding:5px 8px;width:130px;">
+          <button class="btn btn-outline btn-sm" type="button" onclick="setTodoToday()">今日</button>
           <button class="btn btn-gold btn-sm" type="submit">追加</button>
         </form>
       </div>
@@ -956,6 +957,9 @@ function renderDashboard(){
 }
 
 // ─── DASH TODO ────────────────────────────────────────────────────────────────
+function setTodoToday(){
+  document.getElementById('dashTodoDate').value = today();
+}
 function addDashTodo(e){
   e.preventDefault();
   const v = document.getElementById('dashTodoInput').value.trim();
