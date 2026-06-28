@@ -353,6 +353,7 @@ tr.shot-complete td{opacity:.5;}
   <label>案件</label>
   <select class="project-select" id="projectSelect" onchange="switchProject()"></select>
   <button class="btn-new-project" onclick="newProject()">＋ 新しい案件</button>
+  <button class="btn-del-project" onclick="renameProject()">案件名を変更</button>
   <button class="btn-del-project" onclick="deleteProject()">削除</button>
 </div>
 
@@ -1340,6 +1341,21 @@ function newProject(silent=false){
   renderProjectSelect(id);
   switchProject();
   if(!silent) showToast('案件「' + name + '」を作成しました');
+}
+
+function renameProject(){
+  const cur = state[currentProject];
+  if(!cur) return;
+  const name = prompt('案件名を入力してください', cur.name);
+  if(name===null) return;
+  const trimmed = name.trim();
+  if(!trimmed){ showToast('案件名を入力してください'); return; }
+  cur.name = trimmed;
+  saveState();
+  renderProjectSelect(currentProject);
+  renderSchedule();
+  renderDashboard();
+  showToast('案件名を変更しました');
 }
 
 function deleteProject(){
