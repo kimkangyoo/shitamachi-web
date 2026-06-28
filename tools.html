@@ -1961,7 +1961,8 @@ function nearestShootDate(s){
   const dates = (s.shootDates && s.shootDates.length ? s.shootDates : [s.shootDate]).filter(d=>d);
   if(dates.length===0) return '';
   const sorted = [...dates].sort();
-  const todayStr = new Date().toISOString().slice(0,10);
+  const _t = new Date();
+  const todayStr = `${_t.getFullYear()}-${String(_t.getMonth()+1).padStart(2,'0')}-${String(_t.getDate()).padStart(2,'0')}`;
   const upcoming = sorted.find(d=>d>=todayStr);
   return upcoming || sorted[sorted.length-1];
 }
