@@ -2079,6 +2079,11 @@ function renderDashboard(){
           <div style="height:100%;background:#c8880a;width:${pct}%;"></div>
         </div>
       </div>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button onclick="event.stopPropagation();switchToProject('${id}')" style="flex:1;background:#c8880a;border:none;color:#fff8e8;font-size:11px;padding:6px;border-radius:4px;cursor:pointer;">開く</button>
+        <button onclick="event.stopPropagation();renameProjectById('${id}')" style="background:transparent;border:1px solid #b89848;color:#8b6820;font-size:11px;padding:6px 10px;border-radius:4px;cursor:pointer;">名前変更</button>
+        <button onclick="event.stopPropagation();deleteProjectById('${id}')" style="background:transparent;border:1px solid #a05030;color:#a05030;font-size:11px;padding:6px 10px;border-radius:4px;cursor:pointer;">削除</button>
+      </div>
     </div>`;
   });
   html += '</div>';
@@ -2091,6 +2096,34 @@ function switchToProject(id){
   renderAll();
   renderSchedule();
   renderDashboard();
+}
+
+function renameProjectById(id){
+  const p = state[id];
+  if(!p) return;
+  const name = prompt('案件名を入力してください', p.name);
+  if(name===null) return;
+  const trimmed = name.trim();
+  if(!trimmed){ showToast('案件名を入力してください'); return; }
+  p.name = trimmed;
+  saveState();
+  renderProjectSelect(currentProject);
+  renderSchedule();
+  renderDashboard();
+  showToast('案件名を変更しました');
+}
+
+function deleteProjectById(id){
+  if(Object.keys(state).length <= 1){ showToast('最後の案件は削除できません'); return; }
+  if(!confirm('案件「'+state[id].name+'」を削除しますか？')) return;
+  delete state[id];
+  saveState();
+  if(currentProject===id) currentProject = Object.keys(state)[0];
+  renderProjectSelect(currentProject);
+  renderAll();
+  renderSchedule();
+  renderDashboard();
+  showToast('案件を削除しました');
 }
 
 // ─── DOCUMENTS ───────────────────────────────────────────────────────────────
