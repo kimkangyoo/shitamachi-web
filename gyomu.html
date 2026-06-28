@@ -81,6 +81,7 @@ input:focus,textarea:focus,select:focus{outline:2px solid #c8880a;border-color:#
 .badge-green{background:#e4f0e8;color:#2f6040;}
 .badge-gray{background:#ede8dd;color:#6b5840;}
 .badge-blue{background:#e0eaf5;color:#1f4a7a;}
+.badge-purple{background:#ece0f0;color:#5a2f7a;}
 
 /* DEADLINE COLOR */
 .deadline-urgent{color:#c05010;font-weight:700;}
@@ -161,6 +162,7 @@ tr:hover td{background:#fdf5e0;}
 .cal-event.納品{background:#8b2010;color:#fff;}
 .cal-event.打ち合わせ{background:#1f4a7a;color:#fff;}
 .cal-event.その他{background:#2f6040;color:#fff;}
+.cal-event.取材{background:#5a2f7a;color:#fff;}
 .cal-event.project-shoot{background:#c8880a;color:#fff;}
 .cal-event.project-deadline{background:#8b2010;color:#fff;}
 
@@ -264,6 +266,7 @@ tr:hover td{background:#fdf5e0;}
     <span><span style="display:inline-block;width:8px;height:8px;border-radius:1px;background:#8b2010;margin-right:3px;vertical-align:middle;"></span>納品・締切</span>
     <span><span style="display:inline-block;width:8px;height:8px;border-radius:1px;background:#1f4a7a;margin-right:3px;vertical-align:middle;"></span>打ち合わせ</span>
     <span><span style="display:inline-block;width:8px;height:8px;border-radius:1px;background:#2f6040;margin-right:3px;vertical-align:middle;"></span>その他</span>
+    <span><span style="display:inline-block;width:8px;height:8px;border-radius:1px;background:#5a2f7a;margin-right:3px;vertical-align:middle;"></span>取材</span>
   </div>
   <div id="dashCalGrid" style="border:1px solid #d4b870;border-radius:6px;overflow:hidden;margin-bottom:12px;"></div>
   <div id="dashCalDayPanel" style="display:none;margin-bottom:16px;">
@@ -439,6 +442,7 @@ tr:hover td{background:#fdf5e0;}
     <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#8b2010;margin-right:4px;vertical-align:middle;"></span>納品・締切</span>
     <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#1f4a7a;margin-right:4px;vertical-align:middle;"></span>打ち合わせ</span>
     <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#2f6040;margin-right:4px;vertical-align:middle;"></span>その他</span>
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#5a2f7a;margin-right:4px;vertical-align:middle;"></span>取材</span>
   </div>
 
   <!-- カレンダーグリッド -->
@@ -807,6 +811,40 @@ function loadVideo(){
   videoState = JSON.parse(localStorage.getItem(VIDEO_KEY) || '{}');
 }
 
+// 取材ノート（shuzai.html）の取材予定を読み込む
+let shuzaiData = {};
+function loadShuzai(){
+  shuzaiData = JSON.parse(localStorage.getItem('shuzaiData') || '{}');
+}
+// 取材予定（日付あり・未完了）をカレンダーイベント形式で返す
+function getShuzaiEvents(){
+  loadShuzai();
+  const leads = shuzaiData.leads || [];
+  return leads
+    .filter(l=>l.date && l.status!=='記事化済' && l.status!=='見送り')
+    .map(l=>({date:l.date, title:'🎤 '+l.name+'（取材）', type:'取材', src:'shuzai'}));
+}
+// 取材ごとのTODO（未完了）を返す
+function getShuzaiTodos(){
+  loadShuzai();
+  const out = [];
+  (shuzaiData.leads||[]).forEach(l=>{
+    (l.todos||[]).forEach((t,ti)=>{
+      out.push({leadId:l.id, leadName:l.name, ti, text:t.text, done:t.done, dueDate:t.dueDate||''});
+    });
+  });
+  return out;
+}
+function toggleShuzaiTodo(leadId, ti){
+  loadShuzai();
+  const l = (shuzaiData.leads||[]).find(x=>x.id===leadId);
+  if(l && l.todos && l.todos[ti]){
+    l.todos[ti].done = !l.todos[ti].done;
+    localStorage.setItem('shuzaiData', JSON.stringify(shuzaiData));
+  }
+  renderDashTodo(); renderDashSchedule();
+}
+
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function fmt(n){ return Number(n||0).toLocaleString(); }
@@ -935,7 +973,8 @@ function renderDashTodo(){
   const undone = G.manualTasks.filter(t=>!t.done);
   const done   = G.manualTasks.filter(t=>t.done);
   const all = [...undone, ...done];
-  if(all.length===0){
+  const shuzaiTodos = getShuzaiTodos().filter(t=>!t.done);
+  if(all.length===0 && shuzaiTodos.length===0){
     el.innerHTML='<div style="color:#8b6820;font-size:12px;padding:8px 0;">タスクがありません。</div>';
     return;
   }
@@ -977,6 +1016,24 @@ function renderDashTodo(){
       </li>`;
     }).join('');
   }
+  // 取材ごとのTODO（取材ノートと連携・未完了のみ）
+  if(shuzaiTodos.length>0){
+    shuzaiTodos.sort((a,b)=>(a.dueDate||'9999').localeCompare(b.dueDate||'9999'));
+    html += `<li style="font-size:10px;letter-spacing:.2em;color:#5a2f7a;padding:10px 4px 4px;">🎤 取材TODO（取材ノート）</li>`;
+    html += shuzaiTodos.map(t=>{
+      const days = t.dueDate ? daysUntil(t.dueDate) : null;
+      const duLabel = days===null ? '' : days<0 ? `<span style="color:#c05010;font-size:10px;font-weight:700;">${Math.abs(days)}日超過</span>` : days===0 ? `<span style="color:#c05010;font-size:10px;font-weight:700;">今日</span>` : `<span style="color:#8b6820;font-size:10px;">あと${days}日</span>`;
+      return `<li style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:#fbf7fd;border:1px solid #d8c4e0;border-radius:5px;margin-bottom:6px;">
+        <input type="checkbox" style="width:17px;height:17px;accent-color:#5a2f7a;cursor:pointer;flex-shrink:0;" onchange="toggleShuzaiTodo('${t.leadId}',${t.ti})">
+        <div style="flex:1;cursor:pointer;" onclick="toggleShuzaiTodo('${t.leadId}',${t.ti})">
+          <div style="font-size:13px;">${esc(t.text)} <span style="font-size:10px;color:#5a2f7a;">/ ${esc(t.leadName)}</span></div>
+          ${t.dueDate?`<div style="font-size:10px;color:#8b6820;margin-top:2px;">📅 ${fmtDate(t.dueDate)}　${duLabel}</div>`:''}
+        </div>
+        <a href="shuzai.html" style="font-size:10px;color:#5a2f7a;text-decoration:none;flex-shrink:0;">開く→</a>
+      </li>`;
+    }).join('');
+  }
+
   html += '</ul>';
   el.innerHTML = html;
 }
@@ -1009,6 +1066,11 @@ function renderDashSchedule(){
     if(ev.date===todayStr) items.push({type:ev.type, name:ev.title, time:ev.time, client:''});
   });
 
+  // 取材予定 for today
+  getShuzaiEvents().forEach(ev=>{
+    if(ev.date===todayStr) items.push({type:'取材', name:ev.title, time:'', client:''});
+  });
+
   // Routines for today
   const dow2 = d.getDay();
   const routines = G.routines.filter(r=>!r.days||r.days.includes(dow2));
@@ -1019,12 +1081,17 @@ function renderDashSchedule(){
     .filter(t=>!t.done && t.dueDate && t.dueDate<=todayStr)
     .sort((a,b)=>a.dueDate.localeCompare(b.dueDate));
 
-  if(items.length===0 && routines.length===0 && todos.length===0){
+  // 取材TODO due today or overdue
+  const szTodos = getShuzaiTodos()
+    .filter(t=>!t.done && t.dueDate && t.dueDate<=todayStr)
+    .sort((a,b)=>a.dueDate.localeCompare(b.dueDate));
+
+  if(items.length===0 && routines.length===0 && todos.length===0 && szTodos.length===0){
     el.innerHTML='<div style="color:#8b6820;font-size:12px;padding:8px 0;">今日の予定はありません。</div>';
     return;
   }
 
-  const badgeColor = {撮影:'badge-blue',納品:'badge-green',打ち合わせ:'badge-yellow',その他:'badge-gray'};
+  const badgeColor = {撮影:'badge-blue',納品:'badge-green',打ち合わせ:'badge-yellow',その他:'badge-gray',取材:'badge-purple'};
 
   el.innerHTML = [
     ...items.map(it=>`
@@ -1040,6 +1107,17 @@ function renderDashSchedule(){
         <label onclick="toggleDashTodo(${idx})" style="font-size:12px;flex:1;cursor:pointer;">
           <span class="badge badge-red" style="font-size:10px;">やること</span>
           ${esc(t.text)}
+          ${overdue?`<span style="color:#c05010;font-size:10px;font-weight:700;"> （${fmtDate(t.dueDate)} 超過）</span>`:''}
+        </label>
+      </div>`;
+    }),
+    ...szTodos.map(t=>{
+      const overdue = t.dueDate < todayStr;
+      return `<div class="task-item" style="padding:8px 12px;margin-bottom:5px;">
+        <input type="checkbox" onchange="toggleShuzaiTodo('${t.leadId}',${t.ti})">
+        <label onclick="toggleShuzaiTodo('${t.leadId}',${t.ti})" style="font-size:12px;flex:1;cursor:pointer;">
+          <span class="badge badge-purple" style="font-size:10px;">取材</span>
+          ${esc(t.text)} <span style="color:#5a2f7a;font-size:10px;">/ ${esc(t.leadName)}</span>
           ${overdue?`<span style="color:#c05010;font-size:10px;font-weight:700;"> （${fmtDate(t.dueDate)} 超過）</span>`:''}
         </label>
       </div>`;
@@ -1609,6 +1687,15 @@ function runVoiceCheck(){
     .filter(t=>t.days!==null && t.days<=watchDays)
     .sort((a,b)=>a.days-b.days);
 
+  // 取材TODO（取材ノートと連携）
+  getShuzaiTodos()
+    .filter(t=>!t.done && t.dueDate)
+    .forEach(t=>{
+      const days = daysUntil(t.dueDate);
+      if(days!==null && days<=watchDays) todoAlerts.push({name:t.leadName+'の取材「'+t.text+'」', days});
+    });
+  todoAlerts.sort((a,b)=>a.days-b.days);
+
   // Reset overdue message rotation each check
   overdueIdx = 0;
 
@@ -1717,7 +1804,7 @@ let dashCalYear = new Date().getFullYear();
 let dashCalMonth = new Date().getMonth();
 let dashCalSelectedDate = null;
 
-const CAL_COLORS = {撮影:'#c8880a',納品:'#8b2010',打ち合わせ:'#1f4a7a',その他:'#2f6040'};
+const CAL_COLORS = {撮影:'#c8880a',納品:'#8b2010',打ち合わせ:'#1f4a7a',その他:'#2f6040',取材:'#5a2f7a'};
 
 function switchTab_calendar(){
   if(!G.calEvents) G.calEvents = [];
@@ -1758,6 +1845,12 @@ function renderCalendar(){
       if(!eventsMap[s.deadline]) eventsMap[s.deadline]=[];
       eventsMap[s.deadline].push({id:'proj_dl_'+id, title:'🔴 '+p.name+' 締切', type:'納品', src:'project', projectId:id});
     }
+  });
+
+  // From shuzai.html 取材予定
+  getShuzaiEvents().forEach(ev=>{
+    if(!eventsMap[ev.date]) eventsMap[ev.date]=[];
+    eventsMap[ev.date].push({id:'sz_'+ev.date+'_'+ev.title, title:ev.title, type:'取材', src:'shuzai'});
   });
 
   const todayStr = today();
@@ -1928,6 +2021,7 @@ function renderDashCal(){
     if(s.shootDate){if(!evMap[s.shootDate])evMap[s.shootDate]=[];evMap[s.shootDate].push({id:'ps_'+id,title:'📷 '+p.name,type:'撮影',src:'project'});}
     if(s.deadline){if(!evMap[s.deadline])evMap[s.deadline]=[];evMap[s.deadline].push({id:'pd_'+id,title:'🔴 '+p.name,type:'納品',src:'project'});}
   });
+  getShuzaiEvents().forEach(ev=>{ if(!evMap[ev.date])evMap[ev.date]=[]; evMap[ev.date].push(ev); });
 
   const DOW=['日','月','火','水','木','金','土'];
   let html=`<div class="cal-head">${DOW.map(d=>`<div class="cal-dow">${d}</div>`).join('')}</div><div class="cal-body">`;

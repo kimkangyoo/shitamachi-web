@@ -251,6 +251,23 @@ input:focus,textarea:focus,select:focus{outline:2px solid #c8880a;border-color:#
   </div>
 </div>
 
+<!-- LEAD TODO MODAL -->
+<div class="modal-bg" id="todoModal">
+  <div class="modal">
+    <div class="modal-head"><h3 id="todoModalTitle">取材TODO</h3><button class="modal-close" onclick="closeModal('todoModal')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="todoLeadId">
+      <form onsubmit="addTodo(event)" style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+        <input type="text" id="todoText" placeholder="例：アポを取る" style="flex:1;min-width:140px;" required>
+        <input type="date" id="todoDate" style="width:140px;">
+        <button class="btn btn-gold btn-sm" type="submit">追加</button>
+      </form>
+      <button class="btn btn-outline btn-sm" onclick="addTodoTemplate()" style="margin-bottom:14px;">＋ 定番の取材TODOをまとめて追加</button>
+      <div id="todoList"></div>
+    </div>
+  </div>
+</div>
+
 <!-- INTERVIEW VIEW MODAL -->
 <div class="modal-bg" id="interviewModal">
   <div class="modal" style="max-width:760px;">
@@ -397,10 +414,18 @@ function renderLeads(){
             </div>
           </div>
           <div class="list-item-actions">
+            <button class="btn btn-outline btn-sm" onclick="openTodoModal('${l.id}')">✓ TODO${todoCount(l)}</button>
             <button class="btn btn-outline btn-sm" onclick="openLeadModal(${i})">編集</button>
           </div>
         </div>`;
       }).join('');
+}
+
+function todoCount(l){
+  const todos = l.todos||[];
+  if(todos.length===0) return '';
+  const done = todos.filter(t=>t.done).length;
+  return ` (${done}/${todos.length})`;
 }
 
 function openLeadModal(i){
@@ -440,6 +465,77 @@ function deleteLead(){
   const i = Number(document.getElementById('leadEditId').value);
   if(!confirm('この取材先を削除しますか？')) return;
   S.leads.splice(i,1); saveS(); closeModal('leadModal'); renderLeads();
+}
+
+// ─── LEAD TODO ────────────────────────────────────────────────────────────────
+const TODO_TEMPLATE = ['アポを取る','質問を準備する','当日の録音・撮影','文字起こしを整える','記事を書く','本人に確認をもらう'];
+
+function openTodoModal(leadId){
+  const l = S.leads.find(x=>x.id===leadId);
+  if(!l) return;
+  if(!l.todos) l.todos = [];
+  document.getElementById('todoLeadId').value = leadId;
+  document.getElementById('todoModalTitle').textContent = l.name + ' のTODO';
+  renderTodoList();
+  document.getElementById('todoModal').classList.add('open');
+}
+
+function renderTodoList(){
+  const leadId = document.getElementById('todoLeadId').value;
+  const l = S.leads.find(x=>x.id===leadId);
+  if(!l) return;
+  const todos = l.todos||[];
+  const el = document.getElementById('todoList');
+  if(todos.length===0){ el.innerHTML='<div style="color:#8b6820;font-size:12px;">TODOがありません。</div>'; return; }
+  // undone first, by dueDate
+  const undone = todos.filter(t=>!t.done).sort((a,b)=>(a.dueDate||'9999').localeCompare(b.dueDate||'9999'));
+  const done = todos.filter(t=>t.done);
+  const row = (t)=>{
+    const idx = todos.indexOf(t);
+    const due = t.dueDate ? `<span style="font-size:10px;color:#8b6820;"> 📅 ${fmtDate(t.dueDate)}</span>` : '';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:${t.done?'#f5f0e8':'#fffdf5'};border:1px solid #ddc890;border-radius:5px;margin-bottom:6px;${t.done?'opacity:.7;':''}">
+      <input type="checkbox" ${t.done?'checked':''} style="width:16px;height:16px;accent-color:#c8880a;cursor:pointer;" onchange="toggleTodo(${idx})">
+      <span style="flex:1;font-size:13px;${t.done?'text-decoration:line-through;color:#a09080;':''}">${esc(t.text)}${due}</span>
+      <button onclick="deleteTodo(${idx})" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:15px;">✕</button>
+    </div>`;
+  };
+  el.innerHTML = undone.map(row).join('') + (done.length?`<div style="font-size:10px;letter-spacing:.2em;color:#a09080;padding:8px 4px 4px;">完了済み</div>`+done.map(row).join(''):'');
+}
+
+function addTodo(e){
+  e.preventDefault();
+  const leadId = document.getElementById('todoLeadId').value;
+  const l = S.leads.find(x=>x.id===leadId);
+  if(!l) return;
+  if(!l.todos) l.todos=[];
+  const text = document.getElementById('todoText').value.trim();
+  if(!text) return;
+  l.todos.push({id:uid(), text, done:false, dueDate:document.getElementById('todoDate').value||''});
+  saveS(); renderTodoList(); renderLeads();
+  document.getElementById('todoText').value=''; document.getElementById('todoDate').value='';
+}
+
+function addTodoTemplate(){
+  const leadId = document.getElementById('todoLeadId').value;
+  const l = S.leads.find(x=>x.id===leadId);
+  if(!l) return;
+  if(!l.todos) l.todos=[];
+  TODO_TEMPLATE.forEach(t=>{ if(!l.todos.some(x=>x.text===t)) l.todos.push({id:uid(),text:t,done:false,dueDate:''}); });
+  saveS(); renderTodoList(); renderLeads();
+  showToast('定番のTODOを追加しました');
+}
+
+function toggleTodo(idx){
+  const leadId = document.getElementById('todoLeadId').value;
+  const l = S.leads.find(x=>x.id===leadId);
+  l.todos[idx].done = !l.todos[idx].done;
+  saveS(); renderTodoList(); renderLeads();
+}
+function deleteTodo(idx){
+  const leadId = document.getElementById('todoLeadId').value;
+  const l = S.leads.find(x=>x.id===leadId);
+  l.todos.splice(idx,1);
+  saveS(); renderTodoList(); renderLeads();
 }
 
 // ─── RECORD / TRANSCRIBE ──────────────────────────────────────────────────────
