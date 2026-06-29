@@ -832,6 +832,27 @@ function getShuzaiEvents(){
     .filter(l=>l.date && l.status!=='記事化済' && l.status!=='見送り')
     .map(l=>({date:l.date, title:'🎤 '+l.name+'（取材）', type:'取材', src:'shuzai'}));
 }
+// 制作ツールの案件ごとのTODOを返す
+function getVideoTodos(){
+  loadVideo();
+  const out = [];
+  Object.entries(videoState).forEach(([pid,p])=>{
+    (p.todos||[]).forEach((t,ti)=>{
+      out.push({pid, projName:p.name, ti, text:t.text, done:t.done, dueDate:t.dueDate||''});
+    });
+  });
+  return out;
+}
+function toggleVideoTodo(pid, ti){
+  loadVideo();
+  const p = videoState[pid];
+  if(p && p.todos && p.todos[ti]){
+    p.todos[ti].done = !p.todos[ti].done;
+    localStorage.setItem(VIDEO_KEY, JSON.stringify(videoState));
+  }
+  renderDashTodo(); renderDashSchedule();
+}
+
 // 取材ごとのTODO（未完了）を返す
 function getShuzaiTodos(){
   loadShuzai();
@@ -989,7 +1010,8 @@ function renderDashTodo(){
   const done   = G.manualTasks.filter(t=>t.done);
   const all = [...undone, ...done];
   const shuzaiTodos = getShuzaiTodos().filter(t=>!t.done);
-  if(all.length===0 && shuzaiTodos.length===0){
+  const videoTodos = getVideoTodos().filter(t=>!t.done);
+  if(all.length===0 && shuzaiTodos.length===0 && videoTodos.length===0){
     el.innerHTML='<div style="color:#8b6820;font-size:12px;padding:8px 0;">タスクがありません。</div>';
     return;
   }
@@ -1031,6 +1053,24 @@ function renderDashTodo(){
       </li>`;
     }).join('');
   }
+  // 制作ツールの案件TODO（未完了のみ）
+  if(videoTodos.length>0){
+    videoTodos.sort((a,b)=>(a.dueDate||'9999').localeCompare(b.dueDate||'9999'));
+    html += `<li style="font-size:10px;letter-spacing:.2em;color:#1f4a7a;padding:10px 4px 4px;">🎬 案件TODO（制作ツール）</li>`;
+    html += videoTodos.map(t=>{
+      const days = t.dueDate ? daysUntil(t.dueDate) : null;
+      const duLabel = days===null ? '' : days<0 ? `<span style="color:#c05010;font-size:10px;font-weight:700;">${Math.abs(days)}日超過</span>` : days===0 ? `<span style="color:#c05010;font-size:10px;font-weight:700;">今日</span>` : `<span style="color:#8b6820;font-size:10px;">あと${days}日</span>`;
+      return `<li style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:#f3f7fb;border:1px solid #c4d4e0;border-radius:5px;margin-bottom:6px;">
+        <input type="checkbox" style="width:17px;height:17px;accent-color:#1f4a7a;cursor:pointer;flex-shrink:0;" onchange="toggleVideoTodo('${t.pid}',${t.ti})">
+        <div style="flex:1;cursor:pointer;" onclick="toggleVideoTodo('${t.pid}',${t.ti})">
+          <div style="font-size:13px;">${esc(t.text)} <span style="font-size:10px;color:#1f4a7a;">/ ${esc(t.projName)}</span></div>
+          ${t.dueDate?`<div style="font-size:10px;color:#8b6820;margin-top:2px;">📅 ${fmtDate(t.dueDate)}　${duLabel}</div>`:''}
+        </div>
+        <a href="tools.html" style="font-size:10px;color:#1f4a7a;text-decoration:none;flex-shrink:0;">開く→</a>
+      </li>`;
+    }).join('');
+  }
+
   // 取材ごとのTODO（取材ノートと連携・未完了のみ）
   if(shuzaiTodos.length>0){
     shuzaiTodos.sort((a,b)=>(a.dueDate||'9999').localeCompare(b.dueDate||'9999'));
@@ -1101,7 +1141,12 @@ function renderDashSchedule(){
     .filter(t=>!t.done && t.dueDate && t.dueDate<=todayStr)
     .sort((a,b)=>a.dueDate.localeCompare(b.dueDate));
 
-  if(items.length===0 && routines.length===0 && todos.length===0 && szTodos.length===0){
+  // 案件TODO due today or overdue
+  const vdTodos = getVideoTodos()
+    .filter(t=>!t.done && t.dueDate && t.dueDate<=todayStr)
+    .sort((a,b)=>a.dueDate.localeCompare(b.dueDate));
+
+  if(items.length===0 && routines.length===0 && todos.length===0 && szTodos.length===0 && vdTodos.length===0){
     el.innerHTML='<div style="color:#8b6820;font-size:12px;padding:8px 0;">今日の予定はありません。</div>';
     return;
   }
@@ -1122,6 +1167,17 @@ function renderDashSchedule(){
         <label onclick="toggleDashTodo(${idx})" style="font-size:12px;flex:1;cursor:pointer;">
           <span class="badge badge-red" style="font-size:10px;">やること</span>
           ${esc(t.text)}
+          ${overdue?`<span style="color:#c05010;font-size:10px;font-weight:700;"> （${fmtDate(t.dueDate)} 超過）</span>`:''}
+        </label>
+      </div>`;
+    }),
+    ...vdTodos.map(t=>{
+      const overdue = t.dueDate < todayStr;
+      return `<div class="task-item" style="padding:8px 12px;margin-bottom:5px;">
+        <input type="checkbox" onchange="toggleVideoTodo('${t.pid}',${t.ti})">
+        <label onclick="toggleVideoTodo('${t.pid}',${t.ti})" style="font-size:12px;flex:1;cursor:pointer;">
+          <span class="badge badge-blue" style="font-size:10px;">案件</span>
+          ${esc(t.text)} <span style="color:#1f4a7a;font-size:10px;">/ ${esc(t.projName)}</span>
           ${overdue?`<span style="color:#c05010;font-size:10px;font-weight:700;"> （${fmtDate(t.dueDate)} 超過）</span>`:''}
         </label>
       </div>`;
@@ -1708,6 +1764,13 @@ function runVoiceCheck(){
     .forEach(t=>{
       const days = daysUntil(t.dueDate);
       if(days!==null && days<=watchDays) todoAlerts.push({name:t.leadName+'の取材「'+t.text+'」', days});
+    });
+  // 案件TODO（制作ツールと連携）
+  getVideoTodos()
+    .filter(t=>!t.done && t.dueDate)
+    .forEach(t=>{
+      const days = daysUntil(t.dueDate);
+      if(days!==null && days<=watchDays) todoAlerts.push({name:t.projName+'の「'+t.text+'」', days});
     });
   todoAlerts.sort((a,b)=>a.days-b.days);
 

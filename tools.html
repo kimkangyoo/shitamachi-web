@@ -441,6 +441,18 @@ tr.shot-complete td{opacity:.5;}
     <div class="sec-eyebrow" style="margin-bottom:16px;">作業工程</div>
     <div id="schPhases"></div>
 
+    <!-- 案件TODO -->
+    <div style="margin-top:32px;">
+      <div class="sec-eyebrow" style="margin-bottom:12px;">案件TODO（業務管理アプリと連携）</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+        <input type="text" id="todoInput" placeholder="例：構成案をクライアントに送る" style="flex:1;min-width:160px;" onkeydown="if(event.key==='Enter')addProjTodo()">
+        <input type="date" id="todoDate" style="width:150px;">
+        <button class="btn btn-ghost" type="button" onclick="setProjTodoToday()">今日</button>
+        <button class="btn btn-ghost" type="button" onclick="addProjTodo()">追加</button>
+      </div>
+      <div id="schTodoList"></div>
+    </div>
+
     <!-- メモ -->
     <div style="margin-top:24px;">
       <span class="field-label">案件メモ</span>
@@ -1321,7 +1333,8 @@ function initProject(name){
     cuts: [],
     telop: [],
     editNotes: '',
-    storyboard: []
+    storyboard: [],
+    todos: []
   };
 }
 
@@ -1959,6 +1972,50 @@ function saveAndNextProject(){
   newProject();
 }
 
+// ─── 案件TODO ─────────────────────────────────────────────────────────────────
+function localToday(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function setProjTodoToday(){ document.getElementById('todoDate').value = localToday(); }
+
+function addProjTodo(){
+  const p = proj();
+  if(!p.todos) p.todos = [];
+  const text = document.getElementById('todoInput').value.trim();
+  if(!text) return;
+  p.todos.push({id:'t_'+Date.now(), text, done:false, dueDate:document.getElementById('todoDate').value||''});
+  saveState();
+  document.getElementById('todoInput').value='';
+  document.getElementById('todoDate').value='';
+  renderProjTodos();
+}
+function toggleProjTodo(i){ proj().todos[i].done = !proj().todos[i].done; saveState(); renderProjTodos(); }
+function deleteProjTodo(i){ proj().todos.splice(i,1); saveState(); renderProjTodos(); }
+
+function renderProjTodos(){
+  const el = document.getElementById('schTodoList');
+  if(!el) return;
+  const todos = proj().todos || [];
+  if(todos.length===0){ el.innerHTML='<div style="font-family:\'Noto Sans JP\',sans-serif;font-size:12px;color:#8b6820;">TODOがありません。</div>'; return; }
+  const undone = todos.filter(t=>!t.done).sort((a,b)=>(a.dueDate||'9999').localeCompare(b.dueDate||'9999'));
+  const done = todos.filter(t=>t.done);
+  const todayStr = localToday();
+  const row = (t)=>{
+    const i = todos.indexOf(t);
+    let due = '';
+    if(t.dueDate){
+      const overdue = !t.done && t.dueDate < todayStr;
+      const isToday = t.dueDate === todayStr;
+      const col = overdue ? '#c05010' : isToday ? '#c05010' : '#8b6820';
+      due = `<span style="font-size:11px;color:${col};margin-left:8px;">📅 ${t.dueDate}${overdue?'（超過）':isToday?'（今日）':''}</span>`;
+    }
+    return `<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:${t.done?'#efe8d8':'#fffdf5'};border:1px solid #d4c4a4;border-radius:4px;margin-bottom:6px;font-family:'Noto Sans JP',sans-serif;">
+      <input type="checkbox" ${t.done?'checked':''} onchange="toggleProjTodo(${i})" style="width:16px;height:16px;accent-color:#c8880a;cursor:pointer;">
+      <span style="flex:1;font-size:13px;${t.done?'text-decoration:line-through;color:#a09080;':'color:#1a0e04;'}">${esc(t.text)}${due}</span>
+      <button onclick="deleteProjTodo(${i})" style="background:none;border:none;color:#b0a48c;font-size:15px;cursor:pointer;">×</button>
+    </div>`;
+  };
+  el.innerHTML = undone.map(row).join('') + (done.length?`<div style="font-size:10px;letter-spacing:.2em;color:#a09080;padding:8px 2px 4px;font-family:'Noto Sans JP',sans-serif;">完了済み</div>`+done.map(row).join(''):'');
+}
+
 function daysFrom(dateStr){
   if(!dateStr) return null;
   const diff = new Date(dateStr) - new Date(new Date().toDateString());
@@ -1986,6 +2043,7 @@ function renderSchedule(){
   document.getElementById('sch-goal').value      = s.goal      || '';
   document.getElementById('sch-target').value    = s.target    || '';
   document.getElementById('sch-memo').value      = s.memo      || '';
+  renderProjTodos();
 
   // カウントダウン（撮影日は直近の予定日を使用）
   const sd = daysFrom(nearestShootDate(s)), dd = daysFrom(s.deadline);
