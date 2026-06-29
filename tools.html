@@ -2072,8 +2072,9 @@ function renderDashboard(){
           <div style="height:100%;background:#c8880a;width:${pct}%;"></div>
         </div>
       </div>
-      <div style="display:flex;gap:8px;margin-top:12px;">
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
         <button onclick="event.stopPropagation();switchToProject('${id}')" style="flex:1;background:#c8880a;border:none;color:#fff8e8;font-size:11px;padding:6px;border-radius:4px;cursor:pointer;">開く</button>
+        <button onclick="event.stopPropagation();openStoryboard('${id}')" style="background:transparent;border:1px solid #b89848;color:#8b6820;font-size:11px;padding:6px 10px;border-radius:4px;cursor:pointer;">絵コンテ</button>
         <button onclick="event.stopPropagation();renameProjectById('${id}')" style="background:transparent;border:1px solid #b89848;color:#8b6820;font-size:11px;padding:6px 10px;border-radius:4px;cursor:pointer;">名前変更</button>
         <button onclick="event.stopPropagation();deleteProjectById('${id}')" style="background:transparent;border:1px solid #a05030;color:#a05030;font-size:11px;padding:6px 10px;border-radius:4px;cursor:pointer;">削除</button>
       </div>
@@ -2089,6 +2090,17 @@ function switchToProject(id){
   renderAll();
   renderSchedule();
   renderDashboard();
+}
+
+function openStoryboard(id){
+  switchToProject(id);
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  const tab = Array.from(document.querySelectorAll('.tab')).find(t=>(t.getAttribute('onclick')||'').includes("'storyboard'"));
+  if(tab) tab.classList.add('active');
+  document.getElementById('tab-storyboard').classList.add('active');
+  renderSB();
+  window.scrollTo(0,0);
 }
 
 function renameProjectById(id){
