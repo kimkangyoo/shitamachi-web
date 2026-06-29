@@ -344,18 +344,7 @@ tr.shot-complete td{opacity:.5;}
   </div>
 </nav>
 
-<div class="page-header">
-  <div class="page-eyebrow">PRODUCTION TOOLS</div>
-  <div class="page-title">制作<span>ツール</span></div>
-</div>
-
-<div class="project-bar">
-  <label>案件</label>
-  <select class="project-select" id="projectSelect" onchange="switchProject()"></select>
-  <button class="btn-new-project" onclick="newProject()">＋ 新しい案件</button>
-  <button class="btn-del-project" onclick="renameProject()">案件名を変更</button>
-  <button class="btn-del-project" onclick="deleteProject()">削除</button>
-</div>
+<select id="projectSelect" onchange="switchProject()" style="display:none;"></select>
 
 <div class="tabs">
   <div class="tab active" onclick="switchTab('schedule')">スケジュール</div>
@@ -378,6 +367,7 @@ tr.shot-complete td{opacity:.5;}
         <div class="sec-eyebrow">ALL PROJECTS</div>
         <div class="sec-title">案件ダッシュボード</div>
       </div>
+      <button class="btn btn-ghost" onclick="newProject()">＋ 新しい案件</button>
     </div>
     <div id="schDashboard"></div>
   </div>
