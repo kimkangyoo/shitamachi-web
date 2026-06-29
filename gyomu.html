@@ -241,6 +241,7 @@ tr:hover td{background:#fdf5e0;}
           <input type="text" id="dashTodoInput" placeholder="やること" style="font-size:12px;padding:5px 8px;flex:1;min-width:120px;">
           <input type="date" id="dashTodoDate" style="font-size:12px;padding:5px 8px;width:130px;">
           <button class="btn btn-outline btn-sm" type="button" onclick="setTodoToday()">今日</button>
+          <button class="btn btn-outline btn-sm" type="button" onclick="setTodoTomorrow()">明日</button>
           <button class="btn btn-gold btn-sm" type="submit">追加</button>
         </form>
       </div>
@@ -965,6 +966,10 @@ function renderDashboard(){
 // ─── DASH TODO ────────────────────────────────────────────────────────────────
 function setTodoToday(){
   document.getElementById('dashTodoDate').value = today();
+}
+function setTodoTomorrow(){
+  const d = new Date(); d.setDate(d.getDate()+1);
+  document.getElementById('dashTodoDate').value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 function addDashTodo(e){
   e.preventDefault();
