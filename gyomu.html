@@ -483,6 +483,7 @@ tr:hover td{background:#fdf5e0;}
         <div><label class="fl">関連案件（任意）</label>
           <select id="ce-project"><option value="">— なし —</option></select>
         </div>
+        <div class="span2"><label class="fl">場所</label><input type="text" id="ce-place" placeholder="例：〇〇会館 2階会議室"></div>
         <div class="span2"><label class="fl">メモ</label><input type="text" id="ce-memo" placeholder="備考など"></div>
       </div>
       <div class="btn-row">
@@ -1986,13 +1987,14 @@ function showCalDay(dateStr, eventsMap){
     return;
   }
   document.getElementById('calDayEvents').innerHTML = evs.map(ev=>{
-    const gcalUrl=makeGcalAddUrl(ev.title, ev.date||dateStr, ev.memo||'');
+    const gcalUrl=makeGcalAddUrl(ev.title, ev.date||dateStr, [ev.place?'場所：'+ev.place:'',ev.memo||''].filter(Boolean).join(' / '));
     return `<div class="list-item" style="border-left:4px solid ${CAL_COLORS[ev.type]||'#c8880a'};">
       <div class="list-item-body">
         <div class="list-item-title">${esc(ev.title)}</div>
         <div class="list-item-meta">
           ${ev.time?ev.time+(ev.endTime?'〜'+ev.endTime:'')+'　':''}
           <span class="badge" style="background:${CAL_COLORS[ev.type]||'#c8880a'};color:#fff;">${ev.type}</span>
+          ${ev.place?`　📍 ${esc(ev.place)}`:''}
           ${ev.memo?`　${esc(ev.memo)}`:''}
           ${ev.src==='project'?'<span style="font-size:10px;color:#8b6820;"> （制作ツールから）</span>':''}
         </div>
@@ -2024,6 +2026,7 @@ function openCalEventModal(id){
     document.getElementById('ce-endTime').value = ev.endTime||'';
     document.getElementById('ce-type').value = ev.type;
     document.getElementById('ce-project').value = ev.projectId||'';
+    document.getElementById('ce-place').value = ev.place||'';
     document.getElementById('ce-memo').value = ev.memo||'';
     document.getElementById('calEventDeleteBtn').style.display = 'block';
   } else {
@@ -2036,6 +2039,7 @@ function openCalEventModal(id){
     document.getElementById('ce-endTime').value = '';
     document.getElementById('ce-type').value = '打ち合わせ';
     document.getElementById('ce-project').value = '';
+    document.getElementById('ce-place').value = '';
     document.getElementById('ce-memo').value = '';
     document.getElementById('calEventDeleteBtn').style.display = 'none';
   }
@@ -2054,6 +2058,7 @@ function saveCalEvent(){
     endTime: document.getElementById('ce-endTime').value,
     type: document.getElementById('ce-type').value,
     projectId: document.getElementById('ce-project').value,
+    place: document.getElementById('ce-place').value,
     memo: document.getElementById('ce-memo').value
   };
   if(!obj.title||!obj.date){ showToast('タイトルと日付を入力してください'); return; }
@@ -2148,7 +2153,7 @@ function showDashCalDay(ds, evMap){
     return `<div class="list-item" style="border-left:3px solid ${CAL_COLORS[ev.type]||'#c8880a'};padding:10px 14px;">
       <div class="list-item-body">
         <div style="font-size:13px;font-weight:700;">${esc(ev.title)}</div>
-        <div style="font-size:11px;color:#8b6820;">${ev.time?ev.time+' ':''}<span class="badge" style="background:${CAL_COLORS[ev.type]||'#c8880a'};color:#fff;font-size:10px;">${ev.type}</span>${ev.memo?` ${esc(ev.memo)}`:''}</div>
+        <div style="font-size:11px;color:#8b6820;">${ev.time?ev.time+' ':''}<span class="badge" style="background:${CAL_COLORS[ev.type]||'#c8880a'};color:#fff;font-size:10px;">${ev.type}</span>${ev.place?` 📍${esc(ev.place)}`:''}${ev.memo?` ${esc(ev.memo)}`:''}</div>
       </div>
       <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;">
         <a href="${gcalUrl}" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="text-decoration:none;white-space:nowrap;font-size:10px;">📅 Googleに追加</a>
