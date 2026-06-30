@@ -358,6 +358,7 @@ tr.shot-complete td{opacity:.5;}
   <div class="tab" onclick="switchTab('nd')">NDフィルター</div>
   <div class="tab" onclick="switchTab('timeline')">撮影タイムライン</div>
   <div class="tab" onclick="switchTab('storyboard')">絵コンテ</div>
+  <div class="tab" onclick="switchTab('refs')">参考・素材</div>
   <div class="tab" onclick="switchTab('docs')">書類</div>
 </div>
 
@@ -1083,6 +1084,49 @@ tr.shot-complete td{opacity:.5;}
   <div class="tl-list" id="tlList"></div>
 </div>
 
+<!-- ======================== REFS TAB ======================== -->
+<div class="tab-content" id="tab-refs">
+  <div class="sec-head">
+    <div>
+      <div class="sec-eyebrow">REFERENCES & ASSETS</div>
+      <div class="sec-title">参考・素材</div>
+    </div>
+  </div>
+
+  <!-- 参考リンク -->
+  <div style="margin-bottom:40px;">
+    <div class="sec-eyebrow" style="margin-bottom:12px;">参考リンク（参考動画・サイトなど）</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+      <input type="text" id="refLinkTitle" placeholder="タイトル（例：参考のMV）" style="flex:1;min-width:140px;">
+      <input type="text" id="refLinkUrl" placeholder="URL（https://...）" style="flex:2;min-width:180px;">
+      <button class="btn btn-ghost" type="button" onclick="addRefLink()">追加</button>
+    </div>
+    <div id="refLinkList"></div>
+  </div>
+
+  <!-- 参考画像・素材 -->
+  <div style="margin-bottom:40px;">
+    <div class="sec-eyebrow" style="margin-bottom:12px;">参考画像・素材</div>
+    <div class="sb-drop" id="refDrop"
+      onclick="document.getElementById('refFileInput').click()"
+      ondragover="refDragOver(event)" ondragleave="refDragLeave(event)" ondrop="refDropFiles(event)">
+      <div style="font-size:40px;margin-bottom:12px;opacity:.5;">🖼</div>
+      <div style="font-family:'Noto Sans JP',sans-serif;font-size:13px;color:#5a3c18;line-height:2;">
+        クリックまたはドラッグ＆ドロップで画像を追加<br>
+        <strong style="color:#c8880a;">JPG / PNG / WebP</strong>　参考写真・ロゴ・配色見本など
+      </div>
+    </div>
+    <input type="file" id="refFileInput" accept="image/*" multiple style="display:none" onchange="refAddFiles(this.files)">
+    <div class="sb-grid" id="refImgGrid"></div>
+  </div>
+
+  <!-- メモ -->
+  <div>
+    <div class="sec-eyebrow" style="margin-bottom:12px;">参考メモ</div>
+    <textarea class="notes-area" id="refNote" placeholder="参考にしたい雰囲気・トーン・気をつけることなど" style="min-height:100px;" onchange="saveRefNote()"></textarea>
+  </div>
+</div>
+
 <!-- ======================== DOCS TAB ======================== -->
 <div class="tab-content" id="tab-docs">
   <div class="sec-head">
@@ -1334,7 +1378,8 @@ function initProject(name){
     telop: [],
     editNotes: '',
     storyboard: [],
-    todos: []
+    todos: [],
+    refs: {links:[], images:[], note:''}
   };
 }
 
@@ -1405,6 +1450,7 @@ function switchTab(name){
   if(name==='timeline') renderTimeline();
   if(name==='nd') initND();
   if(name==='storyboard') renderSB();
+  if(name==='refs') renderRefs();
 }
 
 // ─── CHECKLIST ───────────────────────────────────────────────────────────────
@@ -2554,6 +2600,89 @@ async function sbAddFiles(files){
   renderSB();
   showToast('追加しました');
 }
+
+// ─── 参考・素材 ───────────────────────────────────────────────────────────────
+function refData(){
+  const p = proj();
+  if(!p.refs) p.refs = {links:[], images:[], note:''};
+  if(!p.refs.links) p.refs.links = [];
+  if(!p.refs.images) p.refs.images = [];
+  return p.refs;
+}
+
+async function renderRefs(){
+  const r = refData();
+  // リンク
+  const ll = document.getElementById('refLinkList');
+  ll.innerHTML = r.links.length===0
+    ? '<div style="font-family:\'Noto Sans JP\',sans-serif;font-size:12px;color:#8b6820;">参考リンクがありません。</div>'
+    : r.links.map((l,i)=>`
+        <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:#fffdf5;border:1px solid #d4c4a4;border-radius:4px;margin-bottom:6px;font-family:'Noto Sans JP',sans-serif;">
+          <a href="${esc(l.url)}" target="_blank" rel="noopener" style="flex:1;font-size:13px;color:#c8880a;text-decoration:none;">🔗 ${esc(l.title||l.url)}</a>
+          <button onclick="deleteRefLink(${i})" style="background:none;border:none;color:#b0a48c;font-size:15px;cursor:pointer;">×</button>
+        </div>`).join('');
+  // 画像
+  const g = document.getElementById('refImgGrid');
+  g.innerHTML = '';
+  for(let i=0;i<r.images.length;i++){
+    const img = r.images[i];
+    const dataUrl = await getImgFromDB(img.id);
+    const card = document.createElement('div');
+    card.className = 'sb-card';
+    card.innerHTML = `
+      ${dataUrl?`<img class="sb-card-img" src="${dataUrl}" alt="" onclick="sbFullscreen('${img.id}')">`:`<div class="sb-card-img-placeholder">🖼</div>`}
+      <div class="sb-card-body">
+        <input type="text" value="${esc(img.caption||'')}" placeholder="キャプション（任意）" onchange="setRefCaption(${i},this.value)" style="width:100%;font-family:'Noto Sans JP',sans-serif;font-size:12px;padding:5px 6px;border:1px solid #c8a860;border-radius:3px;">
+      </div>
+      <div class="sb-card-actions">
+        <button class="sb-card-del" onclick="deleteRefImg(${i})">削除</button>
+      </div>`;
+    g.appendChild(card);
+  }
+  // メモ
+  document.getElementById('refNote').value = r.note || '';
+}
+
+function addRefLink(){
+  const r = refData();
+  const url = document.getElementById('refLinkUrl').value.trim();
+  if(!url){ showToast('URLを入力してください'); return; }
+  r.links.push({title:document.getElementById('refLinkTitle').value.trim(), url});
+  saveState();
+  document.getElementById('refLinkTitle').value='';
+  document.getElementById('refLinkUrl').value='';
+  renderRefs();
+}
+function deleteRefLink(i){ refData().links.splice(i,1); saveState(); renderRefs(); }
+
+function refDragOver(e){ e.preventDefault(); document.getElementById('refDrop').classList.add('drag-over'); }
+function refDragLeave(){ document.getElementById('refDrop').classList.remove('drag-over'); }
+function refDropFiles(e){ e.preventDefault(); refDragLeave(); refAddFiles(e.dataTransfer.files); }
+
+async function refAddFiles(files){
+  if(!files || !files.length) return;
+  const r = refData();
+  for(const file of files){
+    if(!file.type.startsWith('image/')) continue;
+    const dataUrl = await new Promise(res=>{ const fr=new FileReader(); fr.onload=e=>res(e.target.result); fr.readAsDataURL(file); });
+    const id = 'ref_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+    await saveImgToDB(id, dataUrl);
+    r.images.push({id, caption:''});
+  }
+  saveState();
+  renderRefs();
+  showToast('追加しました');
+}
+function setRefCaption(i, val){ refData().images[i].caption = val; saveState(); }
+async function deleteRefImg(i){
+  const r = refData();
+  if(!confirm('この画像を削除しますか？')) return;
+  await delImgFromDB(r.images[i].id);
+  r.images.splice(i,1);
+  saveState();
+  renderRefs();
+}
+function saveRefNote(){ refData().note = document.getElementById('refNote').value; saveState(); }
 
 let sbEditIdx = null;
 
