@@ -362,6 +362,11 @@ tr.shot-complete td{opacity:.5;}
   <div class="tab" onclick="switchTab('docs')">書類</div>
 </div>
 
+<div id="currentProjBar" style="padding:10px 64px;background:#f0e4cc;border-bottom:1px solid #d4c4a4;font-family:'Noto Sans JP',sans-serif;font-size:12px;color:#5a3c18;display:flex;align-items:center;gap:8px;">
+  <span style="letter-spacing:.15em;">現在の案件</span>
+  <strong id="currentProjName" style="color:#1a0e04;font-size:14px;font-family:'Shippori Mincho',serif;">—</strong>
+</div>
+
 <!-- ======================== SHOOT TAB ======================== -->
 <div class="tab-content active" id="tab-schedule">
   <!-- DASHBOARD -->
@@ -1736,6 +1741,12 @@ function renderAll(){
   renderSB();
   renderSchedule();
   renderDashboard();
+  updateCurrentProjBar();
+}
+
+function updateCurrentProjBar(){
+  const el = document.getElementById('currentProjName');
+  if(el && proj()) el.textContent = proj().name;
 }
 
 // ─── ND FILTER ───────────────────────────────────────────────────────────────
