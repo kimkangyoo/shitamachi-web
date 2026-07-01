@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>飲食部門｜下町炭焼きホットドッグ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;700&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans JP',sans-serif;background:#f7f0e2;color:#1e1006;min-height:100vh;}
+nav{background:#150c02;padding:18px 48px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #7a5218;position:sticky;top:0;z-index:100;}
+.nav-logo{font-family:'Shippori Mincho',serif;font-size:16px;letter-spacing:.22em;color:#f0ddb0;text-decoration:none;}
+.nav-logo span{color:#d4920a;}
+.nav-links{display:flex;gap:22px;align-items:center;flex-wrap:wrap;}
+.nav-links a{font-size:11px;letter-spacing:.2em;color:rgba(240,221,176,.5);text-decoration:none;}
+.nav-links a:hover{color:#d4920a;}
+.nav-links a.active{color:#d4920a;}
+.tabs{background:#1e1204;border-bottom:1px solid #3a2208;padding:0 48px;display:flex;overflow-x:auto;}
+.tab{padding:14px 20px;font-size:11px;letter-spacing:.18em;color:rgba(240,221,176,.4);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;}
+.tab:hover{color:rgba(240,221,176,.7);}
+.tab.active{color:#d4920a;border-bottom-color:#d4920a;}
+.tab-content{display:none;padding:40px 48px;max-width:1000px;}
+.tab-content.active{display:block;}
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:24px;padding-bottom:12px;border-bottom:1px solid #b89848;}
+.sec-head h2{font-family:'Shippori Mincho',serif;font-size:18px;font-weight:400;letter-spacing:.1em;}
+.sec-sub{font-size:11px;color:#8b6820;letter-spacing:.08em;}
+.card{background:#fff9ee;border:1px solid #d4b870;border-radius:6px;padding:20px;margin-bottom:16px;}
+.card-label{font-size:10px;letter-spacing:.3em;color:#8b6820;margin-bottom:6px;}
+.card-value{font-family:'Shippori Mincho',serif;font-size:24px;color:#1c0f02;}
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-bottom:28px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;margin-bottom:16px;}
+.form-grid.one{grid-template-columns:1fr;}
+label.fl{font-size:11px;letter-spacing:.15em;color:#5a3a10;display:block;margin-bottom:4px;}
+input[type=text],input[type=date],input[type=number],textarea,select{font-family:'Noto Sans JP',sans-serif;font-size:13px;padding:8px 10px;border:1px solid #c8a860;border-radius:4px;background:#fffdf5;color:#1e1006;width:100%;}
+textarea{resize:vertical;min-height:64px;}
+input:focus,textarea:focus,select:focus{outline:2px solid #c8880a;border-color:#c8880a;}
+.span2{grid-column:span 2;}
+.btn{font-family:'Noto Sans JP',sans-serif;font-size:12px;letter-spacing:.1em;padding:9px 20px;border:none;border-radius:4px;cursor:pointer;}
+.btn:hover{opacity:.85;}
+.btn-gold{background:#c8880a;color:#fff8e8;}
+.btn-outline{background:transparent;border:1px solid #c8880a;color:#c8880a;}
+.btn-sm{padding:5px 12px;font-size:11px;}
+.btn-danger{background:transparent;border:1px solid #c05010;color:#c05010;font-size:11px;padding:4px 10px;border-radius:4px;cursor:pointer;}
+.btn-danger:hover{background:#c05010;color:#fff;}
+.btn-row{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+.list-item{background:#fffdf5;border:1px solid #ddc890;border-radius:5px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px;}
+.list-item:hover{border-color:#c8880a;}
+.list-item-body{flex:1;}
+.list-item-title{font-size:15px;font-weight:700;color:#1c0f02;margin-bottom:3px;}
+.list-item-meta{font-size:11px;color:#8b6820;line-height:1.8;}
+.badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;letter-spacing:.05em;}
+.badge-yellow{background:#fdf3e0;color:#8b5e0a;}
+.badge-green{background:#e4f0e8;color:#2f6040;}
+.badge-gray{background:#ede8dd;color:#6b5840;}
+.chk-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fffdf5;border:1px solid #ddc890;border-radius:5px;margin-bottom:5px;}
+.chk-item input[type=checkbox]{width:16px;height:16px;accent-color:#c8880a;cursor:pointer;}
+.chk-item span{flex:1;font-size:13px;}
+.chk-item.done span{text-decoration:line-through;color:#a09080;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{background:#1c0f02;color:#e8d090;font-family:'Shippori Mincho',serif;font-weight:400;letter-spacing:.08em;padding:9px 10px;text-align:left;}
+td{padding:8px 10px;border-bottom:1px solid #ddc890;}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;align-items:center;justify-content:center;padding:20px;}
+.modal-bg.open{display:flex;}
+.modal{background:#f7f0e2;border:1px solid #b89848;border-radius:8px;width:100%;max-width:680px;max-height:92vh;overflow-y:auto;}
+.modal-head{background:#150c02;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;border-radius:8px 8px 0 0;}
+.modal-head h3{font-family:'Shippori Mincho',serif;font-size:16px;color:#f0ddb0;font-weight:400;}
+.modal-close{background:none;border:none;color:#a09080;font-size:20px;cursor:pointer;}
+.modal-body{padding:24px;}
+.sub-eyebrow{font-size:10px;letter-spacing:.3em;color:#8b6820;margin:22px 0 10px;}
+#toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:#1c0f02;color:#f0ddb0;font-size:12px;letter-spacing:.1em;padding:10px 24px;border-radius:20px;border:1px solid #c8880a;opacity:0;transition:opacity .3s;z-index:9999;pointer-events:none;}
+#toast.show{opacity:1;}
+@media(max-width:700px){nav,.tabs,.tab-content{padding-left:16px;padding-right:16px;}.form-grid{grid-template-columns:1fr;}.span2{grid-column:span 1;}.dash-grid{grid-template-columns:1fr 1fr;}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">下町炭焼き<span>ホットドッグ</span></a>
+  <div class="nav-links">
+    <a href="tools.html">制作ツール</a>
+    <a href="gyomu.html">業務管理</a>
+    <a href="shuzai.html">取材ノート</a>
+    <a href="hotdog.html" class="active">飲食部門</a>
+  </div>
+</nav>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('events')">出店イベント</div>
+  <div class="tab" onclick="switchTab('menu')">メニュー・原価</div>
+  <div class="tab" onclick="switchTab('todo')">TODO</div>
+  <div class="tab" onclick="switchTab('refs')">資料</div>
+  <div class="tab" onclick="switchTab('settings')">設定</div>
+</div>
+
+<!-- EVENTS -->
+<div class="tab-content active" id="tab-events">
+  <div class="sec-head"><h2>出店イベント</h2>
+    <button class="btn btn-gold btn-sm" onclick="openEventModal(null)">＋ 出店を追加</button>
+  </div>
+  <div class="dash-grid" id="eventCards"></div>
+  <div id="eventList"></div>
+</div>
+
+<!-- MENU -->
+<div class="tab-content" id="tab-menu">
+  <div class="sec-head"><h2>メニュー・原価</h2>
+    <button class="btn btn-gold btn-sm" onclick="openMenuModal(null)">＋ 商品を追加</button>
+  </div>
+  <table>
+    <thead><tr><th>商品名</th><th style="width:90px;">売価</th><th style="width:90px;">原価</th><th style="width:80px;">原価率</th><th style="width:90px;">利益</th><th style="width:60px;"></th></tr></thead>
+    <tbody id="menuBody"></tbody>
+  </table>
+</div>
+
+<!-- TODO -->
+<div class="tab-content" id="tab-todo">
+  <div class="sec-head"><h2>TODO</h2>
+    <span class="sec-sub">業務管理アプリと連携</span>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+    <input type="text" id="todoInput" placeholder="やること（例：容器を発注する）" style="flex:1;min-width:160px;">
+    <input type="date" id="todoDate" style="width:150px;">
+    <button class="btn btn-outline btn-sm" type="button" onclick="setTodoToday()">今日</button>
+    <button class="btn btn-gold btn-sm" type="button" onclick="addTodo()">追加</button>
+  </div>
+  <div id="todoList"></div>
+</div>
+
+<!-- REFS -->
+<div class="tab-content" id="tab-refs">
+  <div class="sec-head"><h2>資料</h2>
+    <span class="sec-sub">参考リンク・画像・メモ</span>
+  </div>
+  <div style="margin-bottom:32px;">
+    <div class="card-label" style="margin-bottom:10px;">参考リンク</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+      <input type="text" id="refLinkTitle" placeholder="タイトル" style="flex:1;min-width:120px;">
+      <input type="text" id="refLinkUrl" placeholder="URL（https://...）" style="flex:2;min-width:160px;">
+      <button class="btn btn-outline btn-sm" type="button" onclick="addRefLink()">追加</button>
+    </div>
+    <div id="refLinkList"></div>
+  </div>
+  <div style="margin-bottom:32px;">
+    <div class="card-label" style="margin-bottom:10px;">参考画像</div>
+    <label class="btn btn-gold btn-sm" style="cursor:pointer;display:inline-block;margin-bottom:12px;">📂 画像を追加<input type="file" accept="image/*" multiple style="display:none;" onchange="refAddFiles(this.files)"></label>
+    <div id="refImgGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;"></div>
+  </div>
+  <div>
+    <div class="card-label" style="margin-bottom:10px;">メモ</div>
+    <textarea id="refNote" placeholder="仕入れ先・レシピ・アイデアなど" style="min-height:100px;" onchange="saveRefNote()"></textarea>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="tab-content" id="tab-settings">
+  <div class="sec-head"><h2>設定</h2></div>
+  <div class="card">
+    <div class="card-label">データのバックアップ・復元</div>
+    <p style="font-size:12px;color:#5a3a10;margin:10px 0 16px;line-height:1.8;">ブラウザのデータを消すと消えます。時々バックアップを保存してください。</p>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      <button class="btn btn-gold" onclick="exportData()">💾 バックアップを保存</button>
+      <label class="btn btn-outline" style="cursor:pointer;">📂 復元<input type="file" accept=".json" onchange="importData(event)" style="display:none;"></label>
+    </div>
+    <div id="backupStatus" style="font-size:12px;color:#2f6040;margin-top:10px;"></div>
+  </div>
+</div>
+
+<!-- EVENT MODAL -->
+<div class="modal-bg" id="eventModal">
+  <div class="modal">
+    <div class="modal-head"><h3 id="eventModalTitle">出店を追加</h3><button class="modal-close" onclick="closeModal('eventModal')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="evEditId">
+      <div class="form-grid">
+        <div class="span2"><label class="fl">イベント名</label><input type="text" id="ev-name" placeholder="例：〇〇夏祭り"></div>
+        <div><label class="fl">日付</label><input type="date" id="ev-date"></div>
+        <div><label class="fl">場所</label><input type="text" id="ev-place" placeholder="例：〇〇公園"></div>
+      </div>
+
+      <div class="sub-eyebrow">準備チェックリスト</div>
+      <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+        <input type="text" id="ev-prep-input" placeholder="準備項目を追加" style="flex:1;min-width:140px;">
+        <button class="btn btn-outline btn-sm" type="button" onclick="addPrep()">追加</button>
+        <button class="btn btn-outline btn-sm" type="button" onclick="addPrepTemplate()">定番をまとめて追加</button>
+      </div>
+      <div id="ev-prep-list"></div>
+
+      <div class="sub-eyebrow">買い出しリスト</div>
+      <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+        <input type="text" id="ev-shop-input" placeholder="買うものを追加" style="flex:1;min-width:140px;">
+        <button class="btn btn-outline btn-sm" type="button" onclick="addShop()">追加</button>
+      </div>
+      <div id="ev-shop-list"></div>
+
+      <div class="sub-eyebrow">当日の結果</div>
+      <div class="form-grid">
+        <div><label class="fl">売上（円）</label><input type="number" id="ev-sales" min="0" placeholder="0"></div>
+        <div><label class="fl">販売数・客数</label><input type="number" id="ev-customers" min="0" placeholder="0"></div>
+        <div class="span2"><label class="fl">振り返りメモ（次回への改善など）</label><textarea id="ev-memo"></textarea></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-gold" onclick="saveEvent()">保存</button>
+        <button class="btn btn-outline" onclick="closeModal('eventModal')">キャンセル</button>
+        <button class="btn btn-danger" id="evDeleteBtn" onclick="deleteEvent()" style="display:none;">削除</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MENU MODAL -->
+<div class="modal-bg" id="menuModal">
+  <div class="modal">
+    <div class="modal-head"><h3 id="menuModalTitle">商品を追加</h3><button class="modal-close" onclick="closeModal('menuModal')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="mEditId">
+      <div class="form-grid">
+        <div class="span2"><label class="fl">商品名</label><input type="text" id="m-name" placeholder="例：炭焼きホットドッグ"></div>
+        <div><label class="fl">売価（円）</label><input type="number" id="m-price" min="0"></div>
+        <div><label class="fl">原価（円）</label><input type="number" id="m-cost" min="0"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-gold" onclick="saveMenu()">保存</button>
+        <button class="btn btn-outline" onclick="closeModal('menuModal')">キャンセル</button>
+        <button class="btn btn-danger" id="mDeleteBtn" onclick="deleteMenu()" style="display:none;">削除</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+let D = {};
+const KEY = 'hotdogData';
+function loadD(){ D = JSON.parse(localStorage.getItem(KEY)||'{}'); if(!D.events) D.events=[]; if(!D.menu) D.menu=[]; if(!D.todos) D.todos=[]; if(!D.refs) D.refs={links:[],images:[],note:''}; }
+function saveD(){ localStorage.setItem(KEY, JSON.stringify(D)); }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function fmt(n){ return Number(n||0).toLocaleString(); }
+function fmtDate(d){ if(!d) return '日付未定'; const p=d.split('-'); return `${p[0]}年${p[1]}月${p[2]}日`; }
+function today(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function showToast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+function uid(){ return 'id_'+Date.now()+'_'+Math.random().toString(36).slice(2,6); }
+
+const PREP_TEMPLATE = ['パン・ソーセージの仕込み','トッピング・ソースの準備','炭・ガスの確認','備品（トング・手袋・容器・紙ナプキン）','つり銭の準備','テント・テーブル・のぼり','保健所の営業許可確認','ゴミ袋・クーラーボックス'];
+
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+  if(name==='events') renderEvents();
+  if(name==='menu') renderMenu();
+  if(name==='todo') renderTodo();
+  if(name==='refs') renderRefs();
+}
+
+// ─── IndexedDB (画像) ─────────────────────────────────────────────────────────
+let idb=null;
+function openIDB(){ return new Promise(res=>{ const q=indexedDB.open('hotdogImages',1); q.onupgradeneeded=e=>e.target.result.createObjectStore('images',{keyPath:'id'}); q.onsuccess=e=>{idb=e.target.result;res(idb);}; q.onerror=()=>res(null); }); }
+function putImg(id,dataUrl){ return new Promise(res=>{ if(!idb){res(false);return;} const tx=idb.transaction('images','readwrite'); tx.objectStore('images').put({id,dataUrl}); tx.oncomplete=()=>res(true); }); }
+function getImg(id){ return new Promise(res=>{ if(!idb){res(null);return;} const req=idb.transaction('images').objectStore('images').get(id); req.onsuccess=e=>res(e.target.result?e.target.result.dataUrl:null); req.onerror=()=>res(null); }); }
+function delImg(id){ if(!idb) return; idb.transaction('images','readwrite').objectStore('images').delete(id); }
+
+// ─── TODO ─────────────────────────────────────────────────────────────────────
+function setTodoToday(){ document.getElementById('todoDate').value = today(); }
+function addTodo(){
+  const v=document.getElementById('todoInput').value.trim(); if(!v)return;
+  D.todos.push({id:uid(),text:v,done:false,dueDate:document.getElementById('todoDate').value||''});
+  saveD(); document.getElementById('todoInput').value=''; document.getElementById('todoDate').value=''; renderTodo();
+}
+function toggleTodo(i){ D.todos[i].done=!D.todos[i].done; saveD(); renderTodo(); }
+function deleteTodo(i){ D.todos.splice(i,1); saveD(); renderTodo(); }
+function renderTodo(){
+  const el=document.getElementById('todoList');
+  if(D.todos.length===0){ el.innerHTML='<div style="color:#8b6820;font-size:13px;">TODOがありません。</div>'; return; }
+  const undone=D.todos.filter(t=>!t.done).sort((a,b)=>(a.dueDate||'9999').localeCompare(b.dueDate||'9999'));
+  const done=D.todos.filter(t=>t.done);
+  const row=(t)=>{ const i=D.todos.indexOf(t); const due=t.dueDate?`<span style="font-size:11px;color:${!t.done&&t.dueDate<today()?'#c05010':'#8b6820'};margin-left:8px;">📅 ${fmtDate(t.dueDate)}${!t.done&&t.dueDate<today()?'（超過）':''}</span>`:'';
+    return `<div class="chk-item ${t.done?'done':''}"><input type="checkbox" ${t.done?'checked':''} onchange="toggleTodo(${i})"><span>${esc(t.text)}${due}</span><button onclick="deleteTodo(${i})" style="background:none;border:none;color:#b0a48c;font-size:15px;cursor:pointer;">×</button></div>`; };
+  el.innerHTML = undone.map(row).join('') + (done.length?`<div style="font-size:10px;letter-spacing:.2em;color:#a09080;padding:8px 2px 4px;">完了済み</div>`+done.map(row).join(''):'');
+}
+
+// ─── REFS ─────────────────────────────────────────────────────────────────────
+async function renderRefs(){
+  const r=D.refs;
+  document.getElementById('refLinkList').innerHTML = r.links.length===0
+    ? '<div style="color:#8b6820;font-size:12px;">リンクがありません。</div>'
+    : r.links.map((l,i)=>`<div class="chk-item"><a href="${esc(l.url)}" target="_blank" rel="noopener" style="flex:1;font-size:13px;color:#c8880a;text-decoration:none;">🔗 ${esc(l.title||l.url)}</a><button onclick="deleteRefLink(${i})" style="background:none;border:none;color:#b0a48c;font-size:15px;cursor:pointer;">×</button></div>`).join('');
+  const g=document.getElementById('refImgGrid'); g.innerHTML='';
+  for(let i=0;i<r.images.length;i++){
+    const url=await getImg(r.images[i].id);
+    const d=document.createElement('div'); d.style.cssText='border:1px solid #d4b870;border-radius:5px;overflow:hidden;background:#fff;';
+    d.innerHTML=`${url?`<img src="${url}" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;">`:'<div style="aspect-ratio:1;display:flex;align-items:center;justify-content:center;">🖼</div>'}<button class="btn-danger" style="width:100%;border:none;border-top:1px solid #d4b870;border-radius:0;" onclick="deleteRefImg(${i})">削除</button>`;
+    g.appendChild(d);
+  }
+  document.getElementById('refNote').value=r.note||'';
+}
+function addRefLink(){ const url=document.getElementById('refLinkUrl').value.trim(); if(!url){showToast('URLを入力してください');return;} D.refs.links.push({title:document.getElementById('refLinkTitle').value.trim(),url}); saveD(); document.getElementById('refLinkTitle').value='';document.getElementById('refLinkUrl').value=''; renderRefs(); }
+function deleteRefLink(i){ D.refs.links.splice(i,1); saveD(); renderRefs(); }
+async function refAddFiles(files){ if(!files||!files.length)return; for(const f of files){ if(!f.type.startsWith('image/'))continue; const url=await new Promise(r=>{const fr=new FileReader();fr.onload=e=>r(e.target.result);fr.readAsDataURL(f);}); const id='hi_'+Date.now()+'_'+Math.random().toString(36).slice(2); await putImg(id,url); D.refs.images.push({id}); } saveD(); renderRefs(); showToast('追加しました'); }
+async function deleteRefImg(i){ if(!confirm('この画像を削除しますか？'))return; delImg(D.refs.images[i].id); D.refs.images.splice(i,1); saveD(); renderRefs(); }
+function saveRefNote(){ D.refs.note=document.getElementById('refNote').value; saveD(); }
+
+// ─── EVENTS ───────────────────────────────────────────────────────────────────
+function renderEvents(){
+  const evs = [...D.events].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  // 年間まとめ
+  const yr = new Date().getFullYear();
+  const thisYear = D.events.filter(e=>e.date && e.date.startsWith(yr));
+  const totalSales = D.events.reduce((a,e)=>a+Number(e.sales||0),0);
+  const yearSales = thisYear.reduce((a,e)=>a+Number(e.sales||0),0);
+  const upcoming = D.events.filter(e=>e.date && e.date>=today()).length;
+  document.getElementById('eventCards').innerHTML = `
+    <div class="card"><div class="card-label">出店回数（累計）</div><div class="card-value">${D.events.length}<span style="font-size:13px;"> 回</span></div></div>
+    <div class="card"><div class="card-label">今後の予定</div><div class="card-value">${upcoming}<span style="font-size:13px;"> 件</span></div></div>
+    <div class="card"><div class="card-label">${yr}年の売上</div><div class="card-value">¥${fmt(yearSales)}</div></div>
+    <div class="card"><div class="card-label">累計売上</div><div class="card-value">¥${fmt(totalSales)}</div></div>
+  `;
+  document.getElementById('eventList').innerHTML = evs.length===0
+    ? '<div style="color:#8b6820;font-size:13px;">出店イベントがありません。「＋ 出店を追加」から登録してください。</div>'
+    : evs.map(e=>{
+        const idx = D.events.indexOf(e);
+        const past = e.date && e.date < today();
+        const prepDone = (e.prep||[]).filter(p=>p.done).length, prepAll=(e.prep||[]).length;
+        return `<div class="list-item">
+          <div class="list-item-body">
+            <div class="list-item-title">${esc(e.name||'無題の出店')}
+              <span class="badge ${e.sales?'badge-green':past?'badge-gray':'badge-yellow'}">${e.sales?'売上あり':past?'終了':'予定'}</span>
+            </div>
+            <div class="list-item-meta">
+              ${fmtDate(e.date)}${e.place?`　／　${esc(e.place)}`:''}
+              ${prepAll?`　／　準備 ${prepDone}/${prepAll}`:''}
+              ${e.sales?`　／　売上 ¥${fmt(e.sales)}${e.customers?`（${e.customers}個）`:''}`:''}
+            </div>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="openEventModal(${idx})">開く</button>
+        </div>`;
+      }).join('');
+}
+
+let tmpPrep = [], tmpShop = [];
+
+function openEventModal(idx){
+  const e = idx!==null ? D.events[idx] : null;
+  document.getElementById('eventModalTitle').textContent = e?'出店の編集':'出店を追加';
+  document.getElementById('evEditId').value = idx!==null ? idx : '';
+  document.getElementById('ev-name').value = e?.name||'';
+  document.getElementById('ev-date').value = e?.date||'';
+  document.getElementById('ev-place').value = e?.place||'';
+  document.getElementById('ev-sales').value = e?.sales||'';
+  document.getElementById('ev-customers').value = e?.customers||'';
+  document.getElementById('ev-memo').value = e?.memo||'';
+  tmpPrep = e? JSON.parse(JSON.stringify(e.prep||[])) : [];
+  tmpShop = e? JSON.parse(JSON.stringify(e.shop||[])) : [];
+  renderPrep(); renderShop();
+  document.getElementById('evDeleteBtn').style.display = e?'block':'none';
+  document.getElementById('eventModal').classList.add('open');
+}
+
+function renderPrep(){
+  document.getElementById('ev-prep-list').innerHTML = tmpPrep.length===0
+    ? '<div style="color:#8b6820;font-size:12px;margin-bottom:8px;">項目がありません。</div>'
+    : tmpPrep.map((p,i)=>`<div class="chk-item ${p.done?'done':''}">
+        <input type="checkbox" ${p.done?'checked':''} onchange="tmpPrep[${i}].done=!tmpPrep[${i}].done;renderPrep()">
+        <span>${esc(p.text)}</span>
+        <button onclick="tmpPrep.splice(${i},1);renderPrep()" style="background:none;border:none;color:#b0a48c;font-size:15px;cursor:pointer;">×</button>
+      </div>`).join('');
+}
+function addPrep(){ const v=document.getElementById('ev-prep-input').value.trim(); if(!v)return; tmpPrep.push({text:v,done:false}); document.getElementById('ev-prep-input').value=''; renderPrep(); }
+function addPrepTemplate(){ PREP_TEMPLATE.forEach(t=>{ if(!tmpPrep.some(p=>p.text===t)) tmpPrep.push({text:t,done:false}); }); renderPrep(); }
+
+function renderShop(){
+  document.getElementById('ev-shop-list').innerHTML = tmpShop.length===0
+    ? '<div style="color:#8b6820;font-size:12px;margin-bottom:8px;">項目がありません。</div>'
+    : tmpShop.map((p,i)=>`<div class="chk-item ${p.done?'done':''}">
+        <input type="checkbox" ${p.done?'checked':''} onchange="tmpShop[${i}].done=!tmpShop[${i}].done;renderShop()">
+        <span>${esc(p.text)}</span>
+        <button onclick="tmpShop.splice(${i},1);renderShop()" style="background:none;border:none;color:#b0a48c;font-size:15px;cursor:pointer;">×</button>
+      </div>`).join('');
+}
+function addShop(){ const v=document.getElementById('ev-shop-input').value.trim(); if(!v)return; tmpShop.push({text:v,done:false}); document.getElementById('ev-shop-input').value=''; renderShop(); }
+
+function saveEvent(){
+  const idx = document.getElementById('evEditId').value;
+  const obj = {
+    id: idx!=='' ? D.events[Number(idx)].id : uid(),
+    name:document.getElementById('ev-name').value,
+    date:document.getElementById('ev-date').value,
+    place:document.getElementById('ev-place').value,
+    sales:document.getElementById('ev-sales').value,
+    customers:document.getElementById('ev-customers').value,
+    memo:document.getElementById('ev-memo').value,
+    prep:tmpPrep, shop:tmpShop
+  };
+  if(idx!=='') D.events[Number(idx)]=obj; else D.events.push(obj);
+  saveD(); closeModal('eventModal'); renderEvents();
+  showToast('保存しました');
+}
+function deleteEvent(){
+  const idx=Number(document.getElementById('evEditId').value);
+  if(!confirm('この出店を削除しますか？')) return;
+  D.events.splice(idx,1); saveD(); closeModal('eventModal'); renderEvents();
+}
+
+// ─── MENU ─────────────────────────────────────────────────────────────────────
+function renderMenu(){
+  document.getElementById('menuBody').innerHTML = D.menu.length===0
+    ? '<tr><td colspan="6" style="text-align:center;color:#8b6820;">商品がありません</td></tr>'
+    : D.menu.map((m,i)=>{
+        const price=Number(m.price||0), cost=Number(m.cost||0);
+        const rate = price? Math.round(cost/price*100):0;
+        return `<tr>
+          <td>${esc(m.name)}</td>
+          <td style="text-align:right;">¥${fmt(price)}</td>
+          <td style="text-align:right;">¥${fmt(cost)}</td>
+          <td style="text-align:right;color:${rate>50?'#c05010':'#2f6040'};">${rate}%</td>
+          <td style="text-align:right;">¥${fmt(price-cost)}</td>
+          <td><button class="btn-danger" onclick="openMenuModal(${i})">編集</button></td>
+        </tr>`;
+      }).join('');
+}
+function openMenuModal(i){
+  const m = i!==null ? D.menu[i] : null;
+  document.getElementById('menuModalTitle').textContent = m?'商品を編集':'商品を追加';
+  document.getElementById('mEditId').value = i!==null ? i : '';
+  document.getElementById('m-name').value=m?.name||'';
+  document.getElementById('m-price').value=m?.price||'';
+  document.getElementById('m-cost').value=m?.cost||'';
+  document.getElementById('mDeleteBtn').style.display=m?'block':'none';
+  document.getElementById('menuModal').classList.add('open');
+}
+function saveMenu(){
+  const i=document.getElementById('mEditId').value;
+  const obj={name:document.getElementById('m-name').value,price:document.getElementById('m-price').value,cost:document.getElementById('m-cost').value};
+  if(!obj.name){ showToast('商品名を入力してください'); return; }
+  if(i!=='') D.menu[Number(i)]=obj; else D.menu.push(obj);
+  saveD(); closeModal('menuModal'); renderMenu();
+}
+function deleteMenu(){
+  const i=Number(document.getElementById('mEditId').value);
+  if(!confirm('この商品を削除しますか？')) return;
+  D.menu.splice(i,1); saveD(); closeModal('menuModal'); renderMenu();
+}
+
+// ─── BACKUP ───────────────────────────────────────────────────────────────────
+function exportData(){
+  const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),hotdogData:D},null,2)],{type:'application/json'});
+  const a=document.createElement('a'); const d=new Date();
+  a.href=URL.createObjectURL(blob);
+  a.download=`hotdog_backup_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.json`;
+  a.click(); showToast('保存しました');
+}
+function importData(e){
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=ev=>{ try{ const data=JSON.parse(ev.target.result); if(!data.hotdogData) throw 0;
+    if(!confirm('現在のデータを上書きします。よろしいですか？')) return;
+    localStorage.setItem(KEY, JSON.stringify(data.hotdogData)); loadD(); renderEvents();
+    document.getElementById('backupStatus').textContent='✓ 復元しました'; showToast('復元しました');
+  }catch(err){ alert('読み込みに失敗しました'); } };
+  r.readAsText(f); e.target.value='';
+}
+
+loadD();
+openIDB();
+renderEvents();
+document.querySelectorAll('.modal-bg').forEach(bg=>bg.addEventListener('click',e=>{ if(e.target===bg) bg.classList.remove('open'); }));
+</script>
+</body>
+</html>

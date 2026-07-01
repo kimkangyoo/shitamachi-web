@@ -191,6 +191,7 @@ tr:hover td{background:#fdf5e0;}
     <a href="tools.html">制作ツール</a>
     <a href="gyomu.html" class="active">業務管理</a>
     <a href="shuzai.html">取材ノート</a>
+    <a href="hotdog.html">飲食部門</a>
     <a href="index.html#contact">お問い合わせ</a>
   </div>
 </nav>
@@ -854,6 +855,17 @@ function toggleVideoTodo(pid, ti){
   renderDashTodo(); renderDashSchedule();
 }
 
+// 飲食部門（hotdog）のTODOを返す
+function getHotdogTodos(){
+  const hd = JSON.parse(localStorage.getItem('hotdogData') || '{}');
+  return (hd.todos||[]).map((t,ti)=>({ti, text:t.text, done:t.done, dueDate:t.dueDate||''}));
+}
+function toggleHotdogTodo(ti){
+  const hd = JSON.parse(localStorage.getItem('hotdogData') || '{}');
+  if(hd.todos && hd.todos[ti]){ hd.todos[ti].done=!hd.todos[ti].done; localStorage.setItem('hotdogData', JSON.stringify(hd)); }
+  renderDashTodo(); renderDashSchedule();
+}
+
 // 取材ごとのTODO（未完了）を返す
 function getShuzaiTodos(){
   loadShuzai();
@@ -1012,7 +1024,8 @@ function renderDashTodo(){
   const all = [...undone, ...done];
   const shuzaiTodos = getShuzaiTodos().filter(t=>!t.done);
   const videoTodos = getVideoTodos().filter(t=>!t.done);
-  if(all.length===0 && shuzaiTodos.length===0 && videoTodos.length===0){
+  const hotdogTodos = getHotdogTodos().filter(t=>!t.done);
+  if(all.length===0 && shuzaiTodos.length===0 && videoTodos.length===0 && hotdogTodos.length===0){
     el.innerHTML='<div style="color:#8b6820;font-size:12px;padding:8px 0;">タスクがありません。</div>';
     return;
   }
@@ -1068,6 +1081,24 @@ function renderDashTodo(){
           ${t.dueDate?`<div style="font-size:10px;color:#8b6820;margin-top:2px;">📅 ${fmtDate(t.dueDate)}　${duLabel}</div>`:''}
         </div>
         <a href="tools.html" style="font-size:10px;color:#1f4a7a;text-decoration:none;flex-shrink:0;">開く→</a>
+      </li>`;
+    }).join('');
+  }
+
+  // 飲食部門のTODO（未完了のみ）
+  if(hotdogTodos.length>0){
+    hotdogTodos.sort((a,b)=>(a.dueDate||'9999').localeCompare(b.dueDate||'9999'));
+    html += `<li style="font-size:10px;letter-spacing:.2em;color:#8b5e0a;padding:10px 4px 4px;">🌭 飲食部門TODO</li>`;
+    html += hotdogTodos.map(t=>{
+      const days = t.dueDate ? daysUntil(t.dueDate) : null;
+      const duLabel = days===null ? '' : days<0 ? `<span style="color:#c05010;font-size:10px;font-weight:700;">${Math.abs(days)}日超過</span>` : days===0 ? `<span style="color:#c05010;font-size:10px;font-weight:700;">今日</span>` : `<span style="color:#8b6820;font-size:10px;">あと${days}日</span>`;
+      return `<li style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:#fdf7ec;border:1px solid #e0cfa0;border-radius:5px;margin-bottom:6px;">
+        <input type="checkbox" style="width:17px;height:17px;accent-color:#8b5e0a;cursor:pointer;flex-shrink:0;" onchange="toggleHotdogTodo(${t.ti})">
+        <div style="flex:1;cursor:pointer;" onclick="toggleHotdogTodo(${t.ti})">
+          <div style="font-size:13px;">${esc(t.text)}</div>
+          ${t.dueDate?`<div style="font-size:10px;color:#8b6820;margin-top:2px;">📅 ${fmtDate(t.dueDate)}　${duLabel}</div>`:''}
+        </div>
+        <a href="hotdog.html" style="font-size:10px;color:#8b5e0a;text-decoration:none;flex-shrink:0;">開く→</a>
       </li>`;
     }).join('');
   }
@@ -1147,7 +1178,12 @@ function renderDashSchedule(){
     .filter(t=>!t.done && t.dueDate && t.dueDate<=todayStr)
     .sort((a,b)=>a.dueDate.localeCompare(b.dueDate));
 
-  if(items.length===0 && routines.length===0 && todos.length===0 && szTodos.length===0 && vdTodos.length===0){
+  // 飲食TODO due today or overdue
+  const hdTodos = getHotdogTodos()
+    .filter(t=>!t.done && t.dueDate && t.dueDate<=todayStr)
+    .sort((a,b)=>a.dueDate.localeCompare(b.dueDate));
+
+  if(items.length===0 && routines.length===0 && todos.length===0 && szTodos.length===0 && vdTodos.length===0 && hdTodos.length===0){
     el.innerHTML='<div style="color:#8b6820;font-size:12px;padding:8px 0;">今日の予定はありません。</div>';
     return;
   }
@@ -1190,6 +1226,17 @@ function renderDashSchedule(){
         <label onclick="toggleShuzaiTodo('${t.leadId}',${t.ti})" style="font-size:12px;flex:1;cursor:pointer;">
           <span class="badge badge-purple" style="font-size:10px;">取材</span>
           ${esc(t.text)} <span style="color:#5a2f7a;font-size:10px;">/ ${esc(t.leadName)}</span>
+          ${overdue?`<span style="color:#c05010;font-size:10px;font-weight:700;"> （${fmtDate(t.dueDate)} 超過）</span>`:''}
+        </label>
+      </div>`;
+    }),
+    ...hdTodos.map(t=>{
+      const overdue = t.dueDate < todayStr;
+      return `<div class="task-item" style="padding:8px 12px;margin-bottom:5px;">
+        <input type="checkbox" onchange="toggleHotdogTodo(${t.ti})">
+        <label onclick="toggleHotdogTodo(${t.ti})" style="font-size:12px;flex:1;cursor:pointer;">
+          <span class="badge badge-yellow" style="font-size:10px;">飲食</span>
+          ${esc(t.text)}
           ${overdue?`<span style="color:#c05010;font-size:10px;font-weight:700;"> （${fmtDate(t.dueDate)} 超過）</span>`:''}
         </label>
       </div>`;
@@ -1772,6 +1819,13 @@ function runVoiceCheck(){
     .forEach(t=>{
       const days = daysUntil(t.dueDate);
       if(days!==null && days<=watchDays) todoAlerts.push({name:t.projName+'の「'+t.text+'」', days});
+    });
+  // 飲食部門TODO
+  getHotdogTodos()
+    .filter(t=>!t.done && t.dueDate)
+    .forEach(t=>{
+      const days = daysUntil(t.dueDate);
+      if(days!==null && days<=watchDays) todoAlerts.push({name:'飲食部門の「'+t.text+'」', days});
     });
   todoAlerts.sort((a,b)=>a.days-b.days);
 
