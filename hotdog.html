@@ -20,8 +20,7 @@ nav{background:#150c02;padding:18px 48px;display:flex;align-items:center;justify
 .tab{padding:14px 20px;font-size:11px;letter-spacing:.18em;color:rgba(240,221,176,.4);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;}
 .tab:hover{color:rgba(240,221,176,.7);}
 .tab.active{color:#d4920a;border-bottom-color:#d4920a;}
-.tab-content{display:none;padding:40px 48px;max-width:1000px;}
-.tab-content.active{display:block;}
+.tab-content{display:block;padding:24px 48px 8px;max-width:1000px;}
 .sec-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:24px;padding-bottom:12px;border-bottom:1px solid #b89848;}
 .sec-head h2{font-family:'Shippori Mincho',serif;font-size:18px;font-weight:400;letter-spacing:.1em;}
 .sec-sub{font-size:11px;color:#8b6820;letter-spacing:.08em;}
@@ -85,13 +84,6 @@ td{padding:8px 10px;border-bottom:1px solid #ddc890;}
   </div>
 </nav>
 
-<div class="tabs">
-  <div class="tab active" onclick="switchTab('events')">出店イベント</div>
-  <div class="tab" onclick="switchTab('menu')">メニュー・原価</div>
-  <div class="tab" onclick="switchTab('todo')">TODO</div>
-  <div class="tab" onclick="switchTab('refs')">資料</div>
-  <div class="tab" onclick="switchTab('settings')">設定</div>
-</div>
 
 <!-- EVENTS -->
 <div class="tab-content active" id="tab-events">
@@ -465,8 +457,11 @@ function importData(e){
 }
 
 loadD();
-openIDB();
+openIDB().then(()=>renderRefs());
 renderEvents();
+renderMenu();
+renderTodo();
+renderRefs();
 document.querySelectorAll('.modal-bg').forEach(bg=>bg.addEventListener('click',e=>{ if(e.target===bg) bg.classList.remove('open'); }));
 </script>
 </body>
