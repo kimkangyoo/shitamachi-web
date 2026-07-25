@@ -533,7 +533,7 @@ function renderBring(){
   // この出店の持ち物リスト（準備チェック＋購入チェック）
   document.getElementById('ev-bring-list').innerHTML = tmpBring.length===0
     ? '<div style="color:#8b6820;font-size:12px;margin-bottom:8px;">上のマスターから選ぶか、下で追加してください。</div>'
-    : `<div style="display:flex;font-size:10px;color:#8b6820;padding:0 12px 4px;gap:8px;"><span style="width:16px;">準備</span><span style="flex:1;"></span><span>購入</span></div>`
+    : `<div style="display:flex;font-size:10px;color:#8b6820;padding:0 12px 4px;gap:8px;"><span style="width:16px;">準備</span><span style="flex:1;"></span><span>買い出し</span></div>`
       + tmpBring.map((p,i)=>`<div class="chk-item ${p.done?'done':''}">
         <input type="checkbox" ${p.done?'checked':''} onchange="tmpBring[${i}].done=!tmpBring[${i}].done;renderBring()" title="準備できた">
         <span>${esc(p.text)}</span>
@@ -547,10 +547,10 @@ function toggleBringBuy(i){
   tmpBring[i].bought = !tmpBring[i].bought;
   const text = tmpBring[i].text;
   if(tmpBring[i].bought){
-    if(!tmpShop.some(s=>s.text===text)) tmpShop.push({text, done:false, fromBring:true});
+    if(!tmpShop.some(s=>s.text===text)){ tmpShop.push({text, done:false, fromBring:true}); showToast('買い出しリストに追加：'+text); }
   } else {
     const idx = tmpShop.findIndex(s=>s.text===text && s.fromBring && !s.done);
-    if(idx>=0) tmpShop.splice(idx,1);
+    if(idx>=0){ tmpShop.splice(idx,1); showToast('買い出しリストから外しました'); }
   }
   renderBring(); renderShop();
 }
