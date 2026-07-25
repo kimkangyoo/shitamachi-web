@@ -103,6 +103,7 @@ td{padding:8px 10px;border-bottom:1px solid #ddc890;}
     <thead><tr><th>商品名</th><th style="width:90px;">売価</th><th style="width:90px;">原価</th><th style="width:80px;">原価率</th><th style="width:90px;">利益</th><th style="width:60px;"></th></tr></thead>
     <tbody id="menuBody"></tbody>
   </table>
+  <input type="file" id="menuImgInput" accept="image/*" style="display:none;" onchange="menuSetImage(this.files)">
 </div>
 
 <!-- 共通 持ち物マスター -->
@@ -770,13 +771,34 @@ async function renderMenu(){
       <td style="text-align:right;">¥${fmt(cost)}</td>
       <td style="text-align:right;color:${rate>50?'#c05010':'#2f6040'};">${rate}%</td>
       <td style="text-align:right;">¥${fmt(price-cost)}</td>
-      <td style="white-space:nowrap;"><button class="btn-outline btn-sm" onclick="shareMenu(${i})" style="border:1px solid #c8880a;color:#c8880a;background:transparent;border-radius:4px;padding:4px 8px;cursor:pointer;font-size:11px;">📷</button> <button class="btn-danger" onclick="openMenuModal(${i})">編集</button></td>
+      <td style="white-space:nowrap;">
+        <button onclick="menuPickImage(${i})" title="画像をつける" style="border:1px solid #c8880a;color:#c8880a;background:transparent;border-radius:4px;padding:4px 8px;cursor:pointer;font-size:11px;">🖼</button>
+        <button onclick="shareMenu(${i})" title="シェア" style="border:1px solid #c8880a;color:#c8880a;background:transparent;border-radius:4px;padding:4px 8px;cursor:pointer;font-size:11px;">📷</button>
+        <button class="btn-danger" onclick="openMenuModal(${i})">編集</button>
+      </td>
     </tr>`;
   }).join('');
   // サムネイル読み込み
   for(let i=0;i<D.menu.length;i++){
     if(D.menu[i].imgId){ const url=await getImg(D.menu[i].imgId); const el=document.getElementById('menuThumb'+i); if(el&&url) el.innerHTML=`<img src="${url}" style="width:36px;height:36px;object-fit:cover;border-radius:4px;border:1px solid #d4b870;">`; }
   }
+}
+let menuImgTargetIdx = null;
+function menuPickImage(i){ menuImgTargetIdx = i; document.getElementById('menuImgInput').click(); }
+async function menuSetImage(files){
+  if(!files||!files.length||menuImgTargetIdx===null) return;
+  const f=files[0]; if(!f.type.startsWith('image/')) return;
+  const m = D.menu[menuImgTargetIdx];
+  const url=await new Promise(r=>{const fr=new FileReader();fr.onload=e=>r(e.target.result);fr.readAsDataURL(f);});
+  const id='mi_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+  await putImg(id,url);
+  if(m.imgId) delImg(m.imgId);
+  m.imgId = id;
+  saveD();
+  document.getElementById('menuImgInput').value='';
+  menuImgTargetIdx=null;
+  renderMenu();
+  showToast('画像を登録しました');
 }
 let mTmpImgId = '';
 function openMenuModal(i){
