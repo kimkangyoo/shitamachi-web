@@ -199,11 +199,17 @@ td{padding:8px 10px;border-bottom:1px solid #ddc890;}
       </div>
       <div id="ev-shop-list"></div>
 
-      <div class="sub-eyebrow">当日の結果</div>
+      <div class="sub-eyebrow">当日の実績</div>
       <div class="form-grid">
-        <div><label class="fl">売上（円）</label><input type="number" id="ev-sales" min="0" placeholder="0"></div>
-        <div><label class="fl">販売数・客数</label><input type="number" id="ev-customers" min="0" placeholder="0"></div>
-        <div class="span2"><label class="fl">振り返りメモ（次回への改善など）</label><textarea id="ev-memo"></textarea></div>
+        <div><label class="fl">売上（円）</label><input type="number" id="ev-sales" min="0" placeholder="0" oninput="calcProfit()"></div>
+        <div><label class="fl">販売数（個）</label><input type="number" id="ev-customers" min="0" placeholder="0"></div>
+        <div><label class="fl">経費（材料費・出店料など・円）</label><input type="number" id="ev-cost" min="0" placeholder="0" oninput="calcProfit()"></div>
+        <div><label class="fl">利益（自動計算）</label><input type="text" id="ev-profit" disabled></div>
+        <div><label class="fl">天気</label>
+          <select id="ev-weather"><option value="">—</option><option>☀ 晴れ</option><option>⛅ くもり</option><option>☂ 雨</option><option>🌫 その他</option></select>
+        </div>
+        <div><label class="fl">客層・反応</label><input type="text" id="ev-reaction" placeholder="例：家族連れが多かった"></div>
+        <div class="span2"><label class="fl">振り返りメモ（良かった点・次回への改善）</label><textarea id="ev-memo"></textarea></div>
       </div>
 
       <div class="btn-row">
@@ -333,14 +339,14 @@ function renderEvents(){
   // 年間まとめ
   const yr = new Date().getFullYear();
   const thisYear = D.events.filter(e=>e.date && e.date.startsWith(yr));
-  const totalSales = D.events.reduce((a,e)=>a+Number(e.sales||0),0);
   const yearSales = thisYear.reduce((a,e)=>a+Number(e.sales||0),0);
+  const yearProfit = thisYear.reduce((a,e)=>a+(Number(e.sales||0)-Number(e.cost||0)),0);
   const upcoming = D.events.filter(e=>e.date && e.date>=today()).length;
   document.getElementById('eventCards').innerHTML = `
     <div class="card"><div class="card-label">出店回数（累計）</div><div class="card-value">${D.events.length}<span style="font-size:13px;"> 回</span></div></div>
     <div class="card"><div class="card-label">今後の予定</div><div class="card-value">${upcoming}<span style="font-size:13px;"> 件</span></div></div>
     <div class="card"><div class="card-label">${yr}年の売上</div><div class="card-value">¥${fmt(yearSales)}</div></div>
-    <div class="card"><div class="card-label">累計売上</div><div class="card-value">¥${fmt(totalSales)}</div></div>
+    <div class="card"><div class="card-label">${yr}年の利益</div><div class="card-value">¥${fmt(yearProfit)}</div></div>
   `;
   document.getElementById('eventList').innerHTML = evs.length===0
     ? '<div style="color:#8b6820;font-size:13px;">出店イベントがありません。「＋ 出店を追加」から登録してください。</div>'
@@ -356,7 +362,8 @@ function renderEvents(){
             <div class="list-item-meta">
               ${fmtDate(e.date)}${e.place?`　／　${esc(e.place)}`:''}
               ${prepAll?`　／　準備 ${prepDone}/${prepAll}`:''}
-              ${e.sales?`　／　売上 ¥${fmt(e.sales)}${e.customers?`（${e.customers}個）`:''}`:''}
+              ${e.weather?`　／　${esc(e.weather)}`:''}
+              ${e.sales?`　／　売上 ¥${fmt(e.sales)}${e.customers?`（${e.customers}個）`:''}${e.cost?`・利益 ¥${fmt(Number(e.sales)-Number(e.cost))}`:''}`:''}
             </div>
           </div>
           <button class="btn btn-outline btn-sm" onclick="openEventModal(${idx})">開く</button>
@@ -365,6 +372,12 @@ function renderEvents(){
 }
 
 let tmpPrep = [], tmpShop = [];
+
+function calcProfit(){
+  const s=Number(document.getElementById('ev-sales').value||0);
+  const c=Number(document.getElementById('ev-cost').value||0);
+  document.getElementById('ev-profit').value = '¥'+fmt(s-c);
+}
 
 function openEventModal(idx){
   const e = idx!==null ? D.events[idx] : null;
@@ -375,7 +388,11 @@ function openEventModal(idx){
   document.getElementById('ev-place').value = e?.place||'';
   document.getElementById('ev-sales').value = e?.sales||'';
   document.getElementById('ev-customers').value = e?.customers||'';
+  document.getElementById('ev-cost').value = e?.cost||'';
+  document.getElementById('ev-weather').value = e?.weather||'';
+  document.getElementById('ev-reaction').value = e?.reaction||'';
   document.getElementById('ev-memo').value = e?.memo||'';
+  calcProfit();
   tmpPrep = e? JSON.parse(JSON.stringify(e.prep||[])) : [];
   tmpShop = e? JSON.parse(JSON.stringify(e.shop||[])) : [];
   renderPrep(); renderShop();
@@ -415,6 +432,9 @@ function saveEvent(){
     place:document.getElementById('ev-place').value,
     sales:document.getElementById('ev-sales').value,
     customers:document.getElementById('ev-customers').value,
+    cost:document.getElementById('ev-cost').value,
+    weather:document.getElementById('ev-weather').value,
+    reaction:document.getElementById('ev-reaction').value,
     memo:document.getElementById('ev-memo').value,
     prep:tmpPrep, shop:tmpShop
   };
