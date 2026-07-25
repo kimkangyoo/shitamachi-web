@@ -199,13 +199,13 @@ td{padding:8px 10px;border-bottom:1px solid #ddc890;}
       </div>
       <div id="ev-shop-list"></div>
 
-      <div class="sub-eyebrow">商品別の販売</div>
-      <table style="margin-bottom:8px;">
-        <thead><tr><th>商品</th><th style="width:70px;">個数</th><th style="width:90px;">単価</th><th style="width:90px;">小計</th><th style="width:40px;"></th></tr></thead>
-        <tbody id="ev-sales-tbody"></tbody>
-      </table>
+      <div class="sub-eyebrow">商品別の販売（売れたら ＋ を押すだけ）</div>
+      <div id="ev-sales-tbody"></div>
       <datalist id="menuNames"></datalist>
-      <button class="btn btn-outline btn-sm" type="button" onclick="addSalesItem()" style="margin-bottom:16px;">＋ 商品を追加</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+        <button class="btn btn-outline btn-sm" type="button" onclick="addSalesFromMenu()">メニューから一括で並べる</button>
+        <button class="btn btn-outline btn-sm" type="button" onclick="addSalesItem()">＋ 商品を追加</button>
+      </div>
 
       <div class="sub-eyebrow">当日の実績</div>
       <div class="form-grid">
@@ -382,26 +382,37 @@ function renderEvents(){
 let tmpPrep = [], tmpShop = [], tmpSales = [];
 
 function renderSalesItems(){
-  // メニュー候補
   document.getElementById('menuNames').innerHTML = D.menu.map(m=>`<option value="${esc(m.name)}">`).join('');
   const tb = document.getElementById('ev-sales-tbody');
-  if(tmpSales.length===0){ tb.innerHTML='<tr><td colspan="5" style="color:#8b6820;font-size:12px;">商品がありません。「＋ 商品を追加」から入力できます。</td></tr>'; return; }
-  tb.innerHTML = tmpSales.map((it,i)=>`<tr>
-    <td><input type="text" list="menuNames" value="${esc(it.name)}" placeholder="商品名" oninput="tmpSales[${i}].name=this.value" onchange="autofillPrice(${i})" style="min-width:120px;"></td>
-    <td><input type="number" min="0" value="${it.qty}" oninput="tmpSales[${i}].qty=Number(this.value);renderSalesTotalsOnly();onSalesChange()" style="width:60px;"></td>
-    <td><input type="number" min="0" value="${it.price}" oninput="tmpSales[${i}].price=Number(this.value);renderSalesTotalsOnly();onSalesChange()" style="width:80px;"></td>
-    <td style="text-align:right;font-size:12px;">¥${fmt(it.qty*it.price)}</td>
-    <td><button class="btn-danger" onclick="tmpSales.splice(${i},1);renderSalesItems();onSalesChange()" style="padding:2px 8px;">×</button></td>
-  </tr>`).join('');
+  if(tmpSales.length===0){ tb.innerHTML='<div style="color:#8b6820;font-size:12px;margin-bottom:8px;">商品がありません。「メニューから一括で並べる」か「＋ 商品を追加」から。</div>'; return; }
+  tb.innerHTML = tmpSales.map((it,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:#fffdf5;border:1px solid #ddc890;border-radius:6px;margin-bottom:8px;flex-wrap:wrap;">
+      <input type="text" list="menuNames" value="${esc(it.name)}" placeholder="商品名" oninput="tmpSales[${i}].name=this.value" onchange="autofillPrice(${i})" style="flex:1;min-width:110px;">
+      <input type="number" min="0" value="${it.price}" oninput="tmpSales[${i}].price=Number(this.value);renderSalesTotalsOnly();onSalesChange()" style="width:70px;" title="単価">
+      <button type="button" onclick="bumpSales(${i},-1)" style="width:38px;height:38px;border-radius:50%;border:1px solid #c8880a;background:#fff;color:#c8880a;font-size:20px;cursor:pointer;">−</button>
+      <span style="font-family:'Shippori Mincho',serif;font-size:24px;min-width:44px;text-align:center;" id="qtyDisp${i}">${it.qty}</span>
+      <button type="button" onclick="bumpSales(${i},1)" style="width:44px;height:44px;border-radius:50%;border:none;background:#c8880a;color:#fff;font-size:24px;cursor:pointer;">＋</button>
+      <span style="font-size:12px;color:#8b6820;min-width:70px;text-align:right;" id="subDisp${i}">¥${fmt(it.qty*it.price)}</span>
+      <button class="btn-danger" onclick="tmpSales.splice(${i},1);renderSalesItems();onSalesChange()" style="padding:2px 8px;">×</button>
+    </div>`).join('');
+}
+function bumpSales(i, d){
+  tmpSales[i].qty = Math.max(0, Number(tmpSales[i].qty||0) + d);
+  renderSalesTotalsOnly(); onSalesChange();
 }
 function renderSalesTotalsOnly(){
-  // 小計セルだけ更新（フォーカスを保つため全再描画しない）
-  const rows = document.querySelectorAll('#ev-sales-tbody tr');
-  tmpSales.forEach((it,i)=>{ const cell=rows[i]?.children[3]; if(cell) cell.textContent='¥'+fmt(it.qty*it.price); });
+  tmpSales.forEach((it,i)=>{
+    const q=document.getElementById('qtyDisp'+i); if(q) q.textContent=it.qty;
+    const s=document.getElementById('subDisp'+i); if(s) s.textContent='¥'+fmt(it.qty*it.price);
+  });
 }
 function addSalesItem(){
-  // メニューがあれば1件目の単価を初期値に
-  tmpSales.push({name:'', qty:1, price:0});
+  tmpSales.push({name:'', qty:0, price:0});
+  renderSalesItems(); onSalesChange();
+}
+function addSalesFromMenu(){
+  if(D.menu.length===0){ showToast('先にメニュー・原価で商品を登録してください'); return; }
+  D.menu.forEach(m=>{ if(!tmpSales.some(s=>s.name===m.name)) tmpSales.push({name:m.name, qty:0, price:Number(m.price||0)}); });
   renderSalesItems(); onSalesChange();
 }
 function autofillPrice(i){
