@@ -105,6 +105,20 @@ td{padding:8px 10px;border-bottom:1px solid #ddc890;}
   </table>
 </div>
 
+<!-- 持ち物リスト -->
+<div class="tab-content" id="tab-belongings">
+  <div class="sec-head"><h2>持ち物リスト</h2>
+    <span class="sec-sub">毎回使い回せます</span>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+    <input type="text" id="belInput" placeholder="持ち物を追加（例：延長コード）" style="flex:1;min-width:160px;">
+    <button class="btn btn-gold btn-sm" type="button" onclick="addBel()">追加</button>
+    <button class="btn btn-outline btn-sm" type="button" onclick="addBelTemplate()">定番をまとめて追加</button>
+    <button class="btn btn-outline btn-sm" type="button" onclick="resetBel()">チェックを全部外す</button>
+  </div>
+  <div id="belList"></div>
+</div>
+
 <!-- TODO -->
 <div class="tab-content" id="tab-todo">
   <div class="sec-head"><h2>TODO</h2>
@@ -226,7 +240,7 @@ td{padding:8px 10px;border-bottom:1px solid #ddc890;}
 <script>
 let D = {};
 const KEY = 'hotdogData';
-function loadD(){ D = JSON.parse(localStorage.getItem(KEY)||'{}'); if(!D.events) D.events=[]; if(!D.menu) D.menu=[]; if(!D.todos) D.todos=[]; if(!D.refs) D.refs={links:[],images:[],note:''}; }
+function loadD(){ D = JSON.parse(localStorage.getItem(KEY)||'{}'); if(!D.events) D.events=[]; if(!D.menu) D.menu=[]; if(!D.todos) D.todos=[]; if(!D.refs) D.refs={links:[],images:[],note:''}; if(!D.belongings) D.belongings=[]; }
 function saveD(){ localStorage.setItem(KEY, JSON.stringify(D)); }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function fmt(n){ return Number(n||0).toLocaleString(); }
@@ -255,6 +269,23 @@ function openIDB(){ return new Promise(res=>{ const q=indexedDB.open('hotdogImag
 function putImg(id,dataUrl){ return new Promise(res=>{ if(!idb){res(false);return;} const tx=idb.transaction('images','readwrite'); tx.objectStore('images').put({id,dataUrl}); tx.oncomplete=()=>res(true); }); }
 function getImg(id){ return new Promise(res=>{ if(!idb){res(null);return;} const req=idb.transaction('images').objectStore('images').get(id); req.onsuccess=e=>res(e.target.result?e.target.result.dataUrl:null); req.onerror=()=>res(null); }); }
 function delImg(id){ if(!idb) return; idb.transaction('images','readwrite').objectStore('images').delete(id); }
+
+// ─── 持ち物リスト ─────────────────────────────────────────────────────────────
+const BEL_TEMPLATE = ['テント・タープ','折りたたみテーブル・イス','のぼり・看板・メニュー表','炭・炭焼きコンロ・着火剤','トング・ヘラ・調理器具','クーラーボックス・保冷剤','手袋・エプロン・帽子','容器・紙ナプキン・持ち帰り袋','つり銭・レジ（金庫）','ゴミ袋・雑巾・アルコール','消火用の水・消火器','手指消毒・ペーパータオル'];
+function renderBel(){
+  const el=document.getElementById('belList');
+  if(D.belongings.length===0){ el.innerHTML='<div style="color:#8b6820;font-size:13px;">持ち物がありません。「定番をまとめて追加」から始められます。</div>'; return; }
+  el.innerHTML = D.belongings.map((b,i)=>`<div class="chk-item ${b.done?'done':''}">
+    <input type="checkbox" ${b.done?'checked':''} onchange="toggleBel(${i})">
+    <span>${esc(b.text)}</span>
+    <button onclick="deleteBel(${i})" style="background:none;border:none;color:#b0a48c;font-size:15px;cursor:pointer;">×</button>
+  </div>`).join('');
+}
+function addBel(){ const v=document.getElementById('belInput').value.trim(); if(!v)return; D.belongings.push({text:v,done:false}); saveD(); document.getElementById('belInput').value=''; renderBel(); }
+function addBelTemplate(){ BEL_TEMPLATE.forEach(t=>{ if(!D.belongings.some(b=>b.text===t)) D.belongings.push({text:t,done:false}); }); saveD(); renderBel(); showToast('定番を追加しました'); }
+function toggleBel(i){ D.belongings[i].done=!D.belongings[i].done; saveD(); renderBel(); }
+function deleteBel(i){ D.belongings.splice(i,1); saveD(); renderBel(); }
+function resetBel(){ D.belongings.forEach(b=>b.done=false); saveD(); renderBel(); showToast('チェックを外しました'); }
 
 // ─── TODO ─────────────────────────────────────────────────────────────────────
 function setTodoToday(){ document.getElementById('todoDate').value = today(); }
@@ -460,6 +491,7 @@ loadD();
 openIDB().then(()=>renderRefs());
 renderEvents();
 renderMenu();
+renderBel();
 renderTodo();
 renderRefs();
 document.querySelectorAll('.modal-bg').forEach(bg=>bg.addEventListener('click',e=>{ if(e.target===bg) bg.classList.remove('open'); }));
