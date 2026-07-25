@@ -231,6 +231,7 @@ td{padding:8px 10px;border-bottom:1px solid #ddc890;}
 
       <div class="btn-row">
         <button class="btn btn-gold" onclick="saveEvent()">保存</button>
+        <button class="btn btn-outline" onclick="shareEventFromModal()">📢 告知をシェア</button>
         <button class="btn btn-outline" onclick="closeModal('eventModal')">キャンセル</button>
         <button class="btn btn-danger" id="evDeleteBtn" onclick="deleteEvent()" style="display:none;">削除</button>
       </div>
@@ -631,6 +632,44 @@ function smBump(i, d){
   renderSaleMode();
 }
 
+// ─── シェア（Instagram等） ────────────────────────────────────────────────────
+async function shareContent(text, imgId){
+  let files = [];
+  if(imgId){
+    const url = await getImg(imgId);
+    if(url){
+      try{
+        const blob = await (await fetch(url)).blob();
+        const file = new File([blob], 'photo.jpg', {type:blob.type||'image/jpeg'});
+        if(navigator.canShare && navigator.canShare({files:[file]})) files=[file];
+      }catch(e){}
+    }
+  }
+  if(navigator.share){
+    try{
+      await navigator.share(files.length ? {text, files} : {text});
+      return;
+    }catch(e){ if(e.name==='AbortError') return; }
+  }
+  // フォールバック：文章をコピー
+  try{ await navigator.clipboard.writeText(text); showToast('文章をコピーしました。Instagramに貼り付けてください'); }
+  catch(e){ alert(text); }
+}
+
+function shareMenu(i){
+  const m = D.menu[i];
+  const text = `${m.name}　¥${fmt(m.price)}\n\n炭火でじっくり焼き上げた一品です🔥\n\n#下町炭焼きホットドッグ #ホットドッグ #炭焼き #キッチンカー #出店`;
+  shareContent(text, m.imgId);
+}
+
+function shareEventFromModal(){
+  const name = document.getElementById('ev-name').value;
+  const date = document.getElementById('ev-date').value;
+  const place = document.getElementById('ev-place').value;
+  const text = `【出店のお知らせ】\n${name||''}\n📅 ${date?fmtDate(date):'日程調整中'}\n📍 ${place||''}\n\n炭焼きホットドッグを焼いてお待ちしています！ぜひお越しください🌭🔥\n\n#下町炭焼きホットドッグ #出店 #イベント`;
+  shareContent(text, null);
+}
+
 // ─── MENU ─────────────────────────────────────────────────────────────────────
 async function renderMenu(){
   const tb = document.getElementById('menuBody');
@@ -644,7 +683,7 @@ async function renderMenu(){
       <td style="text-align:right;">¥${fmt(cost)}</td>
       <td style="text-align:right;color:${rate>50?'#c05010':'#2f6040'};">${rate}%</td>
       <td style="text-align:right;">¥${fmt(price-cost)}</td>
-      <td><button class="btn-danger" onclick="openMenuModal(${i})">編集</button></td>
+      <td style="white-space:nowrap;"><button class="btn-outline btn-sm" onclick="shareMenu(${i})" style="border:1px solid #c8880a;color:#c8880a;background:transparent;border-radius:4px;padding:4px 8px;cursor:pointer;font-size:11px;">📷</button> <button class="btn-danger" onclick="openMenuModal(${i})">編集</button></td>
     </tr>`;
   }).join('');
   // サムネイル読み込み
