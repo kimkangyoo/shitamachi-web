@@ -199,9 +199,17 @@ td{padding:8px 10px;border-bottom:1px solid #ddc890;}
       </div>
       <div id="ev-shop-list"></div>
 
+      <div class="sub-eyebrow">商品別の販売</div>
+      <table style="margin-bottom:8px;">
+        <thead><tr><th>商品</th><th style="width:70px;">個数</th><th style="width:90px;">単価</th><th style="width:90px;">小計</th><th style="width:40px;"></th></tr></thead>
+        <tbody id="ev-sales-tbody"></tbody>
+      </table>
+      <datalist id="menuNames"></datalist>
+      <button class="btn btn-outline btn-sm" type="button" onclick="addSalesItem()" style="margin-bottom:16px;">＋ 商品を追加</button>
+
       <div class="sub-eyebrow">当日の実績</div>
       <div class="form-grid">
-        <div><label class="fl">売上（円）</label><input type="number" id="ev-sales" min="0" placeholder="0" oninput="calcProfit()"></div>
+        <div><label class="fl">売上（円）※商品別があれば自動</label><input type="number" id="ev-sales" min="0" placeholder="0" oninput="calcProfit()"></div>
         <div><label class="fl">販売数（個）</label><input type="number" id="ev-customers" min="0" placeholder="0"></div>
         <div><label class="fl">経費（材料費・出店料など・円）</label><input type="number" id="ev-cost" min="0" placeholder="0" oninput="calcProfit()"></div>
         <div><label class="fl">利益（自動計算）</label><input type="text" id="ev-profit" disabled></div>
@@ -371,7 +379,45 @@ function renderEvents(){
       }).join('');
 }
 
-let tmpPrep = [], tmpShop = [];
+let tmpPrep = [], tmpShop = [], tmpSales = [];
+
+function renderSalesItems(){
+  // メニュー候補
+  document.getElementById('menuNames').innerHTML = D.menu.map(m=>`<option value="${esc(m.name)}">`).join('');
+  const tb = document.getElementById('ev-sales-tbody');
+  if(tmpSales.length===0){ tb.innerHTML='<tr><td colspan="5" style="color:#8b6820;font-size:12px;">商品がありません。「＋ 商品を追加」から入力できます。</td></tr>'; return; }
+  tb.innerHTML = tmpSales.map((it,i)=>`<tr>
+    <td><input type="text" list="menuNames" value="${esc(it.name)}" placeholder="商品名" oninput="tmpSales[${i}].name=this.value" onchange="autofillPrice(${i})" style="min-width:120px;"></td>
+    <td><input type="number" min="0" value="${it.qty}" oninput="tmpSales[${i}].qty=Number(this.value);renderSalesTotalsOnly();onSalesChange()" style="width:60px;"></td>
+    <td><input type="number" min="0" value="${it.price}" oninput="tmpSales[${i}].price=Number(this.value);renderSalesTotalsOnly();onSalesChange()" style="width:80px;"></td>
+    <td style="text-align:right;font-size:12px;">¥${fmt(it.qty*it.price)}</td>
+    <td><button class="btn-danger" onclick="tmpSales.splice(${i},1);renderSalesItems();onSalesChange()" style="padding:2px 8px;">×</button></td>
+  </tr>`).join('');
+}
+function renderSalesTotalsOnly(){
+  // 小計セルだけ更新（フォーカスを保つため全再描画しない）
+  const rows = document.querySelectorAll('#ev-sales-tbody tr');
+  tmpSales.forEach((it,i)=>{ const cell=rows[i]?.children[3]; if(cell) cell.textContent='¥'+fmt(it.qty*it.price); });
+}
+function addSalesItem(){
+  // メニューがあれば1件目の単価を初期値に
+  tmpSales.push({name:'', qty:1, price:0});
+  renderSalesItems(); onSalesChange();
+}
+function autofillPrice(i){
+  const m = D.menu.find(x=>x.name===tmpSales[i].name);
+  if(m && (!tmpSales[i].price)){ tmpSales[i].price = Number(m.price||0); }
+  renderSalesItems(); onSalesChange();
+}
+function onSalesChange(){
+  if(tmpSales.length>0){
+    const total = tmpSales.reduce((a,it)=>a+it.qty*it.price,0);
+    const qty = tmpSales.reduce((a,it)=>a+Number(it.qty||0),0);
+    document.getElementById('ev-sales').value = total;
+    document.getElementById('ev-customers').value = qty;
+    calcProfit();
+  }
+}
 
 function calcProfit(){
   const s=Number(document.getElementById('ev-sales').value||0);
@@ -395,7 +441,8 @@ function openEventModal(idx){
   calcProfit();
   tmpPrep = e? JSON.parse(JSON.stringify(e.prep||[])) : [];
   tmpShop = e? JSON.parse(JSON.stringify(e.shop||[])) : [];
-  renderPrep(); renderShop();
+  tmpSales = e? JSON.parse(JSON.stringify(e.salesItems||[])) : [];
+  renderPrep(); renderShop(); renderSalesItems();
   document.getElementById('evDeleteBtn').style.display = e?'block':'none';
   document.getElementById('eventModal').classList.add('open');
 }
@@ -436,7 +483,7 @@ function saveEvent(){
     weather:document.getElementById('ev-weather').value,
     reaction:document.getElementById('ev-reaction').value,
     memo:document.getElementById('ev-memo').value,
-    prep:tmpPrep, shop:tmpShop
+    prep:tmpPrep, shop:tmpShop, salesItems:tmpSales
   };
   if(idx!=='') D.events[Number(idx)]=obj; else D.events.push(obj);
   saveD(); closeModal('eventModal'); renderEvents();
