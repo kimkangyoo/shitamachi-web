@@ -282,7 +282,7 @@ td{padding:8px 10px;border-bottom:1px solid #ddc890;}
       <div style="color:#a09070;font-size:12px;margin-top:2px;" id="smCount">0 個</div>
     </div>
   </div>
-  <div id="smGrid" style="flex:1;overflow-y:auto;padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;align-content:start;"></div>
+  <div id="smGrid" style="flex:1;overflow-y:auto;padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;align-content:start;"></div>
   <input type="file" id="smImgInput" accept="image/*" style="display:none;" onchange="smSetImage(this.files)">
 </div>
 
@@ -647,23 +647,28 @@ function renderSaleMode(){
   document.getElementById('smGrid').innerHTML = items.length===0
     ? '<div style="color:#a09070;grid-column:1/-1;">商品がありません。「開く」から商品を追加してください。</div>'
     : items.map((it,i)=>`
-      <div style="background:#241605;border:1px solid #3a2208;border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:8px;">
-        <div id="smThumb${i}"></div>
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
-          <div style="color:#f0ddb0;font-size:14px;font-weight:700;flex:1;">${esc(it.name||'（無名）')}</div>
-          <button onclick="smPickImage(${i})" style="background:transparent;border:1px solid #7a5218;color:#d4920a;font-size:11px;padding:3px 7px;border-radius:5px;cursor:pointer;white-space:nowrap;">📷</button>
+      <div style="background:#241605;border:1px solid #3a2208;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;">
+        <div onclick="smBump(${i},1)" style="position:relative;cursor:pointer;aspect-ratio:1/1;background:#1a1105;display:flex;align-items:center;justify-content:center;">
+          <div id="smImg${i}" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+            <span style="color:#5a4a2a;font-size:48px;">🌭</span>
+          </div>
+          ${it.qty>0?`<div style="position:absolute;top:8px;right:8px;background:#c8880a;color:#fff;min-width:44px;height:44px;border-radius:22px;display:flex;align-items:center;justify-content:center;font-family:'Shippori Mincho',serif;font-size:26px;padding:0 8px;box-shadow:0 2px 8px rgba(0,0,0,.4);">${it.qty}</div>`:''}
+          <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.75));padding:16px 12px 10px;">
+            <div style="color:#fff;font-size:16px;font-weight:700;line-height:1.3;">${esc(it.name||'（無名）')}</div>
+            <div style="color:#e8d090;font-size:13px;">¥${fmt(it.price)}</div>
+          </div>
+          <div style="position:absolute;bottom:10px;right:10px;color:rgba(255,255,255,.7);font-size:11px;">タップで＋1</div>
         </div>
-        <div style="color:#a09070;font-size:11px;">¥${fmt(it.price)}</div>
-        <div style="display:flex;align-items:center;gap:8px;">
+        <div style="display:flex;align-items:center;gap:8px;padding:8px;">
           <button onclick="smBump(${i},-1)" style="width:40px;height:40px;border-radius:8px;border:1px solid #7a5218;background:transparent;color:#d4920a;font-size:22px;cursor:pointer;">−</button>
-          <div style="flex:1;text-align:center;font-family:'Shippori Mincho',serif;color:#fff;font-size:30px;">${it.qty}</div>
+          <button onclick="smBump(${i},1)" style="flex:1;height:40px;border-radius:8px;border:none;background:#c8880a;color:#fff;font-size:22px;font-weight:700;cursor:pointer;">＋</button>
+          <button onclick="smPickImage(${i})" title="写真" style="width:40px;height:40px;border-radius:8px;border:1px solid #7a5218;background:transparent;color:#d4920a;font-size:16px;cursor:pointer;">📷</button>
         </div>
-        <button onclick="smBump(${i},1)" style="width:100%;height:60px;border-radius:8px;border:none;background:#c8880a;color:#fff;font-size:30px;font-weight:700;cursor:pointer;">＋</button>
       </div>`).join('');
   // 商品写真をメニューから読み込み
   items.forEach(async (it,i)=>{
     const m = D.menu.find(x=>x.name===it.name);
-    if(m && m.imgId){ const url=await getImg(m.imgId); const el=document.getElementById('smThumb'+i); if(el&&url) el.innerHTML=`<img src="${url}" style="width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:6px;">`; }
+    if(m && m.imgId){ const url=await getImg(m.imgId); const el=document.getElementById('smImg'+i); if(el&&url) el.innerHTML=`<img src="${url}" style="width:100%;height:100%;object-fit:cover;">`; }
   });
 }
 let smImgTargetIdx = null;
