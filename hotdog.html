@@ -205,6 +205,7 @@ td{padding:8px 10px;border-bottom:1px solid #ddc890;}
       <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
         <input type="text" id="ev-shop-input" placeholder="買うものを追加" style="flex:1;min-width:140px;">
         <button class="btn btn-outline btn-sm" type="button" onclick="addShop()">追加</button>
+        <button class="btn btn-outline btn-sm" type="button" onclick="printShoppingList()">🖨 PDFで書き出し</button>
       </div>
       <div id="ev-shop-list"></div>
 
@@ -518,6 +519,32 @@ function renderShop(){
       </div>`).join('');
 }
 function addShop(){ const v=document.getElementById('ev-shop-input').value.trim(); if(!v)return; tmpShop.push({text:v,done:false}); document.getElementById('ev-shop-input').value=''; renderShop(); }
+
+function printShoppingList(){
+  if(tmpShop.length===0){ showToast('買い出しリストが空です'); return; }
+  const name = document.getElementById('ev-name').value || '出店';
+  const date = document.getElementById('ev-date').value;
+  const rows = tmpShop.map(s=>`<tr><td class="ck">${s.done?'☑':'☐'}</td><td>${esc(s.text)}</td></tr>`).join('');
+  const w = window.open('','_blank','width=600,height=800');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>買い出しリスト</title>
+  <style>
+    body{font-family:'Hiragino Sans','Yu Gothic',sans-serif;padding:32px;color:#1a1a1a;}
+    h1{font-size:22px;margin:0 0 4px;}
+    .meta{font-size:13px;color:#555;margin-bottom:20px;}
+    table{width:100%;border-collapse:collapse;}
+    td{border-bottom:1px solid #ccc;padding:12px 8px;font-size:16px;}
+    td.ck{width:36px;text-align:center;font-size:22px;}
+    @media print{ .noprint{display:none;} }
+    .noprint{margin-bottom:16px;}
+    button{padding:8px 16px;font-size:14px;cursor:pointer;}
+  </style></head><body>
+    <div class="noprint"><button onclick="window.print()">印刷 / PDF保存</button></div>
+    <h1>買い出しリスト</h1>
+    <div class="meta">${esc(name)}${date?'　／　'+date.replace(/-/g,'.'):''}</div>
+    <table>${rows}</table>
+  </body></html>`);
+  w.document.close();
+}
 
 function renderBring(){
   // マスターのチップ（選択で反映）
