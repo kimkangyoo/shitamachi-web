@@ -105,6 +105,20 @@ td{padding:8px 10px;border-bottom:1px solid #ddc890;}
   </table>
 </div>
 
+<!-- 共通 持ち物マスター -->
+<div class="tab-content" id="tab-belongings">
+  <div class="sec-head"><h2>持ち物マスター</h2>
+    <span class="sec-sub">ここで登録 → 各出店で選んで反映</span>
+  </div>
+  <p style="font-size:12px;color:#5a3a10;margin-bottom:12px;line-height:1.8;">よく持っていくものを登録しておきます。各出店イベントの「持ち物リスト」で、ここから選んで反映できます。</p>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+    <input type="text" id="belInput" placeholder="持ち物を追加（例：延長コード）" style="flex:1;min-width:160px;">
+    <button class="btn btn-gold btn-sm" type="button" onclick="addBel()">追加</button>
+    <button class="btn btn-outline btn-sm" type="button" onclick="addBelTemplate()">定番をまとめて追加</button>
+  </div>
+  <div id="belList"></div>
+</div>
+
 <!-- TODO -->
 <div class="tab-content" id="tab-todo">
   <div class="sec-head"><h2>TODO</h2>
@@ -179,10 +193,11 @@ td{padding:8px 10px;border-bottom:1px solid #ddc890;}
       <div id="ev-prep-list"></div>
 
       <div class="sub-eyebrow">持ち物リスト</div>
+      <div style="font-size:11px;color:#8b6820;margin-bottom:6px;">持ち物マスターから選ぶ（タップで反映）</div>
+      <div id="ev-bring-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;"></div>
       <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
-        <input type="text" id="ev-bring-input" placeholder="持ち物を追加" style="flex:1;min-width:140px;">
+        <input type="text" id="ev-bring-input" placeholder="この出店だけの持ち物を追加" style="flex:1;min-width:140px;">
         <button class="btn btn-outline btn-sm" type="button" onclick="addBring()">追加</button>
-        <button class="btn btn-outline btn-sm" type="button" onclick="addBringTemplate()">定番をまとめて追加</button>
       </div>
       <div id="ev-bring-list"></div>
 
@@ -292,6 +307,20 @@ function getImg(id){ return new Promise(res=>{ if(!idb){res(null);return;} const
 function delImg(id){ if(!idb) return; idb.transaction('images','readwrite').objectStore('images').delete(id); }
 
 const BEL_TEMPLATE = ['テント・タープ','折りたたみテーブル・イス','のぼり・看板・メニュー表','炭・炭焼きコンロ・着火剤','トング・ヘラ・調理器具','クーラーボックス・保冷剤','手袋・エプロン・帽子','容器・紙ナプキン・持ち帰り袋','つり銭・レジ（金庫）','ゴミ袋・雑巾・アルコール','消火用の水・消火器','手指消毒・ペーパータオル'];
+
+// ─── 持ち物マスター（共通） ───────────────────────────────────────────────────
+function renderBel(){
+  const el=document.getElementById('belList');
+  if(!el) return;
+  if((D.belongings||[]).length===0){ el.innerHTML='<div style="color:#8b6820;font-size:13px;">持ち物がありません。「定番をまとめて追加」から始められます。</div>'; return; }
+  el.innerHTML = D.belongings.map((b,i)=>`<div class="chk-item">
+    <span style="flex:1;">${esc(b.text)}</span>
+    <button onclick="deleteBel(${i})" style="background:none;border:none;color:#b0a48c;font-size:15px;cursor:pointer;">×</button>
+  </div>`).join('');
+}
+function addBel(){ const v=document.getElementById('belInput').value.trim(); if(!v)return; if(!D.belongings.some(b=>b.text===v)) D.belongings.push({text:v}); saveD(); document.getElementById('belInput').value=''; renderBel(); }
+function addBelTemplate(){ BEL_TEMPLATE.forEach(t=>{ if(!D.belongings.some(b=>b.text===t)) D.belongings.push({text:t}); }); saveD(); renderBel(); showToast('定番を追加しました'); }
+function deleteBel(i){ D.belongings.splice(i,1); saveD(); renderBel(); }
 
 // ─── TODO ─────────────────────────────────────────────────────────────────────
 function setTodoToday(){ document.getElementById('todoDate').value = today(); }
@@ -451,8 +480,6 @@ function openEventModal(idx){
   tmpShop = e? JSON.parse(JSON.stringify(e.shop||[])) : [];
   tmpSales = e? JSON.parse(JSON.stringify(e.salesItems||[])) : [];
   tmpBring = e? JSON.parse(JSON.stringify(e.bring||[])) : [];
-  // 旧・共通の持ち物リストが残っていれば、新規イベントの初期値として利用
-  if(!e && tmpBring.length===0 && (D.belongings||[]).length>0){ tmpBring = D.belongings.map(b=>({text:b.text,done:false})); }
   renderPrep(); renderShop(); renderSalesItems(); renderBring();
   document.getElementById('evDeleteBtn').style.display = e?'block':'none';
   document.getElementById('eventModal').classList.add('open');
@@ -482,16 +509,31 @@ function renderShop(){
 function addShop(){ const v=document.getElementById('ev-shop-input').value.trim(); if(!v)return; tmpShop.push({text:v,done:false}); document.getElementById('ev-shop-input').value=''; renderShop(); }
 
 function renderBring(){
+  // マスターのチップ（選択で反映）
+  const chips = document.getElementById('ev-bring-chips');
+  if((D.belongings||[]).length===0){
+    chips.innerHTML = '<span style="font-size:11px;color:#a09080;">持ち物マスターが空です。上部の「持ち物マスター」で登録してください。</span>';
+  } else {
+    chips.innerHTML = D.belongings.map(b=>{
+      const on = tmpBring.some(t=>t.text===b.text);
+      return `<button type="button" onclick="toggleBringFromMaster('${esc(b.text).replace(/'/g,"\\'")}')" style="font-size:12px;padding:5px 12px;border-radius:16px;cursor:pointer;border:1px solid ${on?'#c8880a':'#d4c4a4'};background:${on?'#c8880a':'#fffdf5'};color:${on?'#fff':'#5a3a10'};">${on?'✓ ':''}${esc(b.text)}</button>`;
+    }).join('');
+  }
+  // この出店の持ち物リスト（チェック＝準備完了）
   document.getElementById('ev-bring-list').innerHTML = tmpBring.length===0
-    ? '<div style="color:#8b6820;font-size:12px;margin-bottom:8px;">項目がありません。「定番をまとめて追加」から。</div>'
+    ? '<div style="color:#8b6820;font-size:12px;margin-bottom:8px;">上のマスターから選ぶか、下で追加してください。</div>'
     : tmpBring.map((p,i)=>`<div class="chk-item ${p.done?'done':''}">
         <input type="checkbox" ${p.done?'checked':''} onchange="tmpBring[${i}].done=!tmpBring[${i}].done;renderBring()">
         <span>${esc(p.text)}</span>
         <button onclick="tmpBring.splice(${i},1);renderBring()" style="background:none;border:none;color:#b0a48c;font-size:15px;cursor:pointer;">×</button>
       </div>`).join('');
 }
-function addBring(){ const v=document.getElementById('ev-bring-input').value.trim(); if(!v)return; tmpBring.push({text:v,done:false}); document.getElementById('ev-bring-input').value=''; renderBring(); }
-function addBringTemplate(){ BEL_TEMPLATE.forEach(t=>{ if(!tmpBring.some(b=>b.text===t)) tmpBring.push({text:t,done:false}); }); renderBring(); }
+function toggleBringFromMaster(text){
+  const idx = tmpBring.findIndex(t=>t.text===text);
+  if(idx>=0) tmpBring.splice(idx,1); else tmpBring.push({text,done:false});
+  renderBring();
+}
+function addBring(){ const v=document.getElementById('ev-bring-input').value.trim(); if(!v)return; if(!tmpBring.some(t=>t.text===v)) tmpBring.push({text:v,done:false}); document.getElementById('ev-bring-input').value=''; renderBring(); }
 
 function saveEvent(){
   const idx = document.getElementById('evEditId').value;
@@ -632,6 +674,7 @@ loadD();
 openIDB().then(()=>renderRefs());
 renderEvents();
 renderMenu();
+renderBel();
 renderTodo();
 renderRefs();
 document.querySelectorAll('.modal-bg').forEach(bg=>bg.addEventListener('click',e=>{ if(e.target===bg) bg.classList.remove('open'); }));
