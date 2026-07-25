@@ -249,6 +249,16 @@ td{padding:8px 10px;border-bottom:1px solid #ddc890;}
         <div><label class="fl">売価（円）</label><input type="number" id="m-price" min="0"></div>
         <div><label class="fl">原価（円）</label><input type="number" id="m-cost" min="0"></div>
       </div>
+      <div>
+        <label class="fl">看板・写真</label>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+          <img id="m-img-preview" style="width:120px;height:120px;object-fit:cover;border:1px solid #d4b870;border-radius:6px;display:none;background:#fff;">
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <label class="btn btn-outline btn-sm" style="cursor:pointer;">📂 画像を選ぶ<input type="file" accept="image/*" style="display:none;" onchange="chooseMenuImg(this.files)"></label>
+            <button type="button" class="btn-danger" id="m-img-remove" onclick="removeMenuImg()" style="display:none;">画像を削除</button>
+          </div>
+        </div>
+      </div>
       <div class="btn-row">
         <button class="btn btn-gold" onclick="saveMenu()">保存</button>
         <button class="btn btn-outline" onclick="closeModal('menuModal')">キャンセル</button>
@@ -596,6 +606,7 @@ function renderSaleMode(){
     ? '<div style="color:#a09070;grid-column:1/-1;">商品がありません。「開く」から商品を追加してください。</div>'
     : items.map((it,i)=>`
       <div style="background:#241605;border:1px solid #3a2208;border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:8px;">
+        <div id="smThumb${i}"></div>
         <div style="color:#f0ddb0;font-size:14px;font-weight:700;min-height:38px;">${esc(it.name||'（無名）')}</div>
         <div style="color:#a09070;font-size:11px;">¥${fmt(it.price)}</div>
         <div style="display:flex;align-items:center;gap:8px;">
@@ -604,6 +615,11 @@ function renderSaleMode(){
         </div>
         <button onclick="smBump(${i},1)" style="width:100%;height:60px;border-radius:8px;border:none;background:#c8880a;color:#fff;font-size:30px;font-weight:700;cursor:pointer;">＋</button>
       </div>`).join('');
+  // 商品写真をメニューから読み込み
+  items.forEach(async (it,i)=>{
+    const m = D.menu.find(x=>x.name===it.name);
+    if(m && m.imgId){ const url=await getImg(m.imgId); const el=document.getElementById('smThumb'+i); if(el&&url) el.innerHTML=`<img src="${url}" style="width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:6px;">`; }
+  });
 }
 function smBump(i, d){
   const e = D.events[smEventIdx];
@@ -616,22 +632,27 @@ function smBump(i, d){
 }
 
 // ─── MENU ─────────────────────────────────────────────────────────────────────
-function renderMenu(){
-  document.getElementById('menuBody').innerHTML = D.menu.length===0
-    ? '<tr><td colspan="6" style="text-align:center;color:#8b6820;">商品がありません</td></tr>'
-    : D.menu.map((m,i)=>{
-        const price=Number(m.price||0), cost=Number(m.cost||0);
-        const rate = price? Math.round(cost/price*100):0;
-        return `<tr>
-          <td>${esc(m.name)}</td>
-          <td style="text-align:right;">¥${fmt(price)}</td>
-          <td style="text-align:right;">¥${fmt(cost)}</td>
-          <td style="text-align:right;color:${rate>50?'#c05010':'#2f6040'};">${rate}%</td>
-          <td style="text-align:right;">¥${fmt(price-cost)}</td>
-          <td><button class="btn-danger" onclick="openMenuModal(${i})">編集</button></td>
-        </tr>`;
-      }).join('');
+async function renderMenu(){
+  const tb = document.getElementById('menuBody');
+  if(D.menu.length===0){ tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:#8b6820;">商品がありません</td></tr>'; return; }
+  tb.innerHTML = D.menu.map((m,i)=>{
+    const price=Number(m.price||0), cost=Number(m.cost||0);
+    const rate = price? Math.round(cost/price*100):0;
+    return `<tr>
+      <td><span id="menuThumb${i}" style="display:inline-block;vertical-align:middle;margin-right:8px;"></span>${esc(m.name)}</td>
+      <td style="text-align:right;">¥${fmt(price)}</td>
+      <td style="text-align:right;">¥${fmt(cost)}</td>
+      <td style="text-align:right;color:${rate>50?'#c05010':'#2f6040'};">${rate}%</td>
+      <td style="text-align:right;">¥${fmt(price-cost)}</td>
+      <td><button class="btn-danger" onclick="openMenuModal(${i})">編集</button></td>
+    </tr>`;
+  }).join('');
+  // サムネイル読み込み
+  for(let i=0;i<D.menu.length;i++){
+    if(D.menu[i].imgId){ const url=await getImg(D.menu[i].imgId); const el=document.getElementById('menuThumb'+i); if(el&&url) el.innerHTML=`<img src="${url}" style="width:36px;height:36px;object-fit:cover;border-radius:4px;border:1px solid #d4b870;">`; }
+  }
 }
+let mTmpImgId = '';
 function openMenuModal(i){
   const m = i!==null ? D.menu[i] : null;
   document.getElementById('menuModalTitle').textContent = m?'商品を編集':'商品を追加';
@@ -639,12 +660,28 @@ function openMenuModal(i){
   document.getElementById('m-name').value=m?.name||'';
   document.getElementById('m-price').value=m?.price||'';
   document.getElementById('m-cost').value=m?.cost||'';
+  mTmpImgId = m?.imgId||'';
+  showMenuImgPreview();
   document.getElementById('mDeleteBtn').style.display=m?'block':'none';
   document.getElementById('menuModal').classList.add('open');
 }
+async function showMenuImgPreview(){
+  const prev=document.getElementById('m-img-preview'), rm=document.getElementById('m-img-remove');
+  if(mTmpImgId){ const url=await getImg(mTmpImgId); if(url){ prev.src=url; prev.style.display='block'; rm.style.display='block'; return; } }
+  prev.style.display='none'; rm.style.display='none';
+}
+async function chooseMenuImg(files){
+  if(!files||!files.length) return;
+  const f=files[0]; if(!f.type.startsWith('image/')) return;
+  const url=await new Promise(r=>{const fr=new FileReader();fr.onload=e=>r(e.target.result);fr.readAsDataURL(f);});
+  const id='mi_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+  await putImg(id,url);
+  mTmpImgId=id; showMenuImgPreview();
+}
+function removeMenuImg(){ if(mTmpImgId){ delImg(mTmpImgId); mTmpImgId=''; } showMenuImgPreview(); }
 function saveMenu(){
   const i=document.getElementById('mEditId').value;
-  const obj={name:document.getElementById('m-name').value,price:document.getElementById('m-price').value,cost:document.getElementById('m-cost').value};
+  const obj={name:document.getElementById('m-name').value,price:document.getElementById('m-price').value,cost:document.getElementById('m-cost').value,imgId:mTmpImgId};
   if(!obj.name){ showToast('商品名を入力してください'); return; }
   if(i!=='') D.menu[Number(i)]=obj; else D.menu.push(obj);
   saveD(); closeModal('menuModal'); renderMenu();
