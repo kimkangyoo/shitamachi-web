@@ -703,6 +703,11 @@ function smAddProduct(){
   renderSaleMode();
   renderMenu();
   showToast('「'+nm+'」を登録しました');
+  // 続けて写真を登録するか
+  if(confirm('「'+nm+'」の写真を登録しますか？')){
+    const idx = e.salesItems.findIndex(s=>s.name===nm);
+    if(idx>=0) smPickImage(idx);
+  }
 }
 function smBump(i, d){
   const e = D.events[smEventIdx];
