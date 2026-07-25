@@ -537,11 +537,22 @@ function renderBring(){
       + tmpBring.map((p,i)=>`<div class="chk-item ${p.done?'done':''}">
         <input type="checkbox" ${p.done?'checked':''} onchange="tmpBring[${i}].done=!tmpBring[${i}].done;renderBring()" title="準備できた">
         <span>${esc(p.text)}</span>
-        <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:${p.bought?'#2f6040':'#8b6820'};cursor:pointer;white-space:nowrap;">
-          <input type="checkbox" ${p.bought?'checked':''} onchange="tmpBring[${i}].bought=!tmpBring[${i}].bought;renderBring()" style="accent-color:#2f6040;">🛒購入
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:${p.bought?'#c05010':'#8b6820'};cursor:pointer;white-space:nowrap;" title="チェックすると買い出しリストに入ります">
+          <input type="checkbox" ${p.bought?'checked':''} onchange="toggleBringBuy(${i})" style="accent-color:#c05010;">🛒買い出し
         </label>
         <button onclick="tmpBring.splice(${i},1);renderBring()" style="background:none;border:none;color:#b0a48c;font-size:15px;cursor:pointer;">×</button>
       </div>`).join('');
+}
+function toggleBringBuy(i){
+  tmpBring[i].bought = !tmpBring[i].bought;
+  const text = tmpBring[i].text;
+  if(tmpBring[i].bought){
+    if(!tmpShop.some(s=>s.text===text)) tmpShop.push({text, done:false, fromBring:true});
+  } else {
+    const idx = tmpShop.findIndex(s=>s.text===text && s.fromBring && !s.done);
+    if(idx>=0) tmpShop.splice(idx,1);
+  }
+  renderBring(); renderShop();
 }
 function toggleBringFromMaster(text){
   const idx = tmpBring.findIndex(t=>t.text===text);
