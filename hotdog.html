@@ -105,20 +105,6 @@ td{padding:8px 10px;border-bottom:1px solid #ddc890;}
   </table>
 </div>
 
-<!-- 持ち物リスト -->
-<div class="tab-content" id="tab-belongings">
-  <div class="sec-head"><h2>持ち物リスト</h2>
-    <span class="sec-sub">毎回使い回せます</span>
-  </div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-    <input type="text" id="belInput" placeholder="持ち物を追加（例：延長コード）" style="flex:1;min-width:160px;">
-    <button class="btn btn-gold btn-sm" type="button" onclick="addBel()">追加</button>
-    <button class="btn btn-outline btn-sm" type="button" onclick="addBelTemplate()">定番をまとめて追加</button>
-    <button class="btn btn-outline btn-sm" type="button" onclick="resetBel()">チェックを全部外す</button>
-  </div>
-  <div id="belList"></div>
-</div>
-
 <!-- TODO -->
 <div class="tab-content" id="tab-todo">
   <div class="sec-head"><h2>TODO</h2>
@@ -191,6 +177,14 @@ td{padding:8px 10px;border-bottom:1px solid #ddc890;}
         <button class="btn btn-outline btn-sm" type="button" onclick="addPrepTemplate()">定番をまとめて追加</button>
       </div>
       <div id="ev-prep-list"></div>
+
+      <div class="sub-eyebrow">持ち物リスト</div>
+      <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+        <input type="text" id="ev-bring-input" placeholder="持ち物を追加" style="flex:1;min-width:140px;">
+        <button class="btn btn-outline btn-sm" type="button" onclick="addBring()">追加</button>
+        <button class="btn btn-outline btn-sm" type="button" onclick="addBringTemplate()">定番をまとめて追加</button>
+      </div>
+      <div id="ev-bring-list"></div>
 
       <div class="sub-eyebrow">買い出しリスト</div>
       <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
@@ -297,22 +291,7 @@ function putImg(id,dataUrl){ return new Promise(res=>{ if(!idb){res(false);retur
 function getImg(id){ return new Promise(res=>{ if(!idb){res(null);return;} const req=idb.transaction('images').objectStore('images').get(id); req.onsuccess=e=>res(e.target.result?e.target.result.dataUrl:null); req.onerror=()=>res(null); }); }
 function delImg(id){ if(!idb) return; idb.transaction('images','readwrite').objectStore('images').delete(id); }
 
-// ─── 持ち物リスト ─────────────────────────────────────────────────────────────
 const BEL_TEMPLATE = ['テント・タープ','折りたたみテーブル・イス','のぼり・看板・メニュー表','炭・炭焼きコンロ・着火剤','トング・ヘラ・調理器具','クーラーボックス・保冷剤','手袋・エプロン・帽子','容器・紙ナプキン・持ち帰り袋','つり銭・レジ（金庫）','ゴミ袋・雑巾・アルコール','消火用の水・消火器','手指消毒・ペーパータオル'];
-function renderBel(){
-  const el=document.getElementById('belList');
-  if(D.belongings.length===0){ el.innerHTML='<div style="color:#8b6820;font-size:13px;">持ち物がありません。「定番をまとめて追加」から始められます。</div>'; return; }
-  el.innerHTML = D.belongings.map((b,i)=>`<div class="chk-item ${b.done?'done':''}">
-    <input type="checkbox" ${b.done?'checked':''} onchange="toggleBel(${i})">
-    <span>${esc(b.text)}</span>
-    <button onclick="deleteBel(${i})" style="background:none;border:none;color:#b0a48c;font-size:15px;cursor:pointer;">×</button>
-  </div>`).join('');
-}
-function addBel(){ const v=document.getElementById('belInput').value.trim(); if(!v)return; D.belongings.push({text:v,done:false}); saveD(); document.getElementById('belInput').value=''; renderBel(); }
-function addBelTemplate(){ BEL_TEMPLATE.forEach(t=>{ if(!D.belongings.some(b=>b.text===t)) D.belongings.push({text:t,done:false}); }); saveD(); renderBel(); showToast('定番を追加しました'); }
-function toggleBel(i){ D.belongings[i].done=!D.belongings[i].done; saveD(); renderBel(); }
-function deleteBel(i){ D.belongings.splice(i,1); saveD(); renderBel(); }
-function resetBel(){ D.belongings.forEach(b=>b.done=false); saveD(); renderBel(); showToast('チェックを外しました'); }
 
 // ─── TODO ─────────────────────────────────────────────────────────────────────
 function setTodoToday(){ document.getElementById('todoDate').value = today(); }
@@ -375,6 +354,7 @@ function renderEvents(){
         const idx = D.events.indexOf(e);
         const past = e.date && e.date < today();
         const prepDone = (e.prep||[]).filter(p=>p.done).length, prepAll=(e.prep||[]).length;
+        const brDone = (e.bring||[]).filter(p=>p.done).length, brAll=(e.bring||[]).length;
         return `<div class="list-item">
           <div class="list-item-body">
             <div class="list-item-title">${esc(e.name||'無題の出店')}
@@ -383,6 +363,7 @@ function renderEvents(){
             <div class="list-item-meta">
               ${fmtDate(e.date)}${e.place?`　／　${esc(e.place)}`:''}
               ${prepAll?`　／　準備 ${prepDone}/${prepAll}`:''}
+              ${brAll?`　／　持ち物 ${brDone}/${brAll}`:''}
               ${e.weather?`　／　${esc(e.weather)}`:''}
               ${e.sales?`　／　売上 ¥${fmt(e.sales)}${e.customers?`（${e.customers}個）`:''}${e.cost?`・利益 ¥${fmt(Number(e.sales)-Number(e.cost))}`:''}`:''}
             </div>
@@ -395,7 +376,7 @@ function renderEvents(){
       }).join('');
 }
 
-let tmpPrep = [], tmpShop = [], tmpSales = [];
+let tmpPrep = [], tmpShop = [], tmpSales = [], tmpBring = [];
 
 function renderSalesItems(){
   document.getElementById('menuNames').innerHTML = D.menu.map(m=>`<option value="${esc(m.name)}">`).join('');
@@ -469,7 +450,10 @@ function openEventModal(idx){
   tmpPrep = e? JSON.parse(JSON.stringify(e.prep||[])) : [];
   tmpShop = e? JSON.parse(JSON.stringify(e.shop||[])) : [];
   tmpSales = e? JSON.parse(JSON.stringify(e.salesItems||[])) : [];
-  renderPrep(); renderShop(); renderSalesItems();
+  tmpBring = e? JSON.parse(JSON.stringify(e.bring||[])) : [];
+  // 旧・共通の持ち物リストが残っていれば、新規イベントの初期値として利用
+  if(!e && tmpBring.length===0 && (D.belongings||[]).length>0){ tmpBring = D.belongings.map(b=>({text:b.text,done:false})); }
+  renderPrep(); renderShop(); renderSalesItems(); renderBring();
   document.getElementById('evDeleteBtn').style.display = e?'block':'none';
   document.getElementById('eventModal').classList.add('open');
 }
@@ -497,6 +481,18 @@ function renderShop(){
 }
 function addShop(){ const v=document.getElementById('ev-shop-input').value.trim(); if(!v)return; tmpShop.push({text:v,done:false}); document.getElementById('ev-shop-input').value=''; renderShop(); }
 
+function renderBring(){
+  document.getElementById('ev-bring-list').innerHTML = tmpBring.length===0
+    ? '<div style="color:#8b6820;font-size:12px;margin-bottom:8px;">項目がありません。「定番をまとめて追加」から。</div>'
+    : tmpBring.map((p,i)=>`<div class="chk-item ${p.done?'done':''}">
+        <input type="checkbox" ${p.done?'checked':''} onchange="tmpBring[${i}].done=!tmpBring[${i}].done;renderBring()">
+        <span>${esc(p.text)}</span>
+        <button onclick="tmpBring.splice(${i},1);renderBring()" style="background:none;border:none;color:#b0a48c;font-size:15px;cursor:pointer;">×</button>
+      </div>`).join('');
+}
+function addBring(){ const v=document.getElementById('ev-bring-input').value.trim(); if(!v)return; tmpBring.push({text:v,done:false}); document.getElementById('ev-bring-input').value=''; renderBring(); }
+function addBringTemplate(){ BEL_TEMPLATE.forEach(t=>{ if(!tmpBring.some(b=>b.text===t)) tmpBring.push({text:t,done:false}); }); renderBring(); }
+
 function saveEvent(){
   const idx = document.getElementById('evEditId').value;
   const obj = {
@@ -510,7 +506,7 @@ function saveEvent(){
     weather:document.getElementById('ev-weather').value,
     reaction:document.getElementById('ev-reaction').value,
     memo:document.getElementById('ev-memo').value,
-    prep:tmpPrep, shop:tmpShop, salesItems:tmpSales
+    prep:tmpPrep, shop:tmpShop, bring:tmpBring, salesItems:tmpSales
   };
   if(idx!=='') D.events[Number(idx)]=obj; else D.events.push(obj);
   saveD(); closeModal('eventModal'); renderEvents();
@@ -636,7 +632,6 @@ loadD();
 openIDB().then(()=>renderRefs());
 renderEvents();
 renderMenu();
-renderBel();
 renderTodo();
 renderRefs();
 document.querySelectorAll('.modal-bg').forEach(bg=>bg.addEventListener('click',e=>{ if(e.target===bg) bg.classList.remove('open'); }));
