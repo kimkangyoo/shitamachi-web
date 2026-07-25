@@ -519,12 +519,16 @@ function renderBring(){
       return `<button type="button" onclick="toggleBringFromMaster('${esc(b.text).replace(/'/g,"\\'")}')" style="font-size:12px;padding:5px 12px;border-radius:16px;cursor:pointer;border:1px solid ${on?'#c8880a':'#d4c4a4'};background:${on?'#c8880a':'#fffdf5'};color:${on?'#fff':'#5a3a10'};">${on?'✓ ':''}${esc(b.text)}</button>`;
     }).join('');
   }
-  // この出店の持ち物リスト（チェック＝準備完了）
+  // この出店の持ち物リスト（準備チェック＋購入チェック）
   document.getElementById('ev-bring-list').innerHTML = tmpBring.length===0
     ? '<div style="color:#8b6820;font-size:12px;margin-bottom:8px;">上のマスターから選ぶか、下で追加してください。</div>'
-    : tmpBring.map((p,i)=>`<div class="chk-item ${p.done?'done':''}">
-        <input type="checkbox" ${p.done?'checked':''} onchange="tmpBring[${i}].done=!tmpBring[${i}].done;renderBring()">
+    : `<div style="display:flex;font-size:10px;color:#8b6820;padding:0 12px 4px;gap:8px;"><span style="width:16px;">準備</span><span style="flex:1;"></span><span>購入</span></div>`
+      + tmpBring.map((p,i)=>`<div class="chk-item ${p.done?'done':''}">
+        <input type="checkbox" ${p.done?'checked':''} onchange="tmpBring[${i}].done=!tmpBring[${i}].done;renderBring()" title="準備できた">
         <span>${esc(p.text)}</span>
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:${p.bought?'#2f6040':'#8b6820'};cursor:pointer;white-space:nowrap;">
+          <input type="checkbox" ${p.bought?'checked':''} onchange="tmpBring[${i}].bought=!tmpBring[${i}].bought;renderBring()" style="accent-color:#2f6040;">🛒購入
+        </label>
         <button onclick="tmpBring.splice(${i},1);renderBring()" style="background:none;border:none;color:#b0a48c;font-size:15px;cursor:pointer;">×</button>
       </div>`).join('');
 }
