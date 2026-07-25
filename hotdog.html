@@ -275,6 +275,7 @@ td{padding:8px 10px;border-bottom:1px solid #ddc890;}
   <div style="padding:12px 16px;background:#1c0f02;border-bottom:1px solid #3a2208;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
     <button onclick="closeSaleMode()" style="background:transparent;border:1px solid #7a5218;color:#e8d090;font-size:13px;padding:10px 16px;border-radius:6px;cursor:pointer;">終了</button>
     <button onclick="smAddProduct()" style="background:#c8880a;border:none;color:#fff;font-size:14px;padding:10px 16px;border-radius:6px;cursor:pointer;font-weight:700;">＋ 商品を追加</button>
+    <div id="smTitle" style="font-family:'Shippori Mincho',serif;color:#a09070;font-size:12px;"></div>
     <div style="margin-left:auto;text-align:right;">
       <div style="font-family:'Shippori Mincho',serif;color:#d4920a;font-size:28px;line-height:1;" id="smTotal">¥0</div>
       <div style="color:#a09070;font-size:12px;margin-top:2px;" id="smCount">0 個</div>
@@ -626,7 +627,7 @@ function openSaleMode(idx){
     D.menu.forEach(m=>e.salesItems.push({name:m.name, qty:0, price:Number(m.price||0)}));
     saveD();
   }
-  document.getElementById('smTitle').textContent = (e.name||'出店') + ' 販売モード';
+  const t = document.getElementById('smTitle'); if(t) t.textContent = (e.name||'出店') + ' 販売モード';
   renderSaleMode();
   document.getElementById('saleMode').style.display = 'flex';
 }
