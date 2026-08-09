@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#150c02">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<title>取材ノート ／ 下町きろくの動画屋</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;700&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Shippori Mincho',serif;background:#e8dcc8;color:#2a1a08;}
+
+/* NAV */
+nav{background:#150c02;padding:16px 32px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #7a5218;gap:16px;}
+.nav-logo{font-size:16px;letter-spacing:.2em;color:#e8d090;white-space:nowrap;}
+.nav-logo span{color:#c8880a;}
+.nav-links{display:flex;gap:20px;}
+.nav-links a{font-size:12px;letter-spacing:.15em;color:rgba(232,208,144,.7);text-decoration:none;white-space:nowrap;}
+.nav-links a:hover{color:#c8880a;}
+
+/* LAYOUT */
+.app{display:grid;grid-template-columns:300px 1fr;min-height:calc(100vh - 55px);}
+.pane-list{background:#ddd0b0;border-right:1px solid #b89848;display:flex;flex-direction:column;}
+.pane-detail{padding:32px 40px 96px;overflow:auto;}
+
+/* LIST */
+.list-head{padding:20px 20px 14px;border-bottom:1px solid #b89848;display:flex;flex-direction:column;gap:12px;}
+.list-search{width:100%;background:#e8dcc8;border:1px solid #b89848;padding:9px 10px;font-family:'Shippori Mincho',serif;font-size:13px;color:#1a0e04;outline:none;border-radius:0;}
+.list-search:focus{border-color:#7a3010;}
+.list-items{flex:1;overflow:auto;}
+.list-item{padding:16px 20px;border-bottom:1px solid rgba(184,152,72,.5);cursor:pointer;}
+.list-item:hover{background:rgba(240,232,208,.6);}
+.list-item.on{background:#e8dcc8;border-left:4px solid #c8880a;padding-left:16px;}
+.li-title{font-size:15px;letter-spacing:.04em;color:#1a0e04;margin-bottom:6px;word-break:break-all;}
+.li-meta{font-family:'Noto Sans JP',sans-serif;font-size:10px;color:#8b6820;letter-spacing:.06em;line-height:1.9;}
+.list-empty{padding:40px 20px;font-family:'Noto Sans JP',sans-serif;font-size:11px;color:#8b6820;line-height:2.2;text-align:center;}
+.list-foot{padding:14px 20px;border-top:1px solid #b89848;display:flex;flex-wrap:wrap;gap:8px;}
+
+/* BADGE */
+.badge{display:inline-block;font-family:'Noto Sans JP',sans-serif;font-size:9px;letter-spacing:.14em;padding:3px 8px;border:1px solid #b89848;color:#6a5020;margin-bottom:6px;}
+.badge[data-s="取材済"]{background:rgba(200,136,10,.14);border-color:#c8880a;color:#7a5218;}
+.badge[data-s="編集中"]{background:rgba(122,48,16,.12);border-color:#7a3010;color:#7a3010;}
+.badge[data-s="納品済"]{background:#150c02;border-color:#150c02;color:#e8d090;}
+
+/* BUTTONS */
+.btn{font-family:'Shippori Mincho',serif;font-size:12px;letter-spacing:.18em;padding:10px 18px;border:1px solid #7a5218;background:transparent;color:#7a5218;cursor:pointer;border-radius:0;}
+.btn:hover{background:rgba(122,82,24,.1);}
+.btn-fill{background:#150c02;border-color:#150c02;color:#e8d090;}
+.btn-fill:hover{background:#2a1804;}
+.btn-sm{font-size:11px;letter-spacing:.1em;padding:7px 12px;}
+.btn-danger{border-color:#7a3010;color:#7a3010;}
+.btn-danger:hover{background:rgba(122,48,16,.1);}
+.btn-x{border:none;background:transparent;color:#a08050;cursor:pointer;font-size:15px;line-height:1;padding:6px 8px;flex-shrink:0;}
+.btn-x:hover{color:#7a3010;}
+.btn-move{border:none;background:transparent;color:#a08050;cursor:pointer;font-size:12px;line-height:1;padding:6px 4px;flex-shrink:0;}
+.btn-move:hover{color:#7a3010;}
+.btn-move:disabled{opacity:.25;cursor:default;}
+
+/* DETAIL */
+.d-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding-bottom:18px;border-bottom:1px solid #b89848;margin-bottom:28px;flex-wrap:wrap;}
+.d-title-input{flex:1;min-width:220px;background:transparent;border:none;border-bottom:1px dashed rgba(184,152,72,.8);font-family:'Shippori Mincho',serif;font-size:24px;letter-spacing:.08em;color:#1a0e04;padding:4px 2px;outline:none;}
+.d-title-input:focus{border-bottom:1px solid #7a3010;}
+.d-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.d-saved{width:100%;font-family:'Noto Sans JP',sans-serif;font-size:10px;letter-spacing:.1em;color:#8b6820;}
+
+.block{margin-bottom:40px;}
+.block-title{font-size:14px;letter-spacing:.24em;color:#f0ddb0;padding:10px 18px;border-left:4px solid #c8880a;background:#150c02;display:inline-block;margin-bottom:18px;}
+.block-note{font-family:'Noto Sans JP',sans-serif;font-size:10px;color:#8b6820;line-height:2;margin-bottom:14px;}
+
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px 28px;}
+.field label{display:block;font-size:9px;letter-spacing:.36em;color:#8b6820;margin-bottom:8px;}
+.field input,.field select,.field textarea{width:100%;background:#e8dcc8;border:none;border-bottom:1px solid #b89848;padding:10px 4px;font-family:'Shippori Mincho',serif;font-size:14px;color:#1a0e04;outline:none;border-radius:0;}
+.field input:focus,.field select:focus,.field textarea:focus{border-bottom:2px solid #7a3010;background:#f0e8d0;}
+.field-wide{grid-column:1/-1;}
+.field textarea{min-height:200px;resize:vertical;line-height:2.1;padding:12px 8px;}
+
+/* CLOCK */
+.clock{display:flex;align-items:center;gap:18px;flex-wrap:wrap;background:#150c02;padding:20px 24px;margin-bottom:16px;}
+.clock-time{font-family:'Shippori Mincho',serif;font-size:34px;letter-spacing:.1em;color:#e8d090;font-variant-numeric:tabular-nums;min-width:180px;}
+.clock-time.run{color:#c8880a;}
+.clock .btn{border-color:#a0681a;color:#c8a860;}
+.clock .btn:hover{background:rgba(200,136,10,.14);}
+.clock .btn-fill{background:#c8880a;border-color:#c8880a;color:#150c02;}
+.clock .btn-fill:hover{background:#e0a020;}
+
+.rows{display:flex;flex-direction:column;gap:2px;background:#b89848;border:1px solid #b89848;}
+.row{display:flex;align-items:center;gap:10px;background:#e8dcc8;padding:8px 10px;}
+.row input[type=text]{flex:1;min-width:0;background:transparent;border:none;font-family:'Shippori Mincho',serif;font-size:14px;color:#1a0e04;outline:none;padding:4px 2px;}
+.row input.tc{flex:0 0 92px;font-size:13px;color:#7a3010;letter-spacing:.05em;font-variant-numeric:tabular-nums;border-right:1px solid rgba(184,152,72,.7);}
+.row input[type=checkbox]{width:17px;height:17px;accent-color:#7a3010;flex-shrink:0;cursor:pointer;}
+.row.done input[type=text]{color:#a08050;text-decoration:line-through;}
+.rows-empty{background:#e8dcc8;padding:18px;font-family:'Noto Sans JP',sans-serif;font-size:11px;color:#8b6820;text-align:center;}
+.row-tools{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+
+.blank{padding:80px 20px;text-align:center;}
+.blank p{font-family:'Noto Sans JP',sans-serif;font-size:12px;color:#8b6820;line-height:2.4;margin-bottom:24px;}
+
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#150c02;color:#e8d090;font-size:12px;letter-spacing:.14em;padding:14px 28px;border:1px solid #7a5218;opacity:0;pointer-events:none;transition:opacity .25s;z-index:60;}
+.toast.on{opacity:1;}
+
+.back-btn{display:none;}
+
+@media(max-width:820px){
+  nav{padding:12px 16px;}
+  .nav-logo{font-size:14px;letter-spacing:.12em;}
+  .nav-links a{font-size:11px;}
+  .app{grid-template-columns:1fr;min-height:0;}
+  .pane-detail{padding:20px 16px 80px;}
+  .field-grid{grid-template-columns:1fr;gap:16px;}
+  .clock-time{font-size:28px;min-width:140px;}
+  .d-title-input{font-size:19px;}
+  .back-btn{display:inline-block;}
+  body.detail .pane-list{display:none;}
+  body:not(.detail) .pane-detail{display:none;}
+}
+
+@media print{
+  nav,.pane-list,.d-actions,.row-tools,.clock button,.btn,.toast{display:none !important;}
+  body{background:#fff;}
+  .app{grid-template-columns:1fr;}
+  .pane-detail{padding:0;}
+  .block-title{color:#000;background:none;border-left:4px solid #000;}
+  .clock{background:none;padding:0;}
+  .clock-time{color:#000;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">取材<span>ノート</span></div>
+  <div class="nav-links">
+    <a href="index.html">サイトへ戻る</a>
+    <a href="menu.html">映像制作</a>
+  </div>
+</nav>
+
+<div class="app">
+
+  <aside class="pane-list">
+    <div class="list-head">
+      <button class="btn btn-fill" id="newBtn">＋ 新しい取材ノート</button>
+      <input type="search" class="list-search" id="search" placeholder="取材先・場所・メモを検索">
+    </div>
+    <div class="list-items" id="list"></div>
+    <div class="list-foot">
+      <button class="btn btn-sm" id="backupBtn">バックアップ</button>
+      <button class="btn btn-sm" id="restoreBtn">復元</button>
+      <input type="file" id="restoreFile" accept="application/json" hidden>
+    </div>
+  </aside>
+
+  <main class="pane-detail" id="detail"></main>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const KEY = 'shitamachi_torizai_note_v1';
+const STATUSES = ['予定','取材済','編集中','納品済'];
+const CATEGORIES = ['街のドキュメント制作','イベント制作','あなたの記録','写真撮影','その他'];
+const QUESTION_TEMPLATE = [
+  '生まれ育ちと、この街との出会い',
+  'お店・活動を始めたきっかけ',
+  'いちばん忘れられない出来事',
+  '街の変わったところ、変わらないところ',
+  '大切にしている道具・場所',
+  'これから残していきたいもの'
+];
+const EMPTY_MSG = {
+  questions: '質問はまだありません。「定番の質問を入れる」から始められます。',
+  shots: 'カットはまだありません。「定番のカットを入れる」から始められます。'
+};
+const SHOT_TEMPLATE = [
+  '外観（引き）',
+  '看板・のれん',
+  '手元のアップ',
+  '作業風景',
+  '表情・目線',
+  'インサート（小物・道具）',
+  '街並み・周辺環境',
+  'エンディング用のカット'
+];
+
+let db = load();
+let currentId = null;
+let saveTimer = null;
+
+/* STORAGE */
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    const parsed = raw ? JSON.parse(raw) : null;
+    if(parsed && Array.isArray(parsed.notes)) return parsed;
+  }catch(e){}
+  return {notes:[]};
+}
+function save(){
+  try{
+    localStorage.setItem(KEY, JSON.stringify(db));
+    updateSavedLabel();
+  }catch(e){
+    toast('保存できませんでした（保存容量の上限）');
+  }
+}
+function saveSoon(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(save, 250);
+}
+
+/* HELPERS */
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function today(){
+  const d = new Date();
+  const p = n => String(n).padStart(2,'0');
+  return d.getFullYear() + '-' + p(d.getMonth()+1) + '-' + p(d.getDate());
+}
+function fmtTc(sec){
+  const s = Math.max(0, Math.floor(sec));
+  const p = n => String(n).padStart(2,'0');
+  return p(Math.floor(s/3600)) + ':' + p(Math.floor(s%3600/60)) + ':' + p(s%60);
+}
+function parseTc(str){
+  const parts = String(str).split(':').map(n => parseInt(n,10));
+  if(parts.some(isNaN)) return null;
+  if(parts.length === 3) return parts[0]*3600 + parts[1]*60 + parts[2];
+  if(parts.length === 2) return parts[0]*60 + parts[1];
+  if(parts.length === 1) return parts[0];
+  return null;
+}
+function toast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('on');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => el.classList.remove('on'), 2000);
+}
+function note(){ return db.notes.find(n => n.id === currentId) || null; }
+function touch(){
+  const n = note();
+  if(n) n.updatedAt = Date.now();
+}
+
+/* CLOCK */
+function elapsed(n){
+  const c = n.clock;
+  return c.accum + (c.startedAt ? (Date.now() - c.startedAt)/1000 : 0);
+}
+
+/* NOTE CRUD */
+function createNote(){
+  const n = {
+    id: uid(),
+    title: '',
+    date: today(),
+    place: '',
+    person: '',
+    contact: '',
+    category: CATEGORIES[0],
+    status: STATUSES[0],
+    clock: {accum:0, startedAt:null},
+    marks: [],
+    questions: [],
+    shots: [],
+    memo: '',
+    createdAt: Date.now(),
+    updatedAt: Date.now()
+  };
+  db.notes.unshift(n);
+  currentId = n.id;
+  save();
+  render();
+  document.body.classList.add('detail');
+  const t = document.querySelector('.d-title-input');
+  if(t) t.focus();
+}
+/* 前回の取材ノートを下敷きにして続きを書く（聞くことリストの使い回しなど） */
+function duplicateNote(){
+  const src = note();
+  if(!src) return;
+  const copy = normalize(JSON.parse(JSON.stringify(src)));
+  copy.id = uid();
+  copy.title = (src.title || '無題の取材') + '（複製）';
+  copy.date = today();
+  copy.status = STATUSES[0];
+  copy.clock = {accum:0, startedAt:null};
+  copy.marks = [];
+  copy.questions.forEach(q => { q.id = uid(); q.done = false; });
+  copy.shots.forEach(s => { s.id = uid(); s.done = false; });
+  copy.createdAt = copy.updatedAt = Date.now();
+
+  db.notes.unshift(copy);
+  currentId = copy.id;
+  save();
+  render();
+  document.getElementById('detail').scrollTop = 0;
+  toast('複製しました。聞くことリストはそのまま使えます');
+}
+
+function deleteNote(){
+  const n = note();
+  if(!n) return;
+  if(!confirm('この取材ノートを削除します。元に戻せません。よろしいですか？')) return;
+  db.notes = db.notes.filter(x => x.id !== n.id);
+  currentId = null;
+  save();
+  document.body.classList.remove('detail');
+  render();
+}
+
+/* RENDER: LIST */
+function render(){
+  renderList();
+  renderDetail();
+}
+function renderList(){
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  const box = document.getElementById('list');
+  const items = db.notes
+    .filter(n => {
+      if(!q) return true;
+      const hay = [n.title, n.place, n.person, n.memo, n.category, n.status,
+        ...n.marks.map(m => m.text)].join(' ').toLowerCase();
+      return hay.includes(q);
+    })
+    .sort((a,b) => (b.date || '').localeCompare(a.date || '') || b.updatedAt - a.updatedAt);
+
+  if(!items.length){
+    box.innerHTML = '<div class="list-empty">' +
+      (db.notes.length ? '該当する取材ノートがありません。' : '取材ノートはまだありません。<br>「＋ 新しい取材ノート」から始めてください。') +
+      '</div>';
+    return;
+  }
+
+  box.innerHTML = items.map(n => {
+    const meta = [n.date, n.place].filter(Boolean).join(' ／ ');
+    const counts = n.marks.length ? 'メモ ' + n.marks.length + '件' : '';
+    return '<div class="list-item' + (n.id === currentId ? ' on' : '') + '" data-id="' + n.id + '">' +
+      '<span class="badge" data-s="' + esc(n.status) + '">' + esc(n.status) + '</span>' +
+      '<p class="li-title">' + esc(n.title || '（無題の取材）') + '</p>' +
+      '<p class="li-meta">' + esc(meta) + (counts ? '<br>' + counts : '') + '</p>' +
+    '</div>';
+  }).join('');
+
+  box.querySelectorAll('.list-item').forEach(el => {
+    el.addEventListener('click', () => {
+      currentId = el.dataset.id;
+      document.body.classList.add('detail');
+      render();
+      document.getElementById('detail').scrollTop = 0;
+    });
+  });
+}
+
+/* RENDER: DETAIL */
+function renderDetail(){
+  const box = document.getElementById('detail');
+  const n = note();
+
+  if(!n){
+    box.innerHTML = '<div class="blank">' +
+      '<p>取材ノートを選ぶか、新しく作成してください。<br>' +
+      '記録した内容はこの端末のブラウザに保存されます。</p>' +
+      '<button class="btn btn-fill" onclick="createNote()">＋ 新しい取材ノート</button>' +
+    '</div>';
+    return;
+  }
+
+  box.innerHTML = `
+    <div class="d-head">
+      <input type="text" class="d-title-input" id="f-title" placeholder="取材先の名前" value="${esc(n.title)}">
+      <div class="d-actions">
+        <button class="btn btn-sm back-btn" id="backBtn">← 一覧</button>
+        <button class="btn btn-sm" id="dupBtn">複製</button>
+        <button class="btn btn-sm" id="copyBtn">書き出し</button>
+        <button class="btn btn-sm" id="printBtn">印刷</button>
+        <button class="btn btn-sm btn-danger" id="delBtn">削除</button>
+      </div>
+      <p class="d-saved" id="savedAt"></p>
+    </div>
+
+    <div class="block">
+      <div class="field-grid">
+        <div class="field"><label>取材日</label><input type="date" id="f-date" value="${esc(n.date)}"></div>
+        <div class="field"><label>進行状況</label><select id="f-status">${
+          STATUSES.map(s => `<option${s === n.status ? ' selected' : ''}>${esc(s)}</option>`).join('')
+        }</select></div>
+        <div class="field"><label>場所</label><input type="text" id="f-place" placeholder="大阪市生野区 桃谷" value="${esc(n.place)}"></div>
+        <div class="field"><label>案件種別</label><select id="f-category">${
+          CATEGORIES.map(c => `<option${c === n.category ? ' selected' : ''}>${esc(c)}</option>`).join('')
+        }</select></div>
+        <div class="field"><label>お相手</label><input type="text" id="f-person" placeholder="山田 太郎さん" value="${esc(n.person)}"></div>
+        <div class="field"><label>連絡先</label><input type="text" id="f-contact" placeholder="090-0000-0000" value="${esc(n.contact)}"></div>
+      </div>
+    </div>
+
+    <div class="block">
+      <p class="block-title">タイムコードメモ</p>
+      <p class="block-note">録画を回し始めたら「開始」を押してください。「ここ！」を押すとその瞬間の時間が記録され、あとから編集で頭出しできます。</p>
+      <div class="clock">
+        <span class="clock-time${n.clock.startedAt ? ' run' : ''}" id="clockTime">${fmtTc(elapsed(n))}</span>
+        <button class="btn btn-fill" id="markBtn">ここ！</button>
+        <button class="btn" id="runBtn">${n.clock.startedAt ? '一時停止' : '開始'}</button>
+        <button class="btn" id="resetBtn">リセット</button>
+      </div>
+      <div class="rows" id="marks"></div>
+      <div class="row-tools"><button class="btn btn-sm" id="addMark">＋ 手入力で追加</button></div>
+    </div>
+
+    <div class="block">
+      <p class="block-title">聞くことリスト</p>
+      <div class="rows" id="questions"></div>
+      <div class="row-tools">
+        <button class="btn btn-sm" id="addQuestion">＋ 質問を追加</button>
+        <button class="btn btn-sm" id="tplQuestion">定番の質問を入れる</button>
+      </div>
+    </div>
+
+    <div class="block">
+      <p class="block-title">撮っておくカット</p>
+      <div class="rows" id="shots"></div>
+      <div class="row-tools">
+        <button class="btn btn-sm" id="addShot">＋ カットを追加</button>
+        <button class="btn btn-sm" id="tplShot">定番のカットを入れる</button>
+      </div>
+    </div>
+
+    <div class="block">
+      <p class="block-title">自由メモ</p>
+      <div class="field field-wide">
+        <textarea id="f-memo" placeholder="現場の空気、次に伺うときの約束、使えそうな言葉など。">${esc(n.memo)}</textarea>
+      </div>
+    </div>
+  `;
+
+  bindField('f-title','title', renderList);
+  bindField('f-date','date', renderList);
+  bindField('f-status','status', renderList);
+  bindField('f-place','place', renderList);
+  bindField('f-category','category');
+  bindField('f-person','person');
+  bindField('f-contact','contact');
+  bindField('f-memo','memo');
+
+  document.getElementById('backBtn').onclick = () => { document.body.classList.remove('detail'); };
+  document.getElementById('dupBtn').onclick = duplicateNote;
+  document.getElementById('copyBtn').onclick = exportText;
+  document.getElementById('printBtn').onclick = () => window.print();
+  document.getElementById('delBtn').onclick = deleteNote;
+
+  document.getElementById('runBtn').onclick = toggleClock;
+  document.getElementById('resetBtn').onclick = resetClock;
+  document.getElementById('markBtn').onclick = () => addMark(elapsed(n));
+  document.getElementById('addMark').onclick = () => addMark(n.marks.length ? n.marks[n.marks.length-1].tc : 0);
+
+  document.getElementById('addQuestion').onclick = () => addCheck('questions','');
+  document.getElementById('tplQuestion').onclick = () => applyTemplate('questions', QUESTION_TEMPLATE);
+  document.getElementById('addShot').onclick = () => addCheck('shots','');
+  document.getElementById('tplShot').onclick = () => applyTemplate('shots', SHOT_TEMPLATE);
+
+  renderMarks();
+  renderChecks('questions');
+  renderChecks('shots');
+  updateSavedLabel();
+}
+
+function updateSavedLabel(){
+  const n = note();
+  const el = document.getElementById('savedAt');
+  if(!n || !el) return;
+  const d = new Date(n.updatedAt);
+  const p = x => String(x).padStart(2,'0');
+  el.textContent = '自動保存済み ／ 最終更新 ' +
+    (d.getMonth()+1) + '月' + d.getDate() + '日 ' + p(d.getHours()) + ':' + p(d.getMinutes());
+}
+
+function bindField(elId, key, after){
+  const el = document.getElementById(elId);
+  if(!el) return;
+  el.addEventListener('input', () => {
+    const n = note();
+    if(!n) return;
+    n[key] = el.value;
+    touch();
+    saveSoon();
+    if(after) after();
+  });
+  el.addEventListener('change', () => {
+    const n = note();
+    if(!n) return;
+    n[key] = el.value;
+    touch();
+    saveSoon();
+    if(after) after();
+  });
+}
+
+/* MARKS */
+function addMark(tc){
+  const n = note();
+  if(!n) return;
+  const mark = {id: uid(), tc: Math.floor(tc), text: ''};
+  n.marks.push(mark);
+  touch();
+  save();
+  renderMarks();
+  renderList();
+  const row = document.querySelector('#marks .row[data-id="' + mark.id + '"]');
+  if(row) row.querySelector('input[type=text]:not(.tc)').focus();
+}
+function renderMarks(){
+  const n = note();
+  const box = document.getElementById('marks');
+  if(!n || !box) return;
+
+  if(!n.marks.length){
+    box.innerHTML = '<div class="rows-empty">まだメモはありません。撮影中に「ここ！」を押してください。</div>';
+    return;
+  }
+
+  const sorted = [...n.marks].sort((a,b) => a.tc - b.tc);
+  box.innerHTML = sorted.map(m =>
+    '<div class="row" data-id="' + m.id + '">' +
+      '<input type="text" class="tc" value="' + fmtTc(m.tc) + '" inputmode="numeric">' +
+      '<input type="text" value="' + esc(m.text) + '" placeholder="何があったか（例：涙ぐんで語った場面）">' +
+      '<button class="btn-x" title="削除">×</button>' +
+    '</div>'
+  ).join('');
+
+  box.querySelectorAll('.row').forEach(row => {
+    const m = n.marks.find(x => x.id === row.dataset.id);
+    const [tcEl, textEl] = row.querySelectorAll('input[type=text]');
+    tcEl.addEventListener('change', () => {
+      const sec = parseTc(tcEl.value);
+      if(sec === null){ tcEl.value = fmtTc(m.tc); return; }
+      m.tc = sec;
+      tcEl.value = fmtTc(sec);
+      touch();
+      save();
+      renderMarks();
+    });
+    textEl.addEventListener('input', () => { m.text = textEl.value; touch(); saveSoon(); });
+    row.querySelector('.btn-x').addEventListener('click', () => {
+      n.marks = n.marks.filter(x => x.id !== m.id);
+      touch();
+      save();
+      renderMarks();
+      renderList();
+    });
+  });
+}
+
+/* CHECK LISTS */
+function addCheck(key, text){
+  const n = note();
+  if(!n) return;
+  const item = {id: uid(), text: text, done: false};
+  n[key].push(item);
+  touch();
+  save();
+  renderChecks(key);
+  const row = document.querySelector('#' + key + ' .row[data-id="' + item.id + '"]');
+  if(row) row.querySelector('input[type=text]').focus();
+}
+function applyTemplate(key, template){
+  const n = note();
+  if(!n) return;
+  const existing = new Set(n[key].map(i => i.text));
+  const added = template.filter(t => !existing.has(t));
+  if(!added.length){ toast('すでに入っています'); return; }
+  added.forEach(t => n[key].push({id: uid(), text: t, done: false}));
+  touch();
+  save();
+  renderChecks(key);
+  toast(added.length + '件を追加しました');
+}
+function renderChecks(key){
+  const n = note();
+  const box = document.getElementById(key);
+  if(!n || !box) return;
+
+  if(!n[key].length){
+    box.innerHTML = '<div class="rows-empty">' + esc(EMPTY_MSG[key]) + '</div>';
+    return;
+  }
+
+  const last = n[key].length - 1;
+  box.innerHTML = n[key].map((i, idx) =>
+    '<div class="row' + (i.done ? ' done' : '') + '" data-id="' + i.id + '">' +
+      '<input type="checkbox"' + (i.done ? ' checked' : '') + '>' +
+      '<input type="text" value="' + esc(i.text) + '" placeholder="内容">' +
+      '<button class="btn-move" data-dir="-1" title="上へ"' + (idx === 0 ? ' disabled' : '') + '>▲</button>' +
+      '<button class="btn-move" data-dir="1" title="下へ"' + (idx === last ? ' disabled' : '') + '>▼</button>' +
+      '<button class="btn-x" title="削除">×</button>' +
+    '</div>'
+  ).join('');
+
+  box.querySelectorAll('.row').forEach(row => {
+    const item = n[key].find(x => x.id === row.dataset.id);
+    const check = row.querySelector('input[type=checkbox]');
+    const textEl = row.querySelector('input[type=text]');
+    check.addEventListener('change', () => {
+      item.done = check.checked;
+      row.classList.toggle('done', item.done);
+      touch();
+      saveSoon();
+    });
+    textEl.addEventListener('input', () => { item.text = textEl.value; touch(); saveSoon(); });
+    row.querySelectorAll('.btn-move').forEach(btn => {
+      btn.addEventListener('click', () => move(key, item.id, Number(btn.dataset.dir)));
+    });
+    row.querySelector('.btn-x').addEventListener('click', () => {
+      n[key] = n[key].filter(x => x.id !== item.id);
+      touch();
+      save();
+      renderChecks(key);
+    });
+  });
+}
+function move(key, id, dir){
+  const n = note();
+  if(!n) return;
+  const from = n[key].findIndex(x => x.id === id);
+  const to = from + dir;
+  if(from < 0 || to < 0 || to >= n[key].length) return;
+  const [item] = n[key].splice(from, 1);
+  n[key].splice(to, 0, item);
+  touch();
+  save();
+  renderChecks(key);
+}
+
+/* CLOCK CONTROL */
+function toggleClock(){
+  const n = note();
+  if(!n) return;
+  if(n.clock.startedAt){
+    n.clock.accum = elapsed(n);
+    n.clock.startedAt = null;
+  }else{
+    n.clock.startedAt = Date.now();
+    if(n.status === '予定'){ n.status = '取材済'; renderList(); }
+  }
+  touch();
+  save();
+  renderDetail();
+}
+function resetClock(){
+  const n = note();
+  if(!n) return;
+  if(!confirm('タイマーを00:00:00に戻します。記録済みのメモは消えません。')) return;
+  n.clock = {accum:0, startedAt:null};
+  touch();
+  save();
+  renderDetail();
+}
+setInterval(() => {
+  const n = note();
+  const el = document.getElementById('clockTime');
+  if(n && el && n.clock.startedAt) el.textContent = fmtTc(elapsed(n));
+}, 250);
+
+/* EXPORT */
+function noteToText(n){
+  const line = '────────────────────';
+  const out = [];
+  out.push('取材ノート ／ 下町きろくの動画屋');
+  out.push(line);
+  out.push('取材先　：' + (n.title || '（無題の取材）'));
+  out.push('取材日　：' + (n.date || '—'));
+  out.push('場所　　：' + (n.place || '—'));
+  out.push('お相手　：' + (n.person || '—'));
+  out.push('連絡先　：' + (n.contact || '—'));
+  out.push('案件種別：' + (n.category || '—'));
+  out.push('進行状況：' + (n.status || '—'));
+  out.push('');
+  out.push('【タイムコードメモ】');
+  if(n.marks.length){
+    [...n.marks].sort((a,b) => a.tc - b.tc)
+      .forEach(m => out.push('  ' + fmtTc(m.tc) + '  ' + (m.text || '（内容未記入）')));
+  }else{
+    out.push('  （なし）');
+  }
+  out.push('');
+  out.push('【聞くことリスト】');
+  out.push(n.questions.length
+    ? n.questions.map(q => '  [' + (q.done ? '済' : '　') + '] ' + q.text).join('\n')
+    : '  （なし）');
+  out.push('');
+  out.push('【撮っておくカット】');
+  out.push(n.shots.length
+    ? n.shots.map(s => '  [' + (s.done ? '済' : '　') + '] ' + s.text).join('\n')
+    : '  （なし）');
+  out.push('');
+  out.push('【自由メモ】');
+  out.push(n.memo ? n.memo : '  （なし）');
+  out.push(line);
+  return out.join('\n');
+}
+function download(filename, text, type){
+  const blob = new Blob([text], {type: type || 'text/plain;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+function exportText(){
+  const n = note();
+  if(!n) return;
+  const text = noteToText(n);
+  const name = '取材ノート_' + (n.date || today()) + '_' + (n.title || '無題') + '.txt';
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text)
+      .then(() => toast('クリップボードにコピーしました'))
+      .catch(() => {});
+  }
+  download(name, text);
+}
+
+/* BACKUP / RESTORE */
+document.getElementById('backupBtn').onclick = () => {
+  if(!db.notes.length){ toast('保存された取材ノートがありません'); return; }
+  download('取材ノート_バックアップ_' + today() + '.json', JSON.stringify(db, null, 2), 'application/json');
+};
+document.getElementById('restoreBtn').onclick = () => document.getElementById('restoreFile').click();
+document.getElementById('restoreFile').addEventListener('change', ev => {
+  const file = ev.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    let data;
+    try{
+      data = JSON.parse(reader.result);
+    }catch(e){
+      toast('読み込めないファイルです');
+      return;
+    }
+    if(!data || !Array.isArray(data.notes)){ toast('取材ノートのバックアップではありません'); return; }
+    if(!confirm('バックアップの' + data.notes.length + '件を読み込みます。同じノートは上書きされます。')) return;
+
+    data.notes.forEach(incoming => {
+      const n = normalize(incoming);
+      const idx = db.notes.findIndex(x => x.id === n.id);
+      if(idx >= 0) db.notes[idx] = n;
+      else db.notes.push(n);
+    });
+    save();
+    render();
+    toast('復元しました');
+  };
+  reader.readAsText(file);
+  ev.target.value = '';
+});
+
+/* keepRunning: 起動時の読み込みではタイマーを動かしたまま復帰させ、
+   他端末からの復元では止まった状態にする */
+function normalize(n, keepRunning){
+  const list = v => Array.isArray(v)
+    ? v.map(i => ({id: i.id || uid(), text: String(i.text || ''), done: !!i.done}))
+    : [];
+  const started = n.clock && Number(n.clock.startedAt);
+  return {
+    id: n.id || uid(),
+    title: String(n.title || ''),
+    date: String(n.date || ''),
+    place: String(n.place || ''),
+    person: String(n.person || ''),
+    contact: String(n.contact || ''),
+    category: CATEGORIES.includes(n.category) ? n.category : CATEGORIES[0],
+    status: STATUSES.includes(n.status) ? n.status : STATUSES[0],
+    clock: {
+      accum: Number(n.clock && n.clock.accum) || 0,
+      startedAt: (keepRunning && started) ? started : null
+    },
+    marks: Array.isArray(n.marks)
+      ? n.marks.map(m => ({id: m.id || uid(), tc: Number(m.tc) || 0, text: String(m.text || '')}))
+      : [],
+    questions: list(n.questions),
+    shots: list(n.shots),
+    memo: String(n.memo || ''),
+    createdAt: Number(n.createdAt) || Date.now(),
+    updatedAt: Number(n.updatedAt) || Date.now()
+  };
+}
+
+/* INIT */
+document.getElementById('newBtn').onclick = createNote;
+document.getElementById('search').addEventListener('input', renderList);
+window.addEventListener('beforeunload', () => { clearTimeout(saveTimer); save(); });
+
+db.notes = db.notes.map(n => normalize(n, true));
+render();
+</script>
+
+</body>
+</html>
