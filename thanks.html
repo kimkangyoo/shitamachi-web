@@ -9,18 +9,18 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Shippori Mincho',serif;background:#e8dcc8;color:#2a1a08;}
 nav{background:#150c02;padding:22px 64px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #7a5218;}
-.nav-logo{font-family:'Shippori Mincho',serif;font-size:20px;letter-spacing:.25em;color:#e8d090;text-decoration:none;}
+.nav-logo{font-family:'Shippori Mincho',serif;font-size:21px;letter-spacing:.25em;color:#e8d090;text-decoration:none;}
 .nav-logo span{color:#c8880a;}
 .nav-links{display:flex;align-items:center;gap:26px;}
-.nav-links a,.nav-drop>span{font-size:16px;letter-spacing:.15em;color:rgba(232,208,144,.7);text-decoration:none;font-family:'Shippori Mincho',serif;}
+.nav-links a,.nav-drop>span{font-size:17px;letter-spacing:.15em;color:rgba(232,208,144,.7);text-decoration:none;font-family:'Shippori Mincho',serif;}
 .nav-links a:hover,.nav-drop>span:hover{color:#c8880a;}
 .wrap{max-width:600px;margin:120px auto;padding:0 24px;text-align:center;}
-.wrap h1{font-size:28px;font-weight:400;letter-spacing:.1em;color:#1c0f02;margin-bottom:24px;}
-.wrap p{font-size:17px;color:#5c3e18;line-height:2.4;margin-bottom:48px;}
-.wrap a{display:inline-block;border:1px solid #7a5218;color:#8b6820;font-family:'Shippori Mincho',serif;font-size:16px;letter-spacing:.3em;padding:14px 40px;text-decoration:none;}
+.wrap h1{font-size:30px;font-weight:400;letter-spacing:.1em;color:#1c0f02;margin-bottom:24px;}
+.wrap p{font-size:19px;color:#5c3e18;line-height:2.4;margin-bottom:48px;}
+.wrap a{display:inline-block;border:1px solid #7a5218;color:#8b6820;font-family:'Shippori Mincho',serif;font-size:18px;letter-spacing:.3em;padding:14px 40px;text-decoration:none;}
 footer{background:#0c0600;padding:32px 48px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;border-top:1px solid #2a1804;margin-top:80px;}
-.foot-logo{font-family:'Shippori Mincho',serif;font-size:17px;letter-spacing:.25em;color:#8b6820;}
-.foot-meta{font-size:13px;color:#3a2408;letter-spacing:.12em;line-height:2.4;text-align:right;font-family:'Noto Sans JP',sans-serif;}
+.foot-logo{font-family:'Shippori Mincho',serif;font-size:19px;letter-spacing:.25em;color:#8b6820;}
+.foot-meta{font-size:15px;color:#3a2408;letter-spacing:.12em;line-height:2.4;text-align:right;font-family:'Noto Sans JP',sans-serif;}
 
 /* NAV DROPDOWN */
 .nav-drop{position:relative;}
@@ -35,7 +35,9 @@ footer{background:#0c0600;padding:32px 48px;display:flex;justify-content:space-b
   nav{flex-wrap:wrap;row-gap:12px;}
   .nav-logo{white-space:nowrap;}
   .nav-links{width:100%;flex-wrap:wrap;align-items:baseline;gap:12px 18px;}
-  .nav-drop{display:flex;align-items:baseline;gap:14px;}
+  .nav-drop{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;}
+  .nav-drop>span{white-space:nowrap;}
+  .nav-drop-menu a{white-space:nowrap;}
   .nav-drop-menu{position:static;transform:none;margin:0;min-width:0;opacity:1;visibility:visible;border:none;padding:0;background:transparent;display:flex;gap:14px;}
   .nav-drop-menu a{padding:0;}
   .nav-drop>span::after{content:'：';margin-left:0;}
