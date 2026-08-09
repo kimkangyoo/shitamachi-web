@@ -892,6 +892,16 @@ function toggleShuzaiTodo(leadId, ti){
   }
   renderDashTodo(); renderDashSchedule();
 }
+function getShuzaiSchedule(){
+  loadShuzai();
+  const out = [];
+  (shuzaiData.interviews||[]).forEach(iv=>{
+    (iv.schedule||[]).forEach(s=>{
+      if(s.date) out.push({date:s.date, time:s.time||'', label:s.label, title:iv.title});
+    });
+  });
+  return out;
+}
 function toggleShuzaiIvTodo(ivId, ti){
   loadShuzai();
   const iv = (shuzaiData.interviews||[]).find(x=>x.id===ivId);
@@ -1199,7 +1209,12 @@ function renderDashSchedule(){
     .filter(t=>!t.done && t.dueDate && t.dueDate<=todayStr)
     .sort((a,b)=>a.dueDate.localeCompare(b.dueDate));
 
-  if(items.length===0 && routines.length===0 && todos.length===0 && szTodos.length===0 && vdTodos.length===0 && hdTodos.length===0){
+  // 取材記録のスケジュール（今日）
+  const szSch = getShuzaiSchedule()
+    .filter(s=>s.date===todayStr)
+    .sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+
+  if(items.length===0 && routines.length===0 && todos.length===0 && szTodos.length===0 && vdTodos.length===0 && hdTodos.length===0 && szSch.length===0){
     el.innerHTML='<div style="color:#8b6820;font-size:12px;padding:8px 0;">今日の予定はありません。</div>';
     return;
   }
@@ -1211,6 +1226,11 @@ function renderDashSchedule(){
       <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#fffdf5;border:1px solid #ddc890;border-radius:5px;margin-bottom:5px;">
         <span class="badge ${badgeColor[it.type]||'badge-blue'}" style="flex-shrink:0;">${it.type}</span>
         <span style="font-size:12px;flex:1;">${it.time?`<span style="color:#8b6820;">${it.time} </span>`:''}${esc(it.name)}${it.client?`<span style="color:#8b6820;"> / ${esc(it.client)}</span>`:''}</span>
+      </div>`),
+    ...szSch.map(s=>`
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#fbf7fd;border:1px solid #d8c4e0;border-radius:5px;margin-bottom:5px;">
+        <span class="badge badge-purple" style="flex-shrink:0;">取材予定</span>
+        <span style="font-size:12px;flex:1;">${s.time?`<span style="color:#8b6820;">${s.time} </span>`:''}${esc(s.label)}<span style="color:#5a2f7a;font-size:10px;"> / ${esc(s.title)}</span></span>
       </div>`),
     ...todos.map(t=>{
       const idx = G.manualTasks.indexOf(t);
