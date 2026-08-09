@@ -179,6 +179,23 @@ input:focus,textarea:focus,select:focus{outline:2px solid #c8880a;border-color:#
       <button class="btn btn-outline" id="dlAudioBtn" onclick="downloadAudio()" style="display:none;">🎵 録音を保存</button>
     </div>
     <audio id="audioPreview" controls style="width:100%;margin-top:14px;display:none;"></audio>
+
+    <!-- 高精度の文字起こし案内 -->
+    <div style="background:#eef4ee;border:1px solid #b8d0b8;border-radius:6px;padding:16px 18px;margin-top:18px;">
+      <div style="font-weight:700;font-size:13px;color:#2f6040;margin-bottom:8px;">🎯 もっと正確に文字起こししたいとき</div>
+      <p style="font-size:12px;color:#3a5a3a;line-height:1.9;margin-bottom:12px;">
+        ブラウザの自動文字起こしは精度が限られます。<strong>①「🎵 録音を保存」でファイルを保存</strong> → <strong>②下のサービスにアップロード</strong>すると、専用AIで高精度に文字起こしできます（録音はどの端末でも使えます）。
+      </p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-gold btn-sm" id="dlAudioBtn2" onclick="downloadAudio()">🎵 録音を保存</button>
+        <a href="https://app.nottahq.com/" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="text-decoration:none;">Notta（日本語に強い）</a>
+        <a href="https://gemini.google.com/app" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="text-decoration:none;">Gemini（音声OK）</a>
+        <a href="https://notebooklm.google.com/" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="text-decoration:none;">NotebookLM</a>
+      </div>
+      <p style="font-size:11px;color:#6b8b6b;margin-top:10px;line-height:1.7;">
+        文字起こしができたら、その文章を上の「文字起こし」欄に貼り付けて保存できます。
+      </p>
+    </div>
   </div>
 
   <div id="recWarning" style="display:none;background:#f5dede;border:1px solid #c05010;border-radius:6px;padding:14px 18px;font-size:12px;color:#8c2f2f;line-height:1.8;">
@@ -288,6 +305,13 @@ input:focus,textarea:focus,select:focus{outline:2px solid #c8880a;border-color:#
         <a href="https://claude.ai/new" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="text-decoration:none;">🤖 Claudeで要約</a>
         <a href="https://gemini.google.com/app" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="text-decoration:none;">✦ Gemini</a>
       </div>
+      <p style="font-size:11px;color:#6b8b6b;margin-top:8px;line-height:1.7;">
+        高精度で文字起こしし直すには、下の「🎵 録音を保存」でファイルを保存し、
+        <a href="https://app.nottahq.com/" target="_blank" rel="noopener" style="color:#2f6040;">Notta</a>・
+        <a href="https://gemini.google.com/app" target="_blank" rel="noopener" style="color:#2f6040;">Gemini</a>・
+        <a href="https://notebooklm.google.com/" target="_blank" rel="noopener" style="color:#2f6040;">NotebookLM</a>
+        にアップロードしてください。結果はこの欄に貼り付けて保存できます。
+      </p>
       <div class="btn-row">
         <button class="btn btn-gold" onclick="updateInterview()">保存</button>
         <button class="btn btn-outline" onclick="downloadInterviewAudio()" id="ivDlAudioBtn" style="display:none;">🎵 録音を保存</button>
