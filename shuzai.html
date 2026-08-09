@@ -275,7 +275,11 @@ input:focus,textarea:focus,select:focus{outline:2px solid #c8880a;border-color:#
     <div class="modal-head"><h3 id="interviewModalTitle">取材記録</h3><button class="modal-close" onclick="closeModal('interviewModal')">✕</button></div>
     <div class="modal-body">
       <input type="hidden" id="interviewViewId">
-      <div id="interviewMeta" style="font-size:12px;color:#8b6820;margin-bottom:14px;"></div>
+      <div class="form-grid" style="margin-bottom:14px;">
+        <div class="span2"><label class="fl">タイトル</label><input type="text" id="iv-title"></div>
+        <div><label class="fl">取材日</label><input type="date" id="iv-date"></div>
+        <div><label class="fl">取材先</label><select id="iv-lead"><option value="">— 選択しない —</option></select></div>
+      </div>
       <audio id="interviewAudio" controls style="width:100%;margin-bottom:14px;display:none;"></audio>
       <label class="fl">文字起こし（編集できます）</label>
       <textarea id="interviewTranscript" style="min-height:280px;"></textarea>
@@ -739,8 +743,10 @@ async function openInterview(id){
   if(!iv) return;
   document.getElementById('interviewViewId').value = id;
   document.getElementById('interviewModalTitle').textContent = iv.title;
-  const lead = S.leads.find(l=>l.id===iv.leadId);
-  document.getElementById('interviewMeta').textContent = `${fmtDate(iv.date)}${lead?'　／　'+lead.name:''}`;
+  document.getElementById('iv-title').value = iv.title||'';
+  document.getElementById('iv-date').value = iv.date||'';
+  document.getElementById('iv-lead').innerHTML = '<option value="">— 選択しない —</option>' + S.leads.map(l=>`<option value="${l.id}">${esc(l.name)}</option>`).join('');
+  document.getElementById('iv-lead').value = iv.leadId||'';
   document.getElementById('interviewTranscript').value = iv.transcript||'';
 
   const audioEl = document.getElementById('interviewAudio');
@@ -758,6 +764,10 @@ function updateInterview(){
   const id = document.getElementById('interviewViewId').value;
   const iv = S.interviews.find(x=>x.id===id);
   if(!iv) return;
+  const t = document.getElementById('iv-title').value.trim();
+  iv.title = t || iv.title;
+  iv.date = document.getElementById('iv-date').value;
+  iv.leadId = document.getElementById('iv-lead').value;
   iv.transcript = document.getElementById('interviewTranscript').value;
   saveS(); closeModal('interviewModal'); renderInterviews();
   showToast('保存しました');
