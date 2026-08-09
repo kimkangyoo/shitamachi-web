@@ -875,6 +875,12 @@ function getShuzaiTodos(){
       out.push({leadId:l.id, leadName:l.name, ti, text:t.text, done:t.done, dueDate:t.dueDate||''});
     });
   });
+  // 取材記録ごとのやること
+  (shuzaiData.interviews||[]).forEach(iv=>{
+    (iv.todos||[]).forEach((t,ti)=>{
+      out.push({ivId:iv.id, leadName:iv.title, ti, text:t.text, done:t.done, dueDate:t.dueDate||''});
+    });
+  });
   return out;
 }
 function toggleShuzaiTodo(leadId, ti){
@@ -882,6 +888,15 @@ function toggleShuzaiTodo(leadId, ti){
   const l = (shuzaiData.leads||[]).find(x=>x.id===leadId);
   if(l && l.todos && l.todos[ti]){
     l.todos[ti].done = !l.todos[ti].done;
+    localStorage.setItem('shuzaiData', JSON.stringify(shuzaiData));
+  }
+  renderDashTodo(); renderDashSchedule();
+}
+function toggleShuzaiIvTodo(ivId, ti){
+  loadShuzai();
+  const iv = (shuzaiData.interviews||[]).find(x=>x.id===ivId);
+  if(iv && iv.todos && iv.todos[ti]){
+    iv.todos[ti].done = !iv.todos[ti].done;
     localStorage.setItem('shuzaiData', JSON.stringify(shuzaiData));
   }
   renderDashTodo(); renderDashSchedule();
@@ -1110,9 +1125,10 @@ function renderDashTodo(){
     html += shuzaiTodos.map(t=>{
       const days = t.dueDate ? daysUntil(t.dueDate) : null;
       const duLabel = days===null ? '' : days<0 ? `<span style="color:#c05010;font-size:10px;font-weight:700;">${Math.abs(days)}日超過</span>` : days===0 ? `<span style="color:#c05010;font-size:10px;font-weight:700;">今日</span>` : `<span style="color:#8b6820;font-size:10px;">あと${days}日</span>`;
+      const tog = t.ivId ? `toggleShuzaiIvTodo('${t.ivId}',${t.ti})` : `toggleShuzaiTodo('${t.leadId}',${t.ti})`;
       return `<li style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:#fbf7fd;border:1px solid #d8c4e0;border-radius:5px;margin-bottom:6px;">
-        <input type="checkbox" style="width:17px;height:17px;accent-color:#5a2f7a;cursor:pointer;flex-shrink:0;" onchange="toggleShuzaiTodo('${t.leadId}',${t.ti})">
-        <div style="flex:1;cursor:pointer;" onclick="toggleShuzaiTodo('${t.leadId}',${t.ti})">
+        <input type="checkbox" style="width:17px;height:17px;accent-color:#5a2f7a;cursor:pointer;flex-shrink:0;" onchange="${tog}">
+        <div style="flex:1;cursor:pointer;" onclick="${tog}">
           <div style="font-size:13px;">${esc(t.text)} <span style="font-size:10px;color:#5a2f7a;">/ ${esc(t.leadName)}</span></div>
           ${t.dueDate?`<div style="font-size:10px;color:#8b6820;margin-top:2px;">📅 ${fmtDate(t.dueDate)}　${duLabel}</div>`:''}
         </div>
@@ -1221,9 +1237,10 @@ function renderDashSchedule(){
     }),
     ...szTodos.map(t=>{
       const overdue = t.dueDate < todayStr;
+      const tog = t.ivId ? `toggleShuzaiIvTodo('${t.ivId}',${t.ti})` : `toggleShuzaiTodo('${t.leadId}',${t.ti})`;
       return `<div class="task-item" style="padding:8px 12px;margin-bottom:5px;">
-        <input type="checkbox" onchange="toggleShuzaiTodo('${t.leadId}',${t.ti})">
-        <label onclick="toggleShuzaiTodo('${t.leadId}',${t.ti})" style="font-size:12px;flex:1;cursor:pointer;">
+        <input type="checkbox" onchange="${tog}">
+        <label onclick="${tog}" style="font-size:12px;flex:1;cursor:pointer;">
           <span class="badge badge-purple" style="font-size:10px;">取材</span>
           ${esc(t.text)} <span style="color:#5a2f7a;font-size:10px;">/ ${esc(t.leadName)}</span>
           ${overdue?`<span style="color:#c05010;font-size:10px;font-weight:700;"> （${fmtDate(t.dueDate)} 超過）</span>`:''}

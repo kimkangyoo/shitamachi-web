@@ -317,6 +317,17 @@ input:focus,textarea:focus,select:focus{outline:2px solid #c8880a;border-color:#
           <a href="https://notebooklm.google.com/" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="text-decoration:none;">NotebookLM</a>
         </div>
       </div>
+      <!-- やることリスト -->
+      <div style="border-top:1px solid #d4c4a4;margin-top:20px;padding-top:16px;">
+        <label class="fl" style="font-size:13px;margin-bottom:10px;">✅ やることリスト（期限つき・業務管理と連携）</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+          <input type="text" id="ivTodoText" placeholder="例：写真を追加取材する" style="flex:1;min-width:140px;">
+          <input type="date" id="ivTodoDate" style="width:150px;">
+          <button class="btn btn-outline btn-sm" type="button" onclick="addIvTodo()">追加</button>
+        </div>
+        <div id="ivTodoList"></div>
+      </div>
+
       <!-- 参考資料 -->
       <div style="border-top:1px solid #d4c4a4;margin-top:20px;padding-top:16px;">
         <label class="fl" style="font-size:13px;margin-bottom:10px;">📎 参考資料（リンク・動画・画像・メモ）</label>
@@ -781,7 +792,7 @@ function renderInterviews(){
         const preview = (iv.transcript||'').slice(0,80);
         return `<div class="list-item">
           <div class="list-item-body">
-            <div class="list-item-title">${esc(iv.title)} ${iv.hasAudio?'<span class="badge badge-blue">🎵 録音あり</span>':''}${(iv.refs&&((iv.refs.links||[]).length||(iv.refs.images||[]).length))?'<span class="badge badge-blue">📎 資料</span>':''}</div>
+            <div class="list-item-title">${esc(iv.title)} ${iv.hasAudio?'<span class="badge badge-blue">🎵 録音あり</span>':''}${(iv.refs&&((iv.refs.links||[]).length||(iv.refs.images||[]).length))?'<span class="badge badge-blue">📎 資料</span>':''}${(iv.todos&&iv.todos.some(t=>!t.done))?'<span class="badge badge-blue">✅ やること</span>':''}</div>
             <div class="list-item-meta">
               ${fmtDate(iv.date)}${lead?`　／　${esc(lead.name)}`:''}${iv.duration?`　／　${m}分${s}秒`:''}
               ${preview?`<br>${esc(preview)}${iv.transcript.length>80?'…':''}`:''}
@@ -792,6 +803,28 @@ function renderInterviews(){
           </div>
         </div>`;
       }).join('');
+}
+
+let ivTodos = [];
+function renderIvTodos(){
+  const el = document.getElementById('ivTodoList');
+  if(ivTodos.length===0){ el.innerHTML='<div style="font-size:12px;color:#8b6820;">やることがありません。</div>'; return; }
+  const undone = ivTodos.filter(t=>!t.done).sort((a,b)=>(a.dueDate||'9999').localeCompare(b.dueDate||'9999'));
+  const done = ivTodos.filter(t=>t.done);
+  const row = (t)=>{ const i=ivTodos.indexOf(t);
+    const due = t.dueDate?`<span style="font-size:11px;color:${!t.done&&t.dueDate<today()?'#c05010':'#8b6820'};margin-left:8px;">📅 ${fmtDate(t.dueDate)}${!t.done&&t.dueDate<today()?'（超過）':''}</span>`:'';
+    return `<div style="display:flex;align-items:center;gap:9px;padding:8px 11px;background:${t.done?'#efe8d8':'#fffdf5'};border:1px solid #d4c4a4;border-radius:4px;margin-bottom:5px;">
+      <input type="checkbox" ${t.done?'checked':''} onchange="ivTodos[${i}].done=!ivTodos[${i}].done;renderIvTodos()" style="width:16px;height:16px;accent-color:#8b5e0a;">
+      <span style="flex:1;font-size:13px;${t.done?'text-decoration:line-through;color:#a09080;':''}">${esc(t.text)}${due}</span>
+      <button onclick="ivTodos.splice(${i},1);renderIvTodos()" style="background:none;border:none;color:#b0a48c;font-size:15px;cursor:pointer;">×</button>
+    </div>`; };
+  el.innerHTML = undone.map(row).join('') + (done.length?`<div style="font-size:10px;letter-spacing:.2em;color:#a09080;padding:6px 2px 3px;">完了済み</div>`+done.map(row).join(''):'');
+}
+function addIvTodo(){
+  const v = document.getElementById('ivTodoText').value.trim(); if(!v) return;
+  ivTodos.push({id:'it_'+Date.now(), text:v, done:false, dueDate:document.getElementById('ivTodoDate').value||''});
+  document.getElementById('ivTodoText').value=''; document.getElementById('ivTodoDate').value='';
+  renderIvTodos();
 }
 
 let ivRefs = {links:[],images:[],note:''};
@@ -838,6 +871,8 @@ async function openInterview(id){
   document.getElementById('iv-lead').innerHTML = '<option value="">— 選択しない —</option>' + S.leads.map(l=>`<option value="${l.id}">${esc(l.name)}</option>`).join('');
   document.getElementById('iv-lead').value = iv.leadId||'';
   document.getElementById('interviewTranscript').value = iv.transcript||'';
+  ivTodos = iv.todos ? JSON.parse(JSON.stringify(iv.todos)) : [];
+  renderIvTodos();
   ivRefs = iv.refs ? JSON.parse(JSON.stringify(iv.refs)) : {links:[],images:[],note:''};
   if(!ivRefs.links) ivRefs.links=[]; if(!ivRefs.images) ivRefs.images=[];
   document.getElementById('ivRefNote').value = ivRefs.note||'';
@@ -865,6 +900,7 @@ function updateInterview(){
   iv.transcript = document.getElementById('interviewTranscript').value;
   ivRefs.note = document.getElementById('ivRefNote').value;
   iv.refs = ivRefs;
+  iv.todos = ivTodos;
   saveS(); closeModal('interviewModal'); renderInterviews();
   showToast('保存しました');
 }
