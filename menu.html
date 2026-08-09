@@ -13,9 +13,9 @@ body{font-family:'Shippori Mincho',serif;background:#e8dcc8;color:#2a1a08;}
 nav{background:#150c02;padding:22px 64px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #7a5218;}
 .nav-logo{font-family:'Shippori Mincho',serif;font-size:20px;letter-spacing:.25em;color:#e8d090;text-decoration:none;display:block;}
 .nav-logo span{color:#c8880a;}
-.nav-links{display:flex;gap:36px;}
-.nav-links a{font-size:15px;letter-spacing:.15em;color:rgba(232,208,144,.7);text-decoration:none;font-family:'Shippori Mincho',serif;}
-.nav-links a:hover{color:#c8880a;}
+.nav-links{display:flex;align-items:center;gap:36px;}
+.nav-links a,.nav-drop>span{font-size:15px;letter-spacing:.15em;color:rgba(232,208,144,.7);text-decoration:none;font-family:'Shippori Mincho',serif;}
+.nav-links a:hover,.nav-drop>span:hover{color:#c8880a;}
 
 .page-hero{background:#150c02;padding:72px 48px 60px;border-bottom:1px solid #3a2010;}
 .page-hero-eyebrow{font-size:9px;letter-spacing:.6em;color:#8b6820;margin-bottom:14px;font-family:'Noto Sans JP',sans-serif;}
@@ -74,7 +74,7 @@ footer{background:#0c0600;padding:32px 48px;display:flex;justify-content:space-b
 @media(max-width:768px){
   nav{padding:16px 20px;}
   .nav-links{gap:16px;}
-  .nav-links a{font-size:13px;}
+  .nav-links a,.nav-drop>span{font-size:13px;}
   .nav-logo{font-size:16px;}
   .page-hero{padding:48px 20px 40px;}
   .sec{padding:56px 20px;}
@@ -84,6 +84,25 @@ footer{background:#0c0600;padding:32px 48px;display:flex;justify-content:space-b
   footer{padding:24px 20px;flex-direction:column;align-items:flex-start;}
   .foot-meta{text-align:left;}
 }
+
+/* NAV DROPDOWN */
+.nav-drop{position:relative;}
+.nav-drop>span{cursor:pointer;display:inline-block;}
+.nav-drop>span::after{content:'▾';margin-left:.4em;font-size:.8em;}
+.nav-drop-menu{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:14px;background:#150c02;border:1px solid #7a5218;min-width:190px;padding:8px 0;opacity:0;visibility:hidden;transition:opacity .18s;z-index:100;}
+.nav-drop:hover .nav-drop-menu,.nav-drop:focus-within .nav-drop-menu{opacity:1;visibility:visible;}
+.nav-drop-menu::before{content:'';position:absolute;top:-14px;left:0;right:0;height:14px;}
+.nav-drop-menu a{display:block;padding:12px 22px;white-space:nowrap;text-align:left;}
+.nav-drop-menu a:hover{background:rgba(200,136,10,.12);}
+@media(max-width:768px){
+  nav{flex-wrap:wrap;row-gap:12px;}
+  .nav-logo{white-space:nowrap;}
+  .nav-links{width:100%;flex-wrap:wrap;align-items:baseline;gap:12px 18px;}
+  .nav-drop{display:flex;align-items:baseline;gap:14px;}
+  .nav-drop-menu{position:static;transform:none;margin:0;min-width:0;opacity:1;visibility:visible;border:none;padding:0;background:transparent;display:flex;gap:14px;}
+  .nav-drop-menu a{padding:0;}
+  .nav-drop>span::after{content:'：';margin-left:0;}
+}
 </style>
 </head>
 <body>
@@ -92,7 +111,13 @@ footer{background:#0c0600;padding:32px 48px;display:flex;justify-content:space-b
   <a href="index.html" class="nav-logo">下町きろくの<span>動画屋</span></a>
   <div class="nav-links">
     <a href="index.html#about">動画屋とは</a>
-    <a href="index.html#menu">メニュー</a>
+    <div class="nav-drop">
+      <span>メニュー</span>
+      <div class="nav-drop-menu">
+        <a href="menu.html">動画メニュー</a>
+        <a href="photo.html">写真メニュー</a>
+      </div>
+    </div>
     <a href="index.html#works">記録の現場から</a>
     <a href="index.html#profile">記録者</a>
     <a href="index.html#contact">お問い合わせ</a>
