@@ -317,6 +317,20 @@ input:focus,textarea:focus,select:focus{outline:2px solid #c8880a;border-color:#
           <a href="https://notebooklm.google.com/" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="text-decoration:none;">NotebookLM</a>
         </div>
       </div>
+      <!-- 参考資料 -->
+      <div style="border-top:1px solid #d4c4a4;margin-top:20px;padding-top:16px;">
+        <label class="fl" style="font-size:13px;margin-bottom:10px;">📎 参考資料（リンク・動画・画像・メモ）</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+          <input type="text" id="ivRefTitle" placeholder="タイトル（例：関連記事・参考動画）" style="flex:1;min-width:130px;">
+          <input type="text" id="ivRefUrl" placeholder="URL（動画・サイトなど）" style="flex:2;min-width:160px;">
+          <button class="btn btn-outline btn-sm" type="button" onclick="addIvRefLink()">追加</button>
+        </div>
+        <div id="ivRefLinkList" style="margin-bottom:12px;"></div>
+        <label class="btn btn-outline btn-sm" style="cursor:pointer;display:inline-block;margin-bottom:10px;">📂 画像を追加<input type="file" accept="image/*" multiple style="display:none;" onchange="addIvRefImages(this.files)"></label>
+        <div id="ivRefImgGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-bottom:12px;"></div>
+        <textarea id="ivRefNote" placeholder="参考メモ（気づき・確認したいこと・引用元など）" style="min-height:70px;"></textarea>
+      </div>
+
       <div class="btn-row">
         <button class="btn btn-gold" onclick="updateInterview()">保存</button>
         <button class="btn btn-outline" onclick="downloadInterviewAudio()" id="ivDlAudioBtn" style="display:none;">🎵 録音を保存</button>
@@ -410,6 +424,19 @@ function deleteAudioBlob(id){
   const tx = db.transaction('audio','readwrite');
   tx.objectStore('audio').delete(id);
 }
+// 資料画像用DB
+let imgDB = null;
+function openImgDB(){
+  return new Promise((resolve)=>{
+    const req = indexedDB.open('shuzaiImages', 1);
+    req.onupgradeneeded = e => e.target.result.createObjectStore('images', {keyPath:'id'});
+    req.onsuccess = e => { imgDB = e.target.result; resolve(imgDB); };
+    req.onerror = () => resolve(null);
+  });
+}
+function saveRefImg(id, dataUrl){ return new Promise(res=>{ if(!imgDB){res(false);return;} const tx=imgDB.transaction('images','readwrite'); tx.objectStore('images').put({id,dataUrl}); tx.oncomplete=()=>res(true); }); }
+function getRefImg(id){ return new Promise(res=>{ if(!imgDB){res(null);return;} const req=imgDB.transaction('images','readonly').objectStore('images').get(id); req.onsuccess=()=>res(req.result?req.result.dataUrl:null); req.onerror=()=>res(null); }); }
+function delRefImg(id){ if(!imgDB) return; imgDB.transaction('images','readwrite').objectStore('images').delete(id); }
 
 // ─── TABS ─────────────────────────────────────────────────────────────────────
 function switchTab(name){
@@ -754,7 +781,7 @@ function renderInterviews(){
         const preview = (iv.transcript||'').slice(0,80);
         return `<div class="list-item">
           <div class="list-item-body">
-            <div class="list-item-title">${esc(iv.title)} ${iv.hasAudio?'<span class="badge badge-blue">🎵 録音あり</span>':''}</div>
+            <div class="list-item-title">${esc(iv.title)} ${iv.hasAudio?'<span class="badge badge-blue">🎵 録音あり</span>':''}${(iv.refs&&((iv.refs.links||[]).length||(iv.refs.images||[]).length))?'<span class="badge badge-blue">📎 資料</span>':''}</div>
             <div class="list-item-meta">
               ${fmtDate(iv.date)}${lead?`　／　${esc(lead.name)}`:''}${iv.duration?`　／　${m}分${s}秒`:''}
               ${preview?`<br>${esc(preview)}${iv.transcript.length>80?'…':''}`:''}
@@ -767,6 +794,40 @@ function renderInterviews(){
       }).join('');
 }
 
+let ivRefs = {links:[],images:[],note:''};
+async function renderIvRefs(){
+  document.getElementById('ivRefLinkList').innerHTML = ivRefs.links.length===0
+    ? '<div style="font-size:12px;color:#8b6820;">リンクがありません。</div>'
+    : ivRefs.links.map((l,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:#fffdf5;border:1px solid #d4c4a4;border-radius:4px;margin-bottom:5px;">
+        <a href="${esc(l.url)}" target="_blank" rel="noopener" style="flex:1;font-size:13px;color:#8b5e0a;text-decoration:none;">🔗 ${esc(l.title||l.url)}</a>
+        <button onclick="ivRefs.links.splice(${i},1);renderIvRefs()" style="background:none;border:none;color:#b0a48c;font-size:15px;cursor:pointer;">×</button>
+      </div>`).join('');
+  const g = document.getElementById('ivRefImgGrid'); g.innerHTML='';
+  for(let i=0;i<ivRefs.images.length;i++){
+    const url = await getRefImg(ivRefs.images[i].id);
+    const d = document.createElement('div'); d.style.cssText='border:1px solid #d4c4a4;border-radius:5px;overflow:hidden;background:#fff;';
+    d.innerHTML = `${url?`<img src="${url}" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;">`:'<div style="aspect-ratio:1;display:flex;align-items:center;justify-content:center;">🖼</div>'}<button onclick="delIvRefImg(${i})" style="width:100%;border:none;border-top:1px solid #d4c4a4;background:transparent;color:#c05010;font-size:11px;padding:3px;cursor:pointer;">削除</button>`;
+    g.appendChild(d);
+  }
+}
+function addIvRefLink(){
+  const url = document.getElementById('ivRefUrl').value.trim();
+  if(!url){ showToast('URLを入力してください'); return; }
+  ivRefs.links.push({title:document.getElementById('ivRefTitle').value.trim(), url});
+  document.getElementById('ivRefTitle').value=''; document.getElementById('ivRefUrl').value='';
+  renderIvRefs();
+}
+async function addIvRefImages(files){
+  if(!files||!files.length) return;
+  for(const f of files){ if(!f.type.startsWith('image/')) continue;
+    const url = await new Promise(r=>{const fr=new FileReader();fr.onload=e=>r(e.target.result);fr.readAsDataURL(f);});
+    const id = 'ri_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+    await saveRefImg(id,url); ivRefs.images.push({id});
+  }
+  renderIvRefs(); showToast('画像を追加しました');
+}
+async function delIvRefImg(i){ if(!confirm('この画像を削除しますか？')) return; delRefImg(ivRefs.images[i].id); ivRefs.images.splice(i,1); renderIvRefs(); }
+
 async function openInterview(id){
   const iv = S.interviews.find(x=>x.id===id);
   if(!iv) return;
@@ -777,6 +838,10 @@ async function openInterview(id){
   document.getElementById('iv-lead').innerHTML = '<option value="">— 選択しない —</option>' + S.leads.map(l=>`<option value="${l.id}">${esc(l.name)}</option>`).join('');
   document.getElementById('iv-lead').value = iv.leadId||'';
   document.getElementById('interviewTranscript').value = iv.transcript||'';
+  ivRefs = iv.refs ? JSON.parse(JSON.stringify(iv.refs)) : {links:[],images:[],note:''};
+  if(!ivRefs.links) ivRefs.links=[]; if(!ivRefs.images) ivRefs.images=[];
+  document.getElementById('ivRefNote').value = ivRefs.note||'';
+  renderIvRefs();
 
   const audioEl = document.getElementById('interviewAudio');
   const dlBtn = document.getElementById('ivDlAudioBtn');
@@ -798,6 +863,8 @@ function updateInterview(){
   iv.date = document.getElementById('iv-date').value;
   iv.leadId = document.getElementById('iv-lead').value;
   iv.transcript = document.getElementById('interviewTranscript').value;
+  ivRefs.note = document.getElementById('ivRefNote').value;
+  iv.refs = ivRefs;
   saveS(); closeModal('interviewModal'); renderInterviews();
   showToast('保存しました');
 }
@@ -944,6 +1011,7 @@ function importData(e){
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 loadS();
 openDB();
+openImgDB();
 renderLeads();
 document.querySelectorAll('.modal-bg').forEach(bg=>{
   bg.addEventListener('click', e=>{ if(e.target===bg) bg.classList.remove('open'); });
