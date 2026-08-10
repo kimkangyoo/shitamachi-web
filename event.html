@@ -24,7 +24,7 @@ body{font-family:'Shippori Mincho',serif;background:#e8dcc8;color:#2a1a08;}
 body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.6;}
 
 /* NAV */
-nav{background:#150c02;padding:22px 40px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #7a5218;}
+nav{background:#150c02;padding:22px 40px;display:flex;align-items:center;justify-content:space-between;gap:30px;border-bottom:2px solid #7a5218;}
 .nav-logo{text-decoration:none;white-space:nowrap;font-family:'Shippori Mincho',serif;font-size:21px;letter-spacing:.25em;color:#e8d090;}
 .nav-logo span{color:#c8880a;}
 .nav-logo:hover{color:#fff0c0;}
@@ -41,6 +41,20 @@ nav{background:#150c02;padding:22px 40px;display:flex;align-items:center;justify
   .nav-ig-text{display:inline;}
 }
 
+
+/* NAV FIT */
+@media(max-width:1240px){
+  nav{padding:20px 26px;}
+  .nav-links{gap:14px;}
+  .nav-links a,.nav-drop>span{font-size:15px;letter-spacing:.08em;}
+  .nav-logo{font-size:19px;letter-spacing:.18em;}
+}
+
+/* NAV WRAP */
+@media(max-width:900px) and (min-width:769px){
+  nav{flex-wrap:wrap;row-gap:12px;padding:16px 24px;}
+  .nav-links{width:100%;flex-wrap:wrap;gap:12px 16px;}
+}
 
 /* HERO */
 .hero{position:relative;overflow:hidden;}
@@ -158,6 +172,7 @@ footer{background:#0c0600;padding:32px 48px;display:flex;justify-content:space-b
       </div>
     </div>
     <a href="index.html#works">記録の現場から</a>
+    <a href="library.html">図書館</a>
     <a href="recorder.html">記録者</a>
     <a href="index.html#contact">お問い合わせ</a>
     <a href="https://www.instagram.com/shitamachi_memory_moviemaker/" target="_blank" rel="noopener" class="nav-ig" title="Instagram で作品を見る" aria-label="Instagram">

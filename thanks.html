@@ -11,13 +11,25 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Shippori Mincho',serif;background:#e8dcc8;color:#2a1a08;}
-nav{background:#150c02;padding:22px 40px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #7a5218;}
+nav{background:#150c02;padding:22px 40px;display:flex;align-items:center;justify-content:space-between;gap:30px;gap:30px;border-bottom:2px solid #7a5218;}
 .nav-logo{text-decoration:none;white-space:nowrap;font-family:'Shippori Mincho',serif;font-size:21px;letter-spacing:.25em;color:#e8d090;text-decoration:none;}
 .nav-logo span{color:#c8880a;}
 .nav-logo:hover{color:#fff0c0;}
 .foot-logo:hover{color:#c8a860;}
 .nav-links{display:flex;align-items:center;gap:18px;}
 .nav-links a,.nav-drop>span{white-space:nowrap;font-size:17px;letter-spacing:.15em;color:rgba(232,208,144,.7);text-decoration:none;font-family:'Shippori Mincho',serif;}
+
+/* NAV FIT */
+@media(max-width:1240px){
+  nav{padding:20px 26px;}
+  .nav-links{gap:14px;}
+  .nav-links a,.nav-drop>span{font-size:15px;letter-spacing:.08em;}
+}
+/* NAV WRAP */
+@media(max-width:900px) and (min-width:769px){
+  nav{flex-wrap:wrap;row-gap:12px;padding:16px 24px;}
+  .nav-links{width:100%;flex-wrap:wrap;gap:12px 16px;}
+}
 .nav-links a:hover,.nav-drop>span:hover{color:#c8880a;}
 .nav-ig{display:inline-flex;align-items:center;gap:8px;color:#c8880a !important;border:1px solid rgba(200,136,10,.6);padding:8px 16px;}
 .nav-ig:hover{background:rgba(200,136,10,.14);color:#e8a828 !important;}
@@ -73,6 +85,7 @@ footer{background:#0c0600;padding:32px 48px;display:flex;justify-content:space-b
       </div>
     </div>
     <a href="index.html#works">記録の現場から</a>
+    <a href="library.html">図書館</a>
     <a href="recorder.html">記録者</a>
     <a href="index.html#contact">お問い合わせ</a>
     <a href="https://www.instagram.com/shitamachi_memory_moviemaker/" target="_blank" rel="noopener" class="nav-ig" title="Instagram で作品を見る" aria-label="Instagram">

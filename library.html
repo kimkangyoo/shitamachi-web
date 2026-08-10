@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>1分プロフィール動画｜下町きろくの動画屋</title>
-<meta name="description" content="仕事や活動の様子＋短いインタビューで、「今のあなた」を約1分の映像に。ホームページやSNSに動く自己紹介を。">
-<link rel="canonical" href="https://kimkangyoo.github.io/shitamachi-web/profile-movie.html">
+<title>下町きろくの図書館｜下町きろくの動画屋</title>
+<meta name="description" content="記録は、未来の誰かへの贈りもの。街や人の記録を蓄積し、10年後20年後にも出会えるように残していくプロジェクト「下町きろくの図書館」。">
+<link rel="canonical" href="https://kimkangyoo.github.io/shitamachi-web/library.html">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="下町きろくの動画屋">
-<meta property="og:title" content="1分プロフィール動画｜下町きろくの動画屋">
-<meta property="og:description" content="仕事や活動の様子＋短いインタビューで、「今のあなた」を約1分の映像に。ホームページやSNSに動く自己紹介を。">
-<meta property="og:url" content="https://kimkangyoo.github.io/shitamachi-web/profile-movie.html">
+<meta property="og:title" content="下町きろくの図書館｜下町きろくの動画屋">
+<meta property="og:description" content="記録は、未来の誰かへの贈りもの。街や人の記録を蓄積し、10年後20年後にも出会えるように残していくプロジェクト「下町きろくの図書館」。">
+<meta property="og:url" content="https://kimkangyoo.github.io/shitamachi-web/library.html">
 <meta property="og:image" content="https://kimkangyoo.github.io/shitamachi-web/hero.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="https://kimkangyoo.github.io/shitamachi-web/logo.png">
@@ -155,6 +155,28 @@ footer{background:#0c0600;padding:32px 48px;display:flex;justify-content:space-b
   .nav-drop-menu a{padding:0;}
   .nav-drop>span::after{content:'：';margin-left:0;}
 }
+
+/* LIBRARY */
+.flow-line{position:relative;padding-left:74px;}
+.flow-line::before{content:'';position:absolute;left:23px;top:14px;bottom:14px;width:1px;background:linear-gradient(to bottom,rgba(184,152,72,.15),#b89848 12%,#b89848 88%,rgba(184,152,72,.15));}
+.flow-row{position:relative;margin-bottom:44px;}
+.flow-row:last-child{margin-bottom:0;}
+.flow-row::before{content:'';position:absolute;left:-59px;top:6px;width:15px;height:15px;background:#ddd0b0;border:2px solid #c8880a;border-radius:50%;}
+.flow-row.is-last::before{background:#c8880a;}
+.flow-step-label{font-size:14px;letter-spacing:.4em;color:#a0681a;margin-bottom:8px;font-family:'Noto Sans JP',sans-serif;}
+.flow-step-title{font-family:'Shippori Mincho',serif;font-size:23px;color:#1c0f02;letter-spacing:.06em;margin-bottom:10px;}
+.flow-step-desc{font-family:'Shippori Mincho',serif;font-size:18px;color:#5a3c18;line-height:2.2;}
+
+/* 収蔵記録バッジ（記録の現場から の各記事で使えます） */
+.archive-badge{display:inline-flex;align-items:center;gap:9px;font-family:'Noto Sans JP',sans-serif;font-size:14px;letter-spacing:.16em;color:#7a3010;border:1px solid #b89848;background:rgba(184,152,72,.1);padding:8px 16px;text-decoration:none;}
+.archive-badge:hover{background:rgba(184,152,72,.2);}
+.archive-badge svg{flex-shrink:0;}
+.archive-badge.on-dark{color:#c8a860;border-color:rgba(160,104,26,.6);background:rgba(200,168,96,.08);}
+@media(max-width:768px){
+  .flow-line{padding-left:44px;}
+  .flow-line::before{left:8px;}
+  .flow-row::before{left:-44px;}
+}
 </style>
 </head>
 <body>
@@ -182,32 +204,99 @@ footer{background:#0c0600;padding:32px 48px;display:flex;justify-content:space-b
   </div>
 </nav>
 
+<section class="sec bg-dark">
+  <div class="inner">
+    <p class="sec-eyebrow" style="color:#a0681a;">PROJECT 01</p>
+    <h2 style="font-family:'Shippori Mincho',serif;font-size:36px;font-weight:400;color:#f0ddb0;letter-spacing:.12em;line-height:1.5;margin-bottom:44px;">下町きろくの図書館</h2>
+    <p style="font-family:'Shippori Mincho',serif;font-size:30px;color:#e8950a;letter-spacing:.14em;line-height:1.9;padding-left:26px;border-left:3px solid #c8880a;">記録は、<br>未来の誰かへの贈りもの。</p>
+  </div>
+</section>
+
+<div class="divider"><span class="divider-inner">◆</span></div>
+
 <section class="sec bg-aged">
   <div class="inner">
-    <p class="sec-eyebrow">PROFILE MOVIE</p>
-    <h2 class="sec-title">1分プロフィール動画</h2>
-    <p style="font-family:'Shippori Mincho',serif;font-size:24px;color:#7a3010;letter-spacing:.08em;margin-bottom:44px;font-style:italic;">「今のあなた」を、1分の映像に。</p>
+    <p class="sec-eyebrow">ABOUT</p>
+    <h2 class="sec-title" style="margin-bottom:44px;">記録を、残していく場所</h2>
 
-    <div style="display:flex;flex-direction:column;gap:20px;margin-bottom:44px;">
-      <p style="font-family:'Shippori Mincho',serif;font-size:19px;color:#4a3010;line-height:2.4;">仕事や活動の様子＋短いインタビューで、「今のあなた」を約1分の映像に。</p>
-      <p style="font-family:'Shippori Mincho',serif;font-size:19px;color:#4a3010;line-height:2.4;">写真では伝わりきらない、声・話し方・手の動き・その場の空気まで残します。</p>
-      <p style="font-family:'Shippori Mincho',serif;font-size:19px;color:#7a3010;line-height:2.2;">ホームページやSNSのプロフィールに、動く自己紹介を。</p>
+    <div style="display:flex;flex-direction:column;gap:28px;">
+      <p style="font-family:'Shippori Mincho',serif;font-size:19px;color:#4a3010;line-height:2.5;">「下町きろくの図書館」は、街や人の記録を未来へ残していくプロジェクトです。</p>
+      <p style="font-family:'Shippori Mincho',serif;font-size:19px;color:#4a3010;line-height:2.5;">下町きろくの動画屋では、映像や写真を撮影するだけではなく、そこで出会った人、店、地域活動、祭り、街の風景などを「記録の現場から」として紹介しています。</p>
+      <p style="font-family:'Shippori Mincho',serif;font-size:22px;color:#7a3010;line-height:2.2;letter-spacing:.04em;">しかし、記録は発信して終わりではありません。</p>
+      <p style="font-family:'Shippori Mincho',serif;font-size:19px;color:#4a3010;line-height:2.5;">一つひとつの記録を蓄積し、10年後、20年後にも、その人の声や表情、その街の空気に出会えるように残していきたい。そのために始めるのが「下町きろくの図書館」です。</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"><span class="divider-inner">◆</span></div>
+
+<section class="sec bg-aged">
+  <div class="inner">
+    <p class="sec-eyebrow">FLOW</p>
+    <h2 class="sec-title" style="margin-bottom:48px;">このプロジェクトの流れ</h2>
+
+    <div class="flow-line">
+      <div class="flow-row">
+        <p class="flow-step-label">01</p>
+        <p class="flow-step-title">記録する</p>
+        <p class="flow-step-desc">人、店、地域活動、祭り、街の風景。その日その場所にしかないものを、映像と写真におさめます。</p>
+      </div>
+      <div class="flow-row">
+        <p class="flow-step-label">02</p>
+        <p class="flow-step-title">「記録の現場から」で伝える</p>
+        <p class="flow-step-desc">撮ってきたものを、その場の空気ごと紹介します。まずは今、知ってもらうために。</p>
+      </div>
+      <div class="flow-row">
+        <p class="flow-step-label">03</p>
+        <p class="flow-step-title">「下町きろくの図書館」に残す</p>
+        <p class="flow-step-desc">紹介して終わりにせず、一つずつ収蔵していきます。流れて消えないように。</p>
+      </div>
+      <div class="flow-row is-last">
+        <p class="flow-step-label">04</p>
+        <p class="flow-step-title">未来の誰かが、その記録に出会う</p>
+        <p class="flow-step-desc">10年後、20年後。会ったことのない誰かが、この街の誰かの声に出会います。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"><span class="divider-inner">◆</span></div>
+
+<section class="sec bg-dark">
+  <div class="inner">
+    <p class="sec-eyebrow" style="color:#a0681a;">ARCHIVE</p>
+    <h2 class="sec-title" style="color:#f0ddb0;border-bottom-color:#a0681a;margin-bottom:44px;">収蔵していく記録</h2>
+
+    <div style="display:flex;flex-direction:column;gap:26px;margin-bottom:40px;">
+      <p style="font-family:'Shippori Mincho',serif;font-size:19px;color:#c8a060;line-height:2.5;">「記録の現場から」で生まれた記録も、下町きろくの図書館へ少しずつ収蔵していきます。映像、写真、文章、音声。かたちはひとつではありません。</p>
+      <p style="font-family:'Shippori Mincho',serif;font-size:19px;color:#c8a060;line-height:2.5;">収蔵した記録には、この印がつきます。</p>
     </div>
 
+    <div style="padding:32px 30px;border:1px dashed rgba(160,104,26,.5);margin-bottom:8px;">
+      <span class="archive-badge on-dark"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>下町きろくの図書館 収蔵記録</span>
+    </div>
+  </div>
+</section>
 
-    <div style="background:#1c0f02;padding:44px 40px;margin-bottom:40px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;">
-        <div>
-          <p style="font-family:'Shippori Mincho',serif;font-size:18px;color:#8a6a3a;letter-spacing:.06em;margin-bottom:6px;"><s>通常 20,000円</s></p>
-          <p style="font-size:15px;letter-spacing:.3em;color:#a0681a;margin-bottom:6px;font-family:'Noto Sans JP',sans-serif;">ホームページOPEN記念・30名限定</p>
-          <p style="font-family:'Shippori Mincho',serif;font-size:22px;color:#e8950a;letter-spacing:.06em;"><span style="font-size:34px;font-weight:700;">10,000円</span></p>
-        </div>
-        <a href="index.html#contact" style="display:inline-block;border:1px solid rgba(200,136,10,.7);color:#c8880a;font-family:'Shippori Mincho',serif;font-size:17px;letter-spacing:.3em;padding:14px 36px;text-decoration:none;white-space:nowrap;">まずはご相談 →</a>
-      </div>
+<div class="divider"><span class="divider-inner">◆</span></div>
+
+<section class="sec bg-aged">
+  <div class="inner">
+    <p class="sec-eyebrow">FUTURE</p>
+    <h2 class="sec-title" style="margin-bottom:44px;">これからのこと</h2>
+
+    <div style="display:flex;flex-direction:column;gap:28px;margin-bottom:48px;">
+      <p style="font-family:'Shippori Mincho',serif;font-size:19px;color:#4a3010;line-height:2.5;">現在、図書館の建物はありません。まずはこのホームページを入口に、映像・写真・文章・音声など、街にある小さな記録を少しずつ集めていきます。</p>
+      <p style="font-family:'Shippori Mincho',serif;font-size:19px;color:#4a3010;line-height:2.5;">将来は、オンラインだけではなく、実際に記録に触れたり、誰かの物語に出会ったりできる小さな場所をつくることを目指しています。</p>
+      <p style="font-family:'Shippori Mincho',serif;font-size:22px;color:#7a3010;line-height:2.2;letter-spacing:.04em;">本が並ぶ図書館ではなく、<br>誰かの「今」が置いてある場所に。</p>
     </div>
 
     <div style="text-align:center;">
-      <a href="index.html#menu" style="display:inline-block;border:1px solid #7a5218;color:#8b6820;font-family:'Shippori Mincho',serif;font-size:18px;letter-spacing:.3em;padding:16px 48px;text-decoration:none;">← メニューへもどる</a>
+      <p style="font-family:'Shippori Mincho',serif;font-size:19px;color:#5c3e18;line-height:2.2;margin-bottom:30px;">残しておきたいものがあれば、聞かせてください。</p>
+      <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
+        <a href="index.html#works" style="display:inline-block;border:1px solid #7a5218;color:#8b6820;font-family:'Shippori Mincho',serif;font-size:18px;letter-spacing:.3em;padding:16px 40px;text-decoration:none;">記録の現場から →</a>
+        <a href="index.html#contact" style="display:inline-block;border:1px solid rgba(122,48,16,.8);background:#150c02;color:#e8d090;font-family:'Shippori Mincho',serif;font-size:18px;letter-spacing:.3em;padding:16px 40px;text-decoration:none;">お問い合わせ →</a>
+      </div>
     </div>
   </div>
 </section>
