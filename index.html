@@ -24,14 +24,23 @@ body{font-family:'Shippori Mincho',serif;background:#e8dcc8;color:#2a1a08;}
 body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.6;}
 
 /* NAV */
-nav{background:#150c02;padding:22px 64px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #7a5218;}
-.nav-logo{text-decoration:none;font-family:'Shippori Mincho',serif;font-size:21px;letter-spacing:.25em;color:#e8d090;}
+nav{background:#150c02;padding:22px 40px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #7a5218;}
+.nav-logo{text-decoration:none;white-space:nowrap;font-family:'Shippori Mincho',serif;font-size:21px;letter-spacing:.25em;color:#e8d090;}
 .nav-logo span{color:#c8880a;}
 .nav-logo:hover{color:#fff0c0;}
 .foot-logo:hover{color:#c8a860;}
-.nav-links{display:flex;align-items:center;gap:22px;}
-.nav-links a,.nav-drop>span{font-size:17px;letter-spacing:.15em;color:rgba(232,208,144,.7);text-decoration:none;font-family:'Shippori Mincho',serif;}
+.nav-links{display:flex;align-items:center;gap:18px;}
+.nav-links a,.nav-drop>span{white-space:nowrap;font-size:17px;letter-spacing:.15em;color:rgba(232,208,144,.7);text-decoration:none;font-family:'Shippori Mincho',serif;}
 .nav-links a:hover,.nav-drop>span:hover{color:#c8880a;}
+.nav-ig{display:inline-flex;align-items:center;gap:8px;color:#c8880a !important;border:1px solid rgba(200,136,10,.6);padding:8px 16px;}
+.nav-ig:hover{background:rgba(200,136,10,.14);color:#e8a828 !important;}
+.nav-ig-text{display:none;font-size:15px;letter-spacing:.12em;}
+@media(min-width:1280px){.nav-ig-text{display:inline;}}
+@media(max-width:768px){
+  .nav-ig{padding:6px 12px;}
+  .nav-ig-text{display:inline;}
+}
+
 
 /* HERO */
 .hero{position:relative;overflow:hidden;}
@@ -159,6 +168,10 @@ footer{background:#0c0600;padding:32px 48px;display:flex;justify-content:space-b
     <a href="#works">記録の現場から</a>
     <a href="recorder.html">記録者</a>
     <a href="#contact">お問い合わせ</a>
+    <a href="https://www.instagram.com/shitamachi_memory_moviemaker/" target="_blank" rel="noopener" class="nav-ig" title="Instagram で作品を見る" aria-label="Instagram">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/></svg>
+      <span class="nav-ig-text">Instagram</span>
+    </a>
   </div>
 </nav>
 

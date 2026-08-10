@@ -22,11 +22,20 @@
 body{font-family:'Noto Sans JP',sans-serif;background:#f7f0e2;color:#1e1006;}
 
 nav{background:#1c0f02;padding:15px 44px;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #a0681a;}
-.nav-logo{text-decoration:none;font-family:'Shippori Mincho',serif;font-size:20px;letter-spacing:.22em;color:#f0ddb0;text-decoration:none;}
+.nav-logo{text-decoration:none;white-space:nowrap;font-family:'Shippori Mincho',serif;font-size:20px;letter-spacing:.22em;color:#f0ddb0;text-decoration:none;}
 .nav-logo span{color:#d4920a;}
-.nav-links{display:flex;align-items:center;gap:20px;}
-.nav-links a,.nav-drop>span{font-size:16px;letter-spacing:.2em;color:rgba(240,221,176,.5);text-decoration:none;}
+.nav-links{display:flex;align-items:center;gap:16px;}
+.nav-links a,.nav-drop>span{white-space:nowrap;font-size:16px;letter-spacing:.2em;color:rgba(240,221,176,.5);text-decoration:none;}
 .nav-links a:hover,.nav-drop>span:hover{color:#d4920a;}
+.nav-ig{display:inline-flex;align-items:center;gap:8px;color:#d4920a !important;border:1px solid rgba(212,146,10,.6);padding:8px 16px;}
+.nav-ig:hover{background:rgba(212,146,10,.14);color:#f0b028 !important;}
+.nav-ig-text{display:none;font-size:13px;letter-spacing:.12em;}
+@media(min-width:1280px){.nav-ig-text{display:inline;}}
+@media(max-width:768px){
+  .nav-ig{padding:6px 12px;}
+  .nav-ig-text{display:inline;}
+}
+
 
 .page-hero{background:#1c0f02;padding:64px 48px 52px;}
 .page-hero-eyebrow{font-size:14px;letter-spacing:.5em;color:#a0681a;margin-bottom:14px;}
@@ -91,6 +100,10 @@ footer{background:#100800;padding:26px 48px;display:flex;justify-content:space-b
     <a href="index.html#works">記録の現場から</a>
     <a href="recorder.html">記録者</a>
     <a href="index.html#contact">お問い合わせ</a>
+    <a href="https://www.instagram.com/shitamachi_memory_moviemaker/" target="_blank" rel="noopener" class="nav-ig" title="Instagram で作品を見る" aria-label="Instagram">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/></svg>
+      <span class="nav-ig-text">Instagram</span>
+    </a>
   </div>
 </nav>
 
