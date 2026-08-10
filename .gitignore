@@ -1,0 +1,4 @@
+
+# build output for the sakura upload
+dist/
+*.zip
