@@ -158,12 +158,29 @@ footer{background:#0c0600;padding:32px 48px;display:flex;justify-content:space-b
   .nav-drop-menu a{padding:0;}
   .nav-drop>span::after{content:'：';margin-left:0;}
 }
+
+/* HAMBURGER MENU */
+.nav-bar{display:flex;align-items:center;justify-content:space-between;}
+.nav-toggle{display:none;background:none;border:1px solid rgba(200,136,10,.6);color:#e8d090;font-size:20px;line-height:1;padding:8px 14px;cursor:pointer;border-radius:0;}
+.nav-toggle:hover{background:rgba(200,136,10,.14);}
+@media(max-width:768px){
+  nav{display:block;}
+  .nav-bar{display:flex;align-items:center;justify-content:space-between;}
+  .nav-toggle{display:inline-flex;align-items:center;justify-content:center;}
+  .nav-links{display:none !important;flex-direction:column;align-items:flex-start;width:100%;margin-top:16px;gap:14px;}
+  nav.open .nav-links{display:flex !important;}
+  .nav-drop{flex-direction:column;align-items:flex-start;gap:10px;}
+  .nav-drop-menu{display:flex;flex-direction:column;gap:10px;}
+}
 </style>
 </head>
 <body>
 
 <nav>
-  <a href="index.html" class="nav-logo">下町きろくの<span>動画屋</span></a>
+  <div class="nav-bar">
+    <a href="index.html" class="nav-logo">下町きろくの<span>動画屋</span></a>
+    <button type="button" class="nav-toggle" aria-label="メニューを開く" onclick="this.closest('nav').classList.toggle('open')">☰</button>
+  </div>
   <div class="nav-links">
     <a href="index.html">ホーム</a>
     <a href="about.html">動画屋とは</a>
