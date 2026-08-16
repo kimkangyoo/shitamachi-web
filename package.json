@@ -22,7 +22,10 @@
     "url": "git+https://github.com/kimkangyoo/shitamachi-web.git"
   },
   "keywords": [],
-  "author": "",
+  "author": {
+    "name": "Shitamachi Kiroku",
+    "email": "kimkangyoo@gmail.com"
+  },
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/kimkangyoo/shitamachi-web/issues"
@@ -77,9 +80,10 @@
     },
     "linux": {
       "target": [
-        "AppImage",
-        "deb"
-      ]
+        "AppImage"
+      ],
+      "category": "Utility",
+      "synopsis": "下町きろく サイト管理ツール"
     }
   }
 }
