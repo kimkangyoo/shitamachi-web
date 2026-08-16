@@ -1,0 +1,2459 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>業務管理｜下町きろくの動画屋</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;700&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans JP',sans-serif;background:#f7f0e2;color:#1e1006;min-height:100vh;}
+
+/* NAV */
+nav{background:#150c02;padding:18px 48px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #7a5218;position:sticky;top:0;z-index:100;}
+.nav-logo{font-family:'Shippori Mincho',serif;font-size:16px;letter-spacing:.22em;color:#f0ddb0;text-decoration:none;}
+.nav-logo span{color:#d4920a;}
+.nav-links{display:flex;gap:24px;align-items:center;}
+.nav-links a{font-size:11px;letter-spacing:.2em;color:rgba(240,221,176,.5);text-decoration:none;}
+.nav-links a:hover{color:#d4920a;}
+.nav-links a.active{color:#d4920a;}
+
+/* TABS */
+.tabs{background:#1e1204;border-bottom:1px solid #3a2208;padding:0 48px;display:flex;gap:0;overflow-x:auto;}
+.tab{padding:14px 20px;font-size:11px;letter-spacing:.18em;color:rgba(240,221,176,.4);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;}
+.tab:hover{color:rgba(240,221,176,.7);}
+.tab.active{color:#d4920a;border-bottom-color:#d4920a;}
+
+/* CONTENT */
+.tab-content{display:none;padding:40px 48px;max-width:1100px;}
+.tab-content.active{display:block;}
+
+/* SECTION TITLE */
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:24px;padding-bottom:12px;border-bottom:1px solid #b89848;}
+.sec-head h2{font-family:'Shippori Mincho',serif;font-size:18px;font-weight:400;letter-spacing:.1em;}
+.sec-sub{font-size:11px;color:#8b6820;letter-spacing:.08em;}
+
+/* CARDS */
+.card{background:#fff9ee;border:1px solid #d4b870;border-radius:6px;padding:20px;margin-bottom:16px;}
+.card-label{font-size:10px;letter-spacing:.3em;color:#8b6820;margin-bottom:6px;}
+.card-value{font-family:'Shippori Mincho',serif;font-size:24px;color:#1c0f02;}
+.card-value.warn{color:#c05010;}
+.card-value.ok{color:#2f6040;}
+
+/* DASHBOARD GRID */
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-bottom:32px;}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;margin-bottom:16px;}
+.form-grid.one{grid-template-columns:1fr;}
+.form-grid.three{grid-template-columns:1fr 1fr 1fr;}
+label.fl{font-size:11px;letter-spacing:.15em;color:#5a3a10;display:block;margin-bottom:4px;}
+input[type=text],input[type=date],input[type=number],input[type=email],input[type=tel],textarea,select{
+  font-family:'Noto Sans JP',sans-serif;font-size:13px;padding:8px 10px;border:1px solid #c8a860;
+  border-radius:4px;background:#fffdf5;color:#1e1006;width:100%;}
+textarea{resize:vertical;min-height:72px;}
+input:focus,textarea:focus,select:focus{outline:2px solid #c8880a;border-color:#c8880a;}
+.span2{grid-column:span 2;}
+
+/* BUTTONS */
+.btn{font-family:'Noto Sans JP',sans-serif;font-size:12px;letter-spacing:.1em;padding:9px 20px;border:none;border-radius:4px;cursor:pointer;transition:opacity .15s;}
+.btn:hover{opacity:.82;}
+.btn-gold{background:#c8880a;color:#fff8e8;}
+.btn-outline{background:transparent;border:1px solid #c8880a;color:#c8880a;}
+.btn-sm{padding:5px 12px;font-size:11px;}
+.btn-danger{background:transparent;border:1px solid #c05010;color:#c05010;font-size:11px;padding:4px 10px;border-radius:4px;cursor:pointer;}
+.btn-danger:hover{background:#c05010;color:#fff;}
+.btn-row{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+
+/* LIST ITEMS */
+.list-item{background:#fffdf5;border:1px solid #ddc890;border-radius:5px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px;}
+.list-item:hover{border-color:#c8880a;}
+.list-item-body{flex:1;}
+.list-item-title{font-size:14px;font-weight:700;color:#1c0f02;margin-bottom:3px;}
+.list-item-meta{font-size:11px;color:#8b6820;line-height:1.8;}
+.list-item-actions{display:flex;gap:6px;align-items:center;}
+
+/* BADGE */
+.badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;letter-spacing:.05em;}
+.badge-red{background:#fde8e8;color:#9a2010;}
+.badge-yellow{background:#fdf3e0;color:#8b5e0a;}
+.badge-green{background:#e4f0e8;color:#2f6040;}
+.badge-gray{background:#ede8dd;color:#6b5840;}
+.badge-blue{background:#e0eaf5;color:#1f4a7a;}
+.badge-purple{background:#ece0f0;color:#5a2f7a;}
+
+/* DEADLINE COLOR */
+.deadline-urgent{color:#c05010;font-weight:700;}
+.deadline-soon{color:#9a6b1f;}
+.deadline-ok{color:#2f6040;}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{background:#1c0f02;color:#e8d090;font-family:'Shippori Mincho',serif;font-weight:400;letter-spacing:.1em;padding:10px 12px;text-align:left;}
+td{padding:9px 12px;border-bottom:1px solid #ddc890;}
+tr:hover td{background:#fdf5e0;}
+
+/* TASK CHECKBOX */
+.task-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fffdf5;border:1px solid #ddc890;border-radius:5px;margin-bottom:6px;}
+.task-item input[type=checkbox]{width:16px;height:16px;accent-color:#c8880a;cursor:pointer;}
+.task-item label{flex:1;font-size:13px;cursor:pointer;}
+.task-item.done label{text-decoration:line-through;color:#a09080;}
+
+/* MEMO GRID */
+.memo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
+.memo-card{background:#fffdf5;border:1px solid #ddc890;border-radius:6px;padding:16px;cursor:pointer;}
+.memo-card:hover{border-color:#c8880a;}
+.memo-card-title{font-size:14px;font-weight:700;margin-bottom:6px;color:#1c0f02;}
+.memo-card-body{font-size:12px;color:#5a3a10;line-height:1.7;white-space:pre-wrap;word-break:break-all;max-height:80px;overflow:hidden;}
+.memo-card-date{font-size:10px;color:#a09080;margin-top:8px;}
+
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;align-items:center;justify-content:center;padding:20px;}
+.modal-bg.open{display:flex;}
+.modal{background:#f7f0e2;border:1px solid #b89848;border-radius:8px;width:100%;max-width:620px;max-height:90vh;overflow-y:auto;}
+.modal-head{background:#150c02;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;border-radius:8px 8px 0 0;}
+.modal-head h3{font-family:'Shippori Mincho',serif;font-size:16px;color:#f0ddb0;font-weight:400;}
+.modal-close{background:none;border:none;color:#a09080;font-size:20px;cursor:pointer;line-height:1;}
+.modal-body{padding:24px;}
+
+/* QUICK LINKS */
+.link-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+.link-chip{background:#1c0f02;color:#d4920a;font-size:11px;letter-spacing:.1em;padding:6px 14px;border-radius:16px;text-decoration:none;cursor:pointer;}
+.link-chip:hover{background:#3a2208;}
+
+/* DOC PREVIEW */
+.doc-preview{background:#fff;border:1px solid #ccc;border-radius:4px;padding:32px;font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:13px;line-height:1.8;min-height:400px;}
+.doc-title{text-align:center;font-size:22px;font-weight:700;margin-bottom:24px;letter-spacing:.2em;}
+.doc-meta{display:flex;justify-content:space-between;margin-bottom:20px;font-size:12px;}
+.doc-to{font-size:16px;border-bottom:1px solid #333;padding-bottom:6px;margin-bottom:16px;}
+.doc-table{width:100%;border-collapse:collapse;margin-bottom:16px;}
+.doc-table th{background:#f0f0f0;border:1px solid #ccc;padding:6px 10px;font-size:12px;}
+.doc-table td{border:1px solid #ccc;padding:6px 10px;font-size:12px;}
+.doc-total{text-align:right;font-size:14px;font-weight:700;margin-top:8px;}
+.doc-from{font-size:12px;text-align:right;margin-top:16px;line-height:1.9;}
+
+/* EXPENSE SUMMARY */
+.exp-summary-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:20px;}
+.exp-cat-card{background:#fffdf5;border:1px solid #ddc890;border-radius:5px;padding:12px 14px;}
+.exp-cat-name{font-size:10px;color:#8b6820;letter-spacing:.15em;margin-bottom:4px;}
+.exp-cat-amount{font-size:16px;font-weight:700;color:#1c0f02;}
+
+/* TOAST */
+#toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:#1c0f02;color:#f0ddb0;font-size:12px;letter-spacing:.1em;padding:10px 24px;border-radius:20px;border:1px solid #c8880a;opacity:0;transition:opacity .3s;z-index:9999;pointer-events:none;}
+#toast.show{opacity:1;}
+
+/* CALENDAR */
+.cal-head{display:grid;grid-template-columns:repeat(7,1fr);background:#1c0f02;}
+.cal-dow{text-align:center;font-size:11px;letter-spacing:.1em;color:#c8a860;padding:10px 4px;}
+.cal-dow:first-child{color:#e05050;}
+.cal-dow:last-child{color:#6090d0;}
+.cal-body{display:grid;grid-template-columns:repeat(7,1fr);}
+.cal-cell{min-height:90px;border-right:1px solid #e8dcc8;border-bottom:1px solid #e8dcc8;padding:6px 4px;cursor:pointer;background:#fffdf5;transition:background .15s;vertical-align:top;}
+.cal-cell:hover{background:#f5ead0;}
+.cal-cell.today{background:#fff8e0;border:2px solid #c8880a;}
+.cal-cell.other-month{background:#f0ebe0;opacity:.6;}
+.cal-cell.selected{background:#f5ead0;outline:2px solid #c8880a;}
+.cal-cell:nth-child(7n+1) .cal-date{color:#e05050;}
+.cal-cell:nth-child(7n) .cal-date{color:#6090d0;}
+.cal-date{font-size:13px;font-weight:700;color:#1c0f02;margin-bottom:4px;display:block;}
+.cal-event{font-size:10px;padding:2px 5px;border-radius:3px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;}
+.cal-event.撮影{background:#c8880a;color:#fff;}
+.cal-event.納品{background:#8b2010;color:#fff;}
+.cal-event.打ち合わせ{background:#1f4a7a;color:#fff;}
+.cal-event.その他{background:#2f6040;color:#fff;}
+.cal-event.取材{background:#5a2f7a;color:#fff;}
+.cal-event.project-shoot{background:#c8880a;color:#fff;}
+.cal-event.project-deadline{background:#8b2010;color:#fff;}
+
+/* PRINT */
+@media print {
+  nav,  .tabs, .tab-content:not(.active), .btn, .btn-row, .modal-bg, #toast{display:none!important;}
+  body{background:#fff;}
+  .doc-preview{border:none;padding:0;}
+}
+
+/* RESPONSIVE */
+@media(max-width:700px){
+  nav,.tabs,.tab-content{padding-left:16px;padding-right:16px;}
+  .form-grid,.form-grid.three{grid-template-columns:1fr;}
+  .span2{grid-column:span 1;}
+  .dash-grid{grid-template-columns:1fr 1fr;}
+  .dash-today-grid{grid-template-columns:1fr!important;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">下町きろくの<span>動画屋</span></a>
+  <div class="nav-links">
+    <a href="tools.html">制作ツール</a>
+    <a href="gyomu.html" class="active">業務管理</a>
+    <a href="shuzai.html">取材ノート</a>
+    <a href="hotdog.html">飲食部門</a>
+    <a href="index.html#contact">お問い合わせ</a>
+  </div>
+</nav>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('dashboard')">ダッシュボード</div>
+  <div class="tab" onclick="switchTab('today')">今日のタスク</div>
+  <div class="tab" onclick="switchTab('projects')">案件管理</div>
+  <div class="tab" onclick="switchTab('clients')">顧客</div>
+  <div class="tab" onclick="switchTab('expenses')">経費</div>
+  <div class="tab" onclick="switchTab('docs')">帳票作成</div>
+  <div class="tab" onclick="switchTab('calendar')">カレンダー</div>
+  <div class="tab" onclick="switchTab('sns')">SNS</div>
+  <div class="tab" onclick="switchTab('memos')">メモ</div>
+  <div class="tab" onclick="switchTab('settings')">設定</div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="tab-content active" id="tab-dashboard">
+  <div class="sec-head"><h2>ダッシュボード</h2><span class="sec-sub" id="clockDisplay"></span></div>
+
+  <!-- VOICE BAR -->
+  <div id="voiceBar" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:#1c0f02;border:1px solid #7a5218;border-radius:6px;padding:12px 18px;margin-bottom:24px;">
+    <button class="btn btn-gold btn-sm" id="voiceEnableBtn" onclick="enableVoice()">🔊 音声アラートを有効にする</button>
+    <span id="voiceStatus" style="font-size:12px;color:#a09070;">音声：未有効（ボタンを押すまで鳴りません）</span>
+    <button class="btn btn-outline btn-sm" onclick="manualVoiceCheck()" style="margin-left:auto;">今すぐ確認</button>
+  </div>
+
+  <div class="dash-grid" id="dashCards"></div>
+
+  <!-- TODAY 2-column layout -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:8px;">
+
+    <!-- TODAY'S SCHEDULE -->
+    <div>
+      <div class="sec-head" style="margin-top:0;">
+        <h2>今日の予定</h2>
+        <span class="sec-sub" id="dashTodayLabel"></span>
+      </div>
+      <div id="dashSchedule"></div>
+    </div>
+
+    <!-- TODO LIST -->
+    <div>
+      <div class="sec-head" style="margin-top:0;">
+        <h2>TODOリスト</h2>
+        <form id="dashTodoForm" onsubmit="addDashTodo(event)" style="display:flex;gap:6px;flex-wrap:wrap;">
+          <input type="text" id="dashTodoInput" placeholder="やること" style="font-size:12px;padding:5px 8px;flex:1;min-width:120px;">
+          <input type="date" id="dashTodoDate" style="font-size:12px;padding:5px 8px;width:130px;">
+          <button class="btn btn-outline btn-sm" type="button" onclick="setTodoToday()">今日</button>
+          <button class="btn btn-outline btn-sm" type="button" onclick="setTodoTomorrow()">明日</button>
+          <button class="btn btn-gold btn-sm" type="submit">追加</button>
+        </form>
+      </div>
+      <div id="dashTodoList"></div>
+    </div>
+
+  </div>
+
+  <div class="sec-head" style="margin-top:16px;"><h2>締切が近い案件</h2></div>
+  <div id="dashProjects"></div>
+
+  <!-- MINI CALENDAR ON DASHBOARD -->
+  <div class="sec-head" style="margin-top:24px;">
+    <h2>カレンダー</h2>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <button class="btn btn-outline btn-sm" onclick="dashCalPrev()">◀</button>
+      <span id="dashCalTitle" style="font-family:'Shippori Mincho',serif;font-size:14px;min-width:100px;text-align:center;"></span>
+      <button class="btn btn-outline btn-sm" onclick="dashCalNext()">▶</button>
+      <button class="btn btn-gold btn-sm" onclick="dashCalGoToday()">今月</button>
+    </div>
+  </div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;font-size:11px;margin-bottom:10px;">
+    <span><span style="display:inline-block;width:8px;height:8px;border-radius:1px;background:#c8880a;margin-right:3px;vertical-align:middle;"></span>撮影</span>
+    <span><span style="display:inline-block;width:8px;height:8px;border-radius:1px;background:#8b2010;margin-right:3px;vertical-align:middle;"></span>納品・締切</span>
+    <span><span style="display:inline-block;width:8px;height:8px;border-radius:1px;background:#1f4a7a;margin-right:3px;vertical-align:middle;"></span>打ち合わせ</span>
+    <span><span style="display:inline-block;width:8px;height:8px;border-radius:1px;background:#2f6040;margin-right:3px;vertical-align:middle;"></span>その他</span>
+    <span><span style="display:inline-block;width:8px;height:8px;border-radius:1px;background:#5a2f7a;margin-right:3px;vertical-align:middle;"></span>取材</span>
+  </div>
+  <div id="dashCalGrid" style="border:1px solid #d4b870;border-radius:6px;overflow:hidden;margin-bottom:12px;"></div>
+  <div id="dashCalDayPanel" style="display:none;margin-bottom:16px;">
+    <div style="font-family:'Shippori Mincho',serif;font-size:14px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid #d4b870;display:flex;justify-content:space-between;align-items:center;">
+      <span id="dashCalDayTitle"></span>
+      <button class="btn btn-gold btn-sm" onclick="openCalEventModalFromDash()">＋ 予定を追加</button>
+    </div>
+    <div id="dashCalDayEvents"></div>
+  </div>
+
+  <!-- GOOGLE CALENDAR LINK -->
+  <div style="padding:12px 16px;background:#1c0f02;border:1px solid #3a2208;border-radius:6px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
+    <span style="font-size:11px;color:#a09070;">Googleカレンダー：</span>
+    <a href="https://calendar.google.com/calendar/r/day" target="_blank" rel="noopener" class="btn btn-gold btn-sm" style="text-decoration:none;">📅 今日</a>
+    <a href="https://calendar.google.com/calendar/r/week" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="text-decoration:none;">📅 週間</a>
+  </div>
+
+  <!-- AI LINK -->
+  <div style="padding:12px 16px;background:#1c0f02;border:1px solid #3a2208;border-radius:6px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:24px;">
+    <span style="font-size:11px;color:#a09070;">AIに相談：</span>
+    <a href="https://claude.ai/new" target="_blank" rel="noopener" class="btn btn-gold btn-sm" style="text-decoration:none;">🤖 Claude</a>
+    <a href="https://chatgpt.com/" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="text-decoration:none;">💬 ChatGPT</a>
+    <a href="https://gemini.google.com/app" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="text-decoration:none;">✦ Gemini</a>
+    <span style="font-size:10px;color:#7a6850;margin-left:auto;">投稿文・企画書・メール文の作成に</span>
+  </div>
+
+  <div class="sec-head" style="margin-top:24px;"><h2>よく使うリンク</h2>
+    <button class="btn btn-outline btn-sm" onclick="openLinkModal()">＋ 追加</button>
+  </div>
+  <div class="link-chips" id="linkChips"></div>
+</div>
+
+<!-- TODAY TASKS -->
+<div class="tab-content" id="tab-today">
+  <div class="sec-head"><h2>今日のタスク</h2><span class="sec-sub" id="todayDate"></span></div>
+
+  <div class="sec-head" style="margin-top:0;"><h2 style="font-size:14px;">案件から自動生成</h2></div>
+  <div id="autoTaskList" style="margin-bottom:24px;"></div>
+
+  <div class="sec-head"><h2 style="font-size:14px;">今日やること <span style="font-size:11px;color:#8b6820;">（手動）</span></h2>
+    <form id="manualTaskForm" style="display:flex;gap:8px;" onsubmit="addManualTask(event)">
+      <input type="text" id="manualTaskInput" placeholder="例：請求書を送る" style="width:240px;">
+      <button class="btn btn-gold btn-sm" type="submit">追加</button>
+    </form>
+  </div>
+  <div id="manualTaskList"></div>
+
+  <div class="sec-head" style="margin-top:24px;"><h2 style="font-size:14px;">定期タスク</h2>
+    <button class="btn btn-outline btn-sm" onclick="openRoutineModal()">管理</button>
+  </div>
+  <div id="routineList"></div>
+</div>
+
+<!-- PROJECTS -->
+<div class="tab-content" id="tab-projects">
+  <div class="sec-head"><h2>案件管理</h2>
+    <span class="sec-sub">制作ツールの案件と連携しています</span>
+  </div>
+  <div id="projectList"></div>
+  <div style="margin-top:16px;padding:14px 16px;background:#f0e8cc;border-left:3px solid #c8880a;font-size:12px;color:#5a3a10;border-radius:0 4px 4px 0;">
+    案件の追加・編集は <a href="tools.html" style="color:#c8880a;">制作ツール</a> のスケジュールタブから行えます。ここでは支払状況などを管理できます。
+  </div>
+</div>
+
+<!-- CLIENTS -->
+<div class="tab-content" id="tab-clients">
+  <div class="sec-head"><h2>顧客管理</h2>
+    <button class="btn btn-gold btn-sm" onclick="openClientModal()">＋ 顧客を追加</button>
+  </div>
+  <div id="clientList"></div>
+</div>
+
+<!-- EXPENSES -->
+<div class="tab-content" id="tab-expenses">
+  <div class="sec-head"><h2>経費記録</h2>
+    <button class="btn btn-gold btn-sm" onclick="openExpenseModal()">＋ 経費を追加</button>
+  </div>
+  <div class="exp-summary-grid" id="expSummary"></div>
+  <div class="sec-head"><h2 style="font-size:14px;">今月の経費一覧</h2>
+    <select id="expMonthSel" onchange="renderExpenses()" style="font-size:12px;padding:5px 8px;width:auto;"></select>
+  </div>
+  <table id="expTable">
+    <thead><tr><th>日付</th><th>分類</th><th>内容</th><th>金額</th><th></th></tr></thead>
+    <tbody id="expBody"></tbody>
+  </table>
+</div>
+
+<!-- DOCS -->
+<div class="tab-content" id="tab-docs">
+  <div class="sec-head"><h2>帳票作成</h2></div>
+  <div style="display:flex;gap:10px;margin-bottom:24px;">
+    <button class="btn btn-outline" onclick="setDocType('見積書')" id="docBtn-見積書">見積書</button>
+    <button class="btn btn-gold" onclick="setDocType('請求書')" id="docBtn-請求書">請求書</button>
+    <button class="btn btn-outline" onclick="setDocType('領収書')" id="docBtn-領収書">領収書</button>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+    <div>
+      <div class="form-grid">
+        <div>
+          <label class="fl">書類種別</label>
+          <div id="docTypeLabel" style="font-family:'Shippori Mincho',serif;font-size:18px;color:#1c0f02;padding:8px 0;">請求書</div>
+        </div>
+        <div>
+          <label class="fl">発行日</label>
+          <input type="date" id="docIssueDate">
+        </div>
+        <div class="span2">
+          <label class="fl">関連案件（任意）</label>
+          <select id="docProject" onchange="fillDocFromProject()">
+            <option value="">— 選択しない —</option>
+          </select>
+        </div>
+        <div class="span2">
+          <label class="fl">宛先</label>
+          <input type="text" id="docTo" placeholder="例：山田 太郎 様">
+        </div>
+        <div class="span2">
+          <label class="fl">件名</label>
+          <input type="text" id="docSubject" placeholder="例：記録映像制作費">
+        </div>
+      </div>
+
+      <div id="docItemsBlock">
+        <label class="fl" style="margin-bottom:8px;">品目</label>
+        <table style="margin-bottom:8px;">
+          <thead><tr><th>品目</th><th style="width:70px;">数量</th><th style="width:100px;">単価（円）</th><th style="width:100px;">金額</th></tr></thead>
+          <tbody id="docItemsTbody"></tbody>
+        </table>
+        <button class="btn btn-outline btn-sm" onclick="addDocItem()">＋ 行を追加</button>
+        <div style="text-align:right;margin-top:12px;font-size:13px;line-height:2;">
+          小計 <span id="docSubtotal" style="margin-left:16px;font-weight:700;">¥0</span><br>
+          消費税 <select id="docTaxRate" onchange="calcDocTotal()" style="width:auto;font-size:12px;padding:3px 6px;margin:0 8px;">
+            <option value="10">10%</option><option value="8">8%</option><option value="0">0%（非課税）</option>
+          </select> <span id="docTax">¥0</span><br>
+          <strong>合計 <span id="docTotal" style="font-size:16px;color:#c8880a;">¥0</span></strong>
+        </div>
+      </div>
+
+      <div id="docReceiptBlock" style="display:none;">
+        <div class="form-grid">
+          <div><label class="fl">受取金額（税込）</label><input type="number" id="docReceiptAmt" placeholder="0" oninput="calcReceiptTax()"></div>
+          <div><label class="fl">内消費税（10%）</label><input type="text" id="docReceiptTax" disabled></div>
+          <div class="span2"><label class="fl">ただし書き</label><input type="text" id="docReceiptPurpose" placeholder="例：映像制作費として"></div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-gold" onclick="printDoc()">🖨 印刷 / PDF保存</button>
+        <button class="btn btn-outline" onclick="resetDoc()">新規作成</button>
+      </div>
+    </div>
+    <div>
+      <div class="doc-preview" id="docPreview"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CALENDAR -->
+<div class="tab-content" id="tab-calendar">
+  <div class="sec-head">
+    <h2>カレンダー</h2>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="btn btn-outline btn-sm" onclick="calPrev()">◀</button>
+      <span id="calTitle" style="font-family:'Shippori Mincho',serif;font-size:16px;min-width:120px;text-align:center;"></span>
+      <button class="btn btn-outline btn-sm" onclick="calNext()">▶</button>
+      <button class="btn btn-gold btn-sm" onclick="calToday()">今月</button>
+    </div>
+  </div>
+
+  <!-- 凡例 -->
+  <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;font-size:11px;">
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#c8880a;margin-right:4px;vertical-align:middle;"></span>撮影</span>
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#8b2010;margin-right:4px;vertical-align:middle;"></span>納品・締切</span>
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#1f4a7a;margin-right:4px;vertical-align:middle;"></span>打ち合わせ</span>
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#2f6040;margin-right:4px;vertical-align:middle;"></span>その他</span>
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#5a2f7a;margin-right:4px;vertical-align:middle;"></span>取材</span>
+  </div>
+
+  <!-- カレンダーグリッド -->
+  <div id="calGrid" style="border:1px solid #d4b870;border-radius:6px;overflow:hidden;"></div>
+
+  <!-- 選択日の予定 -->
+  <div id="calDayPanel" style="display:none;margin-top:24px;">
+    <div class="sec-head">
+      <h2 id="calDayTitle" style="font-size:16px;"></h2>
+      <button class="btn btn-gold btn-sm" onclick="openCalEventModal(null)">＋ 予定を追加</button>
+    </div>
+    <div id="calDayEvents"></div>
+  </div>
+</div>
+
+<!-- CALENDAR EVENT MODAL -->
+<div class="modal-bg" id="calEventModal">
+  <div class="modal">
+    <div class="modal-head"><h3 id="calEventModalTitle">予定を追加</h3><button class="modal-close" onclick="closeModal('calEventModal')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="calEventEditId">
+      <div class="form-grid">
+        <div class="span2"><label class="fl">タイトル</label><input type="text" id="ce-title" placeholder="例：山田様 打ち合わせ" required></div>
+        <div><label class="fl">日付</label><input type="date" id="ce-date" required></div>
+        <div><label class="fl">終了日（任意）</label><input type="date" id="ce-endDate"></div>
+        <div><label class="fl">開始時刻（任意）</label><input type="time" id="ce-time"></div>
+        <div><label class="fl">終了時刻（任意）</label><input type="time" id="ce-endTime"></div>
+        <div><label class="fl">種別</label>
+          <select id="ce-type">
+            <option value="撮影">撮影</option>
+            <option value="納品">納品・締切</option>
+            <option value="打ち合わせ" selected>打ち合わせ</option>
+            <option value="その他">その他</option>
+          </select>
+        </div>
+        <div><label class="fl">関連案件（任意）</label>
+          <select id="ce-project"><option value="">— なし —</option></select>
+        </div>
+        <div class="span2"><label class="fl">場所</label><input type="text" id="ce-place" placeholder="例：〇〇会館 2階会議室"></div>
+        <div class="span2"><label class="fl">メモ</label><input type="text" id="ce-memo" placeholder="備考など"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-gold" onclick="saveCalEvent()">保存</button>
+        <button class="btn btn-outline" onclick="closeModal('calEventModal')">キャンセル</button>
+        <button class="btn btn-danger" id="calEventDeleteBtn" onclick="deleteCalEvent()" style="display:none;">削除</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SNS -->
+<div class="tab-content" id="tab-sns">
+  <div class="sec-head"><h2>SNS</h2></div>
+
+  <!-- INSTAGRAM ACCOUNTS -->
+  <div class="sec-head" style="margin-top:0;">
+    <h2 style="font-size:15px;">Instagramアカウント</h2>
+    <button class="btn btn-outline btn-sm" onclick="openSnsAccModal(null)">＋ アカウント追加</button>
+  </div>
+  <div id="snsAccList" style="margin-bottom:8px;"></div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:32px;">
+    <a href="https://www.instagram.com/" target="_blank" rel="noopener" class="btn btn-gold btn-sm" style="text-decoration:none;">📷 Instagramを開く</a>
+    <a href="https://studio.youtube.com/" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="text-decoration:none;">▶ YouTube Studio</a>
+    <a href="https://x.com/compose/post" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="text-decoration:none;">✕ Xに投稿</a>
+    <a href="https://www.tiktok.com/upload" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="text-decoration:none;">🎵 TikTokに投稿</a>
+  </div>
+
+  <!-- HASHTAG / TEMPLATES -->
+  <div class="sec-head">
+    <h2 style="font-size:15px;">ハッシュタグ・定型文</h2>
+    <button class="btn btn-outline btn-sm" onclick="openSnsTplModal(null)">＋ 追加</button>
+  </div>
+  <div id="snsTplList" style="margin-bottom:32px;"></div>
+
+  <!-- THUMBNAIL CONVERTER -->
+  <div class="sec-head">
+    <h2 style="font-size:15px;">横向き → 縦向き変換</h2>
+    <span class="sec-sub">リール・ストーリー用（9:16）</span>
+  </div>
+  <div class="card">
+    <p style="font-size:12px;color:#5a3a10;margin-bottom:14px;line-height:1.8;">
+      横向き（16:9など）の画像を、リールやストーリー用の縦長（9:16）に変換します。背景は元画像をぼかして埋めます。
+    </p>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;">
+      <div style="flex:1;min-width:200px;">
+        <label class="btn btn-gold" style="cursor:pointer;display:inline-block;">
+          📂 画像を選ぶ
+          <input type="file" accept="image/*" onchange="loadThumbImage(event)" style="display:none;">
+        </label>
+        <div class="form-grid" style="margin-top:16px;">
+          <div><label class="fl">出力サイズ</label>
+            <select id="thumbRatio" onchange="renderThumb()">
+              <option value="9:16">縦長 9:16（リール・ストーリー）</option>
+              <option value="4:5">縦長 4:5（フィード推奨）</option>
+              <option value="1:1">正方形 1:1</option>
+            </select>
+          </div>
+          <div><label class="fl">背景</label>
+            <select id="thumbBg" onchange="renderThumb()">
+              <option value="blur">元画像をぼかす</option>
+              <option value="white">白</option>
+              <option value="black">黒</option>
+            </select>
+          </div>
+          <div class="span2"><label class="fl">画像の拡大率 <span id="thumbScaleVal">100%</span></label>
+            <input type="range" id="thumbScale" min="100" max="200" value="100" oninput="document.getElementById('thumbScaleVal').textContent=this.value+'%';renderThumb()" style="width:100%;">
+          </div>
+        </div>
+        <button class="btn btn-gold" onclick="downloadThumb()" style="margin-top:8px;">💾 ダウンロード</button>
+      </div>
+      <div style="flex-shrink:0;">
+        <canvas id="thumbCanvas" style="max-width:200px;max-height:360px;border:1px solid #d4b870;border-radius:4px;background:#f0ebe0;"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SNS ACCOUNT MODAL -->
+<div class="modal-bg" id="snsAccModal">
+  <div class="modal">
+    <div class="modal-head"><h3 id="snsAccModalTitle">アカウント追加</h3><button class="modal-close" onclick="closeModal('snsAccModal')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="snsAccEditId">
+      <div class="form-grid one">
+        <div><label class="fl">アカウント名（表示用）</label><input type="text" id="sa-name" placeholder="例：本店アカウント" required></div>
+        <div><label class="fl">ユーザー名（@は不要）</label><input type="text" id="sa-handle" placeholder="例：shitamachi_kiroku"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-gold" onclick="saveSnsAcc()">保存</button>
+        <button class="btn btn-outline" onclick="closeModal('snsAccModal')">キャンセル</button>
+        <button class="btn btn-danger" id="snsAccDeleteBtn" onclick="deleteSnsAcc()" style="display:none;">削除</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SNS TEMPLATE MODAL -->
+<div class="modal-bg" id="snsTplModal">
+  <div class="modal">
+    <div class="modal-head"><h3 id="snsTplModalTitle">定型文を追加</h3><button class="modal-close" onclick="closeModal('snsTplModal')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="snsTplEditId">
+      <div class="form-grid one">
+        <div><label class="fl">タイトル</label><input type="text" id="st-title" placeholder="例：撮影報告用ハッシュタグ" required></div>
+        <div><label class="fl">本文・ハッシュタグ</label><textarea id="st-body" style="min-height:160px;" placeholder="#動画制作 #映像クリエイター #大阪..."></textarea></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-gold" onclick="saveSnsTpl()">保存</button>
+        <button class="btn btn-outline" onclick="closeModal('snsTplModal')">キャンセル</button>
+        <button class="btn btn-danger" id="snsTplDeleteBtn" onclick="deleteSnsTpl()" style="display:none;">削除</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MEMOS -->
+<div class="tab-content" id="tab-memos">
+  <div class="sec-head"><h2>メモ</h2>
+    <button class="btn btn-gold btn-sm" onclick="openMemoModal(null)">＋ 新規メモ</button>
+  </div>
+  <div class="memo-grid" id="memoGrid"></div>
+</div>
+
+<!-- SETTINGS -->
+<div class="tab-content" id="tab-settings">
+  <div class="sec-head"><h2>設定</h2></div>
+
+  <div class="card" style="margin-bottom:24px;">
+    <div class="card-label">データのバックアップ・復元</div>
+    <p style="font-size:12px;color:#5a3a10;margin:10px 0 16px;line-height:1.8;">ブラウザの閲覧データを消去するとデータが消えます。定期的にバックアップを保存してください。</p>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      <button class="btn btn-gold" onclick="exportData()">💾 バックアップを保存（JSONファイル）</button>
+      <label class="btn btn-outline" style="cursor:pointer;">
+        📂 バックアップから復元
+        <input type="file" accept=".json" onchange="importData(event)" style="display:none;">
+      </label>
+    </div>
+    <div id="backupStatus" style="font-size:12px;color:#2f6040;margin-top:10px;"></div>
+  </div>
+  <div class="card">
+    <div class="card-label">事業者情報（帳票に使用）</div>
+    <div class="form-grid" style="margin-top:12px;">
+      <div><label class="fl">屋号・事業者名</label><input type="text" id="s-bizName" placeholder="下町きろくの動画屋"></div>
+      <div><label class="fl">代表者名</label><input type="text" id="s-bizOwner" placeholder="例：K.E"></div>
+      <div class="span2"><label class="fl">住所</label><input type="text" id="s-bizAddr" placeholder="大阪市生野区 桃谷"></div>
+      <div><label class="fl">電話番号</label><input type="text" id="s-bizTel"></div>
+      <div><label class="fl">メールアドレス</label><input type="email" id="s-bizEmail"></div>
+      <div class="span2"><label class="fl">振込先（請求書に記載）</label><input type="text" id="s-bizBank" placeholder="例：○○銀行 ××支店 普通 1234567"></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-gold" onclick="saveSettings()">保存</button></div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <div class="card-label">音声アラート設定</div>
+    <div class="form-grid" style="margin-top:12px;">
+      <div><label class="fl">「締切が近い」と見なす日数</label>
+        <select id="s-watchDays"><option value="3">3日以内</option><option value="5" selected>5日以内</option><option value="7">7日以内</option><option value="14">14日以内</option></select>
+      </div>
+      <div><label class="fl">自動チェックの間隔</label>
+        <select id="s-voiceInterval">
+          <option value="0">自動チェックしない（手動のみ）</option>
+          <option value="5">5分ごと</option>
+          <option value="15" selected>15分ごと</option>
+          <option value="30">30分ごと</option>
+          <option value="60">60分ごと</option>
+        </select>
+      </div>
+      <div><label class="fl">口調（厳しさ）</label>
+        <select id="s-voiceStrict">
+          <option value="soft">やさしめ</option>
+          <option value="normal">ふつう</option>
+          <option value="strict" selected>厳しい</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<!-- Link Modal -->
+<div class="modal-bg" id="linkModal">
+  <div class="modal">
+    <div class="modal-head"><h3>リンクを追加</h3><button class="modal-close" onclick="closeModal('linkModal')">✕</button></div>
+    <div class="modal-body">
+      <form onsubmit="addLink(event)">
+        <div class="form-grid one">
+          <div><label class="fl">名前</label><input type="text" id="linkName" placeholder="例：楽天銀行" required></div>
+          <div><label class="fl">URL</label><input type="text" id="linkUrl" placeholder="https://..." required></div>
+        </div>
+        <div class="btn-row"><button class="btn btn-gold" type="submit">追加</button></div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Client Modal -->
+<div class="modal-bg" id="clientModal">
+  <div class="modal">
+    <div class="modal-head"><h3 id="clientModalTitle">顧客を追加</h3><button class="modal-close" onclick="closeModal('clientModal')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="clientEditId">
+      <div class="form-grid">
+        <div><label class="fl">顧客名・屋号</label><input type="text" id="c-name" placeholder="山田 太郎" required></div>
+        <div><label class="fl">担当者名（法人の場合）</label><input type="text" id="c-contact"></div>
+        <div><label class="fl">電話番号</label><input type="tel" id="c-tel"></div>
+        <div><label class="fl">メールアドレス</label><input type="email" id="c-email"></div>
+        <div class="span2"><label class="fl">住所</label><input type="text" id="c-address"></div>
+        <div class="span2"><label class="fl">メモ（好み・注意点など）</label><textarea id="c-notes"></textarea></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-gold" onclick="saveClient()">保存</button>
+        <button class="btn btn-outline" onclick="closeModal('clientModal')">キャンセル</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Expense Modal -->
+<div class="modal-bg" id="expenseModal">
+  <div class="modal">
+    <div class="modal-head"><h3>経費を追加</h3><button class="modal-close" onclick="closeModal('expenseModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div><label class="fl">日付</label><input type="date" id="e-date" required></div>
+        <div><label class="fl">分類</label>
+          <select id="e-cat">
+            <option>機材</option><option>交通費</option><option>通信費</option>
+            <option>消耗品</option><option>外注費</option><option>会議・打ち合わせ</option><option>その他</option>
+          </select>
+        </div>
+        <div class="span2"><label class="fl">内容</label><input type="text" id="e-desc" placeholder="例：SDカード購入"></div>
+        <div><label class="fl">金額（円）</label><input type="number" id="e-amount" min="0" required></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-gold" onclick="saveExpense()">保存</button>
+        <button class="btn btn-outline" onclick="closeModal('expenseModal')">キャンセル</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Memo Modal -->
+<div class="modal-bg" id="memoModal">
+  <div class="modal" style="max-width:700px;">
+    <div class="modal-head"><h3 id="memoModalTitle">新規メモ</h3><button class="modal-close" onclick="closeModal('memoModal')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="memoEditId">
+      <div class="form-grid one">
+        <div><label class="fl">タイトル</label><input type="text" id="m-title" placeholder="メモのタイトル"></div>
+        <div><label class="fl">内容</label><textarea id="m-body" style="min-height:200px;"></textarea></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-gold" onclick="saveMemo()">保存</button>
+        <button class="btn btn-outline" onclick="closeModal('memoModal')">キャンセル</button>
+        <button class="btn btn-danger" onclick="deleteMemo()" id="memoDeleteBtn" style="display:none;">削除</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Routine Modal -->
+<div class="modal-bg" id="routineModal">
+  <div class="modal">
+    <div class="modal-head"><h3>定期タスク管理</h3><button class="modal-close" onclick="closeModal('routineModal')">✕</button></div>
+    <div class="modal-body">
+      <form onsubmit="addRoutine(event)" style="display:flex;gap:8px;margin-bottom:16px;">
+        <input type="text" id="routineInput" placeholder="例：SNSを確認する" style="flex:1;" required>
+        <button class="btn btn-gold btn-sm" type="submit">追加</button>
+      </form>
+      <div id="routineManageList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Project Detail Modal -->
+<div class="modal-bg" id="projectModal">
+  <div class="modal">
+    <div class="modal-head"><h3 id="projModalTitle">案件詳細</h3><button class="modal-close" onclick="closeModal('projectModal')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="projEditId">
+      <div class="form-grid">
+        <div><label class="fl">入金状況</label>
+          <select id="p-payment">
+            <option value="未請求">未請求</option>
+            <option value="請求済">請求済</option>
+            <option value="入金済">入金済</option>
+          </select>
+        </div>
+        <div><label class="fl">入金予定日</label><input type="date" id="p-payDate"></div>
+        <div class="span2"><label class="fl">メモ（業務管理用）</label><textarea id="p-bizNote"></textarea></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-gold" onclick="saveProjectMeta()">保存</button>
+        <button class="btn btn-outline" onclick="closeModal('projectModal')">キャンセル</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let G = {};  // gyomuData
+let videoState = {};  // from tools.html
+
+const GYOMU_KEY = 'gyomuData';
+const VIDEO_KEY = 'videoTools';
+
+function loadG(){
+  G = JSON.parse(localStorage.getItem(GYOMU_KEY) || '{}');
+  if(!G.clients) G.clients = [];
+  if(!G.expenses) G.expenses = [];
+  if(!G.memos) G.memos = [];
+  if(!G.manualTasks) G.manualTasks = [];
+  if(!G.routines) G.routines = [];
+  if(!G.routineDone) G.routineDone = {};
+  if(!G.links) G.links = [];
+  if(!G.snsAccounts) G.snsAccounts = [];
+  if(!G.snsTemplates) G.snsTemplates = [];
+  if(!G.projectMeta) G.projectMeta = {};
+  if(!G.settings) G.settings = {bizName:'下町きろくの動画屋',bizOwner:'',bizAddr:'大阪市生野区 桃谷',bizTel:'',bizEmail:'',bizBank:'',watchDays:5};
+}
+function saveG(){ localStorage.setItem(GYOMU_KEY, JSON.stringify(G)); }
+
+function loadVideo(){
+  videoState = JSON.parse(localStorage.getItem(VIDEO_KEY) || '{}');
+}
+// 撮影日（複数対応・旧データの単一shootDateにも対応）
+function getShootDates(s){
+  if(!s) return [];
+  if(s.shootDates && s.shootDates.length) return s.shootDates.filter(d=>d);
+  return s.shootDate ? [s.shootDate] : [];
+}
+
+// 取材ノート（shuzai.html）の取材予定を読み込む
+let shuzaiData = {};
+function loadShuzai(){
+  shuzaiData = JSON.parse(localStorage.getItem('shuzaiData') || '{}');
+}
+// 取材予定（日付あり・未完了）をカレンダーイベント形式で返す
+function getShuzaiEvents(){
+  loadShuzai();
+  const leads = shuzaiData.leads || [];
+  return leads
+    .filter(l=>l.date && l.status!=='記事化済' && l.status!=='見送り')
+    .map(l=>({date:l.date, title:'🎤 '+l.name+'（取材）', type:'取材', src:'shuzai'}));
+}
+// 制作ツールの案件ごとのTODOを返す
+function getVideoTodos(){
+  loadVideo();
+  const out = [];
+  Object.entries(videoState).forEach(([pid,p])=>{
+    (p.todos||[]).forEach((t,ti)=>{
+      out.push({pid, projName:p.name, ti, text:t.text, done:t.done, dueDate:t.dueDate||''});
+    });
+  });
+  return out;
+}
+function toggleVideoTodo(pid, ti){
+  loadVideo();
+  const p = videoState[pid];
+  if(p && p.todos && p.todos[ti]){
+    p.todos[ti].done = !p.todos[ti].done;
+    localStorage.setItem(VIDEO_KEY, JSON.stringify(videoState));
+  }
+  renderDashTodo(); renderDashSchedule();
+}
+
+// 飲食部門（hotdog）のTODOを返す
+function getHotdogTodos(){
+  const hd = JSON.parse(localStorage.getItem('hotdogData') || '{}');
+  return (hd.todos||[]).map((t,ti)=>({ti, text:t.text, done:t.done, dueDate:t.dueDate||''}));
+}
+function toggleHotdogTodo(ti){
+  const hd = JSON.parse(localStorage.getItem('hotdogData') || '{}');
+  if(hd.todos && hd.todos[ti]){ hd.todos[ti].done=!hd.todos[ti].done; localStorage.setItem('hotdogData', JSON.stringify(hd)); }
+  renderDashTodo(); renderDashSchedule();
+}
+
+// 取材ごとのTODO（未完了）を返す
+function getShuzaiTodos(){
+  loadShuzai();
+  const out = [];
+  (shuzaiData.leads||[]).forEach(l=>{
+    (l.todos||[]).forEach((t,ti)=>{
+      out.push({leadId:l.id, leadName:l.name, ti, text:t.text, done:t.done, dueDate:t.dueDate||''});
+    });
+  });
+  // 取材記録ごとのやること
+  (shuzaiData.interviews||[]).forEach(iv=>{
+    (iv.todos||[]).forEach((t,ti)=>{
+      out.push({ivId:iv.id, leadName:iv.title, ti, text:t.text, done:t.done, dueDate:t.dueDate||''});
+    });
+  });
+  return out;
+}
+function toggleShuzaiTodo(leadId, ti){
+  loadShuzai();
+  const l = (shuzaiData.leads||[]).find(x=>x.id===leadId);
+  if(l && l.todos && l.todos[ti]){
+    l.todos[ti].done = !l.todos[ti].done;
+    localStorage.setItem('shuzaiData', JSON.stringify(shuzaiData));
+  }
+  renderDashTodo(); renderDashSchedule();
+}
+function toggleShuzaiIvTodo(ivId, ti){
+  loadShuzai();
+  const iv = (shuzaiData.interviews||[]).find(x=>x.id===ivId);
+  if(iv && iv.todos && iv.todos[ti]){
+    iv.todos[ti].done = !iv.todos[ti].done;
+    localStorage.setItem('shuzaiData', JSON.stringify(shuzaiData));
+  }
+  renderDashTodo(); renderDashSchedule();
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function fmt(n){ return Number(n||0).toLocaleString(); }
+function today(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function daysUntil(d){ if(!d) return null; return Math.ceil((new Date(d)-new Date(today()))/(1000*60*60*24)); }
+function fmtDate(d){ if(!d) return ''; const p=d.split('-'); return `${p[0]}年${p[1]}月${p[2]}日`; }
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+function uid(){ return 'id_'+Date.now()+'_'+Math.random().toString(36).slice(2,7); }
+
+function deadlineClass(days){
+  if(days===null) return '';
+  if(days<0) return 'deadline-urgent';
+  if(days<=3) return 'deadline-urgent';
+  if(days<=7) return 'deadline-soon';
+  return 'deadline-ok';
+}
+function deadlineLabel(days){
+  if(days===null) return '';
+  if(days<0) return `${Math.abs(days)}日超過`;
+  if(days===0) return '今日締切';
+  return `あと${days}日`;
+}
+
+// ─── TABS ─────────────────────────────────────────────────────────────────────
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+  loadVideo();
+  if(name==='dashboard') renderDashboard();
+  if(name==='today') renderToday();
+  if(name==='projects') renderProjects();
+  if(name==='clients') renderClients();
+  if(name==='expenses') renderExpenses();
+  if(name==='docs') renderDocTab();
+  if(name==='calendar'){ if(!G.calEvents) G.calEvents=[]; renderCalendar(); }
+  if(name==='sns') renderSns();
+  if(name==='memos') renderMemos();
+  if(name==='settings') renderSettings();
+}
+
+// ─── CLOCK ────────────────────────────────────────────────────────────────────
+function updateClock(){
+  const d=new Date();
+  const s=`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  const el=document.getElementById('clockDisplay');
+  if(el) el.textContent=s;
+  const td=document.getElementById('todayDate');
+  if(td) td.textContent=s;
+}
+
+// ─── DASHBOARD ────────────────────────────────────────────────────────────────
+function renderDashboard(){
+  loadVideo();
+  const projects = Object.entries(videoState).map(([id,p])=>({id,name:p.name,s:p.schedule||null}));
+  const today_str = today();
+  const watchDays = Number(G.settings.watchDays)||5;
+
+  // Cards
+  const activeProj = projects.filter(p=>p.s&&p.s.deadline&&daysUntil(p.s.deadline)>=0).length;
+  const overdueProj = projects.filter(p=>p.s&&p.s.deadline&&daysUntil(p.s.deadline)<0).length;
+  const thisMonth = new Date().toISOString().slice(0,7);
+  const monthExp = G.expenses.filter(e=>e.date.startsWith(thisMonth)).reduce((a,e)=>a+Number(e.amount),0);
+  const unpaid = projects.filter(p=>(G.projectMeta[p.id]||{}).payment!=='入金済').length;
+
+  document.getElementById('dashCards').innerHTML = `
+    <div class="card"><div class="card-label">進行中の案件</div><div class="card-value">${activeProj}<span style="font-size:14px;"> 件</span></div></div>
+    <div class="card"><div class="card-label">期限超過</div><div class="card-value ${overdueProj>0?'warn':'ok'}">${overdueProj}<span style="font-size:14px;"> 件</span></div></div>
+    <div class="card"><div class="card-label">今月の経費</div><div class="card-value">¥${fmt(monthExp)}</div></div>
+    <div class="card"><div class="card-label">未入金の案件</div><div class="card-value ${unpaid>0?'warn':'ok'}">${unpaid}<span style="font-size:14px;"> 件</span></div></div>
+  `;
+
+  // Upcoming deadlines
+  const sorted = projects.filter(p=>p.s&&p.s.deadline).sort((a,b)=>a.s.deadline.localeCompare(b.s.deadline));
+  const near = sorted.filter(p=>{ const d=daysUntil(p.s.deadline); return d!==null&&d<=watchDays*2; });
+  const dp = document.getElementById('dashProjects');
+  if(near.length===0){ dp.innerHTML='<div style="color:#8b6820;font-size:13px;">締切が近い案件はありません。</div>'; return; }
+  dp.innerHTML = near.map(p=>{
+    const d=daysUntil(p.s.deadline);
+    const meta=G.projectMeta[p.id]||{};
+    const gcalUrl = makeGcalAddUrl(p.name, p.s.deadline, p.s.client);
+    return `<div class="list-item">
+      <div class="list-item-body">
+        <div class="list-item-title">${esc(p.name)}</div>
+        <div class="list-item-meta">
+          締切：${fmtDate(p.s.deadline)}
+          <span class="${deadlineClass(d)}" style="margin-left:10px;">　${deadlineLabel(d)}</span>
+          ${p.s.client?`　／　${esc(p.s.client)}`:''}
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-shrink:0;">
+        <span class="badge ${meta.payment==='入金済'?'badge-green':meta.payment==='請求済'?'badge-yellow':'badge-gray'}">${meta.payment||'未請求'}</span>
+        <a href="${gcalUrl}" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="text-decoration:none;white-space:nowrap;">📅 カレンダーに追加</a>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Today schedule & todo
+  renderDashSchedule();
+  renderDashTodo();
+
+  // Mini calendar
+  renderDashCal();
+
+  // Links
+  renderLinks();
+}
+
+// ─── DASH TODO ────────────────────────────────────────────────────────────────
+function setTodoToday(){
+  document.getElementById('dashTodoDate').value = today();
+}
+function setTodoTomorrow(){
+  const d = new Date(); d.setDate(d.getDate()+1);
+  document.getElementById('dashTodoDate').value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function addDashTodo(e){
+  e.preventDefault();
+  const v = document.getElementById('dashTodoInput').value.trim();
+  if(!v) return;
+  const d = document.getElementById('dashTodoDate').value;
+  G.manualTasks.push({id:uid(), text:v, done:false, dueDate:d||''});
+  saveG(); renderDashTodo();
+  document.getElementById('dashTodoInput').value = '';
+  document.getElementById('dashTodoDate').value = '';
+}
+
+function renderDashTodo(){
+  const el = document.getElementById('dashTodoList');
+  if(!el) return;
+  const undone = G.manualTasks.filter(t=>!t.done);
+  const done   = G.manualTasks.filter(t=>t.done);
+  const all = [...undone, ...done];
+  const shuzaiTodos = getShuzaiTodos().filter(t=>!t.done);
+  const videoTodos = getVideoTodos().filter(t=>!t.done);
+  const hotdogTodos = getHotdogTodos().filter(t=>!t.done);
+  if(all.length===0 && shuzaiTodos.length===0 && videoTodos.length===0 && hotdogTodos.length===0){
+    el.innerHTML='<div style="color:#8b6820;font-size:12px;padding:8px 0;">タスクがありません。</div>';
+    return;
+  }
+  let html = '<ul style="list-style:none;padding:0;margin:0;">';
+  // Sort undone by dueDate
+  undone.sort((a,b)=>{
+    if(!a.dueDate && !b.dueDate) return 0;
+    if(!a.dueDate) return 1;
+    if(!b.dueDate) return -1;
+    return a.dueDate.localeCompare(b.dueDate);
+  });
+
+  if(undone.length>0){
+    html += undone.map(t=>{
+      const idx = G.manualTasks.indexOf(t);
+      const days = t.dueDate ? daysUntil(t.dueDate) : null;
+      const duLabel = days===null ? '' : days<0 ? `<span style="color:#c05010;font-size:10px;font-weight:700;">${Math.abs(days)}日超過</span>` : days===0 ? `<span style="color:#c05010;font-size:10px;font-weight:700;">今日</span>` : `<span style="color:#8b6820;font-size:10px;">あと${days}日</span>`;
+      return `<li style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:#fffdf5;border:1px solid #ddc890;border-radius:5px;margin-bottom:6px;">
+        <input type="checkbox" style="width:17px;height:17px;accent-color:#c8880a;cursor:pointer;flex-shrink:0;" onchange="toggleDashTodo(${idx})">
+        <div style="flex:1;cursor:pointer;" onclick="toggleDashTodo(${idx})">
+          <div style="font-size:13px;">${esc(t.text)}</div>
+          ${t.dueDate?`<div style="font-size:10px;color:#8b6820;margin-top:2px;">📅 ${fmtDate(t.dueDate)}　${duLabel}</div>`:''}
+        </div>
+        <button onclick="deleteDashTodo(${idx})" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:15px;line-height:1;padding:0;">✕</button>
+      </li>`;
+    }).join('');
+  }
+  if(done.length>0){
+    html += `<li style="font-size:10px;letter-spacing:.2em;color:#a09080;padding:8px 4px 4px;">完了済み</li>`;
+    html += done.map(t=>{
+      const idx = G.manualTasks.indexOf(t);
+      return `<li style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:#f5f0e8;border:1px solid #e8dcc8;border-radius:5px;margin-bottom:6px;opacity:.7;">
+        <input type="checkbox" checked style="width:17px;height:17px;accent-color:#c8880a;cursor:pointer;flex-shrink:0;" onchange="toggleDashTodo(${idx})">
+        <div style="flex:1;cursor:pointer;" onclick="toggleDashTodo(${idx})">
+          <div style="font-size:13px;text-decoration:line-through;color:#a09080;">${esc(t.text)}</div>
+          ${t.dueDate?`<div style="font-size:10px;color:#c0b090;margin-top:2px;">📅 ${fmtDate(t.dueDate)}</div>`:''}
+        </div>
+        <button onclick="deleteDashTodo(${idx})" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:15px;line-height:1;padding:0;">✕</button>
+      </li>`;
+    }).join('');
+  }
+  // 制作ツールの案件TODO（未完了のみ）
+  if(videoTodos.length>0){
+    videoTodos.sort((a,b)=>(a.dueDate||'9999').localeCompare(b.dueDate||'9999'));
+    html += `<li style="font-size:10px;letter-spacing:.2em;color:#1f4a7a;padding:10px 4px 4px;">🎬 案件TODO（制作ツール）</li>`;
+    html += videoTodos.map(t=>{
+      const days = t.dueDate ? daysUntil(t.dueDate) : null;
+      const duLabel = days===null ? '' : days<0 ? `<span style="color:#c05010;font-size:10px;font-weight:700;">${Math.abs(days)}日超過</span>` : days===0 ? `<span style="color:#c05010;font-size:10px;font-weight:700;">今日</span>` : `<span style="color:#8b6820;font-size:10px;">あと${days}日</span>`;
+      return `<li style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:#f3f7fb;border:1px solid #c4d4e0;border-radius:5px;margin-bottom:6px;">
+        <input type="checkbox" style="width:17px;height:17px;accent-color:#1f4a7a;cursor:pointer;flex-shrink:0;" onchange="toggleVideoTodo('${t.pid}',${t.ti})">
+        <div style="flex:1;cursor:pointer;" onclick="toggleVideoTodo('${t.pid}',${t.ti})">
+          <div style="font-size:13px;">${esc(t.text)} <span style="font-size:10px;color:#1f4a7a;">/ ${esc(t.projName)}</span></div>
+          ${t.dueDate?`<div style="font-size:10px;color:#8b6820;margin-top:2px;">📅 ${fmtDate(t.dueDate)}　${duLabel}</div>`:''}
+        </div>
+        <a href="tools.html" style="font-size:10px;color:#1f4a7a;text-decoration:none;flex-shrink:0;">開く→</a>
+      </li>`;
+    }).join('');
+  }
+
+  // 飲食部門のTODO（未完了のみ）
+  if(hotdogTodos.length>0){
+    hotdogTodos.sort((a,b)=>(a.dueDate||'9999').localeCompare(b.dueDate||'9999'));
+    html += `<li style="font-size:10px;letter-spacing:.2em;color:#8b5e0a;padding:10px 4px 4px;">🌭 飲食部門TODO</li>`;
+    html += hotdogTodos.map(t=>{
+      const days = t.dueDate ? daysUntil(t.dueDate) : null;
+      const duLabel = days===null ? '' : days<0 ? `<span style="color:#c05010;font-size:10px;font-weight:700;">${Math.abs(days)}日超過</span>` : days===0 ? `<span style="color:#c05010;font-size:10px;font-weight:700;">今日</span>` : `<span style="color:#8b6820;font-size:10px;">あと${days}日</span>`;
+      return `<li style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:#fdf7ec;border:1px solid #e0cfa0;border-radius:5px;margin-bottom:6px;">
+        <input type="checkbox" style="width:17px;height:17px;accent-color:#8b5e0a;cursor:pointer;flex-shrink:0;" onchange="toggleHotdogTodo(${t.ti})">
+        <div style="flex:1;cursor:pointer;" onclick="toggleHotdogTodo(${t.ti})">
+          <div style="font-size:13px;">${esc(t.text)}</div>
+          ${t.dueDate?`<div style="font-size:10px;color:#8b6820;margin-top:2px;">📅 ${fmtDate(t.dueDate)}　${duLabel}</div>`:''}
+        </div>
+        <a href="hotdog.html" style="font-size:10px;color:#8b5e0a;text-decoration:none;flex-shrink:0;">開く→</a>
+      </li>`;
+    }).join('');
+  }
+
+  // 取材ごとのTODO（取材ノートと連携・未完了のみ）
+  if(shuzaiTodos.length>0){
+    shuzaiTodos.sort((a,b)=>(a.dueDate||'9999').localeCompare(b.dueDate||'9999'));
+    html += `<li style="font-size:10px;letter-spacing:.2em;color:#5a2f7a;padding:10px 4px 4px;">🎤 取材TODO（取材ノート）</li>`;
+    html += shuzaiTodos.map(t=>{
+      const days = t.dueDate ? daysUntil(t.dueDate) : null;
+      const duLabel = days===null ? '' : days<0 ? `<span style="color:#c05010;font-size:10px;font-weight:700;">${Math.abs(days)}日超過</span>` : days===0 ? `<span style="color:#c05010;font-size:10px;font-weight:700;">今日</span>` : `<span style="color:#8b6820;font-size:10px;">あと${days}日</span>`;
+      const tog = t.ivId ? `toggleShuzaiIvTodo('${t.ivId}',${t.ti})` : `toggleShuzaiTodo('${t.leadId}',${t.ti})`;
+      return `<li style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:#fbf7fd;border:1px solid #d8c4e0;border-radius:5px;margin-bottom:6px;">
+        <input type="checkbox" style="width:17px;height:17px;accent-color:#5a2f7a;cursor:pointer;flex-shrink:0;" onchange="${tog}">
+        <div style="flex:1;cursor:pointer;" onclick="${tog}">
+          <div style="font-size:13px;">${esc(t.text)} <span style="font-size:10px;color:#5a2f7a;">/ ${esc(t.leadName)}</span></div>
+          ${t.dueDate?`<div style="font-size:10px;color:#8b6820;margin-top:2px;">📅 ${fmtDate(t.dueDate)}　${duLabel}</div>`:''}
+        </div>
+        <a href="shuzai.html" style="font-size:10px;color:#5a2f7a;text-decoration:none;flex-shrink:0;">開く→</a>
+      </li>`;
+    }).join('');
+  }
+
+  html += '</ul>';
+  el.innerHTML = html;
+}
+
+function toggleDashTodo(i){ G.manualTasks[i].done=!G.manualTasks[i].done; saveG(); renderDashTodo(); renderDashSchedule(); }
+function deleteDashTodo(i){ G.manualTasks.splice(i,1); saveG(); renderDashTodo(); renderDashSchedule(); }
+
+// ─── DASH SCHEDULE ────────────────────────────────────────────────────────────
+function renderDashSchedule(){
+  const el = document.getElementById('dashSchedule');
+  const label = document.getElementById('dashTodayLabel');
+  if(!el) return;
+  const d = new Date();
+  const dow = ['日','月','火','水','木','金','土'][d.getDay()];
+  if(label) label.textContent = `${d.getMonth()+1}月${d.getDate()}日（${dow}）`;
+
+  const todayStr = today();
+  loadVideo();
+
+  // Projects with shoot date = today or deadline = today
+  const items = [];
+  Object.entries(videoState).forEach(([id,p])=>{
+    const s = p.schedule||{};
+    if(getShootDates(s).includes(todayStr)) items.push({type:'撮影', name:p.name, time:'', client:s.client});
+    if(s.deadline===todayStr) items.push({type:'納品', name:p.name, time:s.deadline, client:s.client});
+  });
+
+  // Calendar events for today
+  (G.calEvents||[]).forEach(ev=>{
+    if(ev.date===todayStr) items.push({type:ev.type, name:ev.title, time:ev.time, client:''});
+  });
+
+  // 取材予定 for today
+  getShuzaiEvents().forEach(ev=>{
+    if(ev.date===todayStr) items.push({type:'取材', name:ev.title, time:'', client:''});
+  });
+
+  // Routines for today
+  const dow2 = d.getDay();
+  const routines = G.routines.filter(r=>!r.days||r.days.includes(dow2));
+  const donelist = G.routineDone[todayStr]||[];
+
+  // TODO items due today or overdue (not done)
+  const todos = G.manualTasks
+    .filter(t=>!t.done && t.dueDate && t.dueDate<=todayStr)
+    .sort((a,b)=>a.dueDate.localeCompare(b.dueDate));
+
+  // 取材TODO due today or overdue
+  const szTodos = getShuzaiTodos()
+    .filter(t=>!t.done && t.dueDate && t.dueDate<=todayStr)
+    .sort((a,b)=>a.dueDate.localeCompare(b.dueDate));
+
+  // 案件TODO due today or overdue
+  const vdTodos = getVideoTodos()
+    .filter(t=>!t.done && t.dueDate && t.dueDate<=todayStr)
+    .sort((a,b)=>a.dueDate.localeCompare(b.dueDate));
+
+  // 飲食TODO due today or overdue
+  const hdTodos = getHotdogTodos()
+    .filter(t=>!t.done && t.dueDate && t.dueDate<=todayStr)
+    .sort((a,b)=>a.dueDate.localeCompare(b.dueDate));
+
+  if(items.length===0 && routines.length===0 && todos.length===0 && szTodos.length===0 && vdTodos.length===0 && hdTodos.length===0){
+    el.innerHTML='<div style="color:#8b6820;font-size:12px;padding:8px 0;">今日の予定はありません。</div>';
+    return;
+  }
+
+  const badgeColor = {撮影:'badge-blue',納品:'badge-green',打ち合わせ:'badge-yellow',その他:'badge-gray',取材:'badge-purple'};
+
+  el.innerHTML = [
+    ...items.map(it=>`
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#fffdf5;border:1px solid #ddc890;border-radius:5px;margin-bottom:5px;">
+        <span class="badge ${badgeColor[it.type]||'badge-blue'}" style="flex-shrink:0;">${it.type}</span>
+        <span style="font-size:12px;flex:1;">${it.time?`<span style="color:#8b6820;">${it.time} </span>`:''}${esc(it.name)}${it.client?`<span style="color:#8b6820;"> / ${esc(it.client)}</span>`:''}</span>
+      </div>`),
+    ...todos.map(t=>{
+      const idx = G.manualTasks.indexOf(t);
+      const overdue = t.dueDate < todayStr;
+      return `<div class="task-item" style="padding:8px 12px;margin-bottom:5px;">
+        <input type="checkbox" onchange="toggleDashTodo(${idx})">
+        <label onclick="toggleDashTodo(${idx})" style="font-size:12px;flex:1;cursor:pointer;">
+          <span class="badge badge-red" style="font-size:10px;">やること</span>
+          ${esc(t.text)}
+          ${overdue?`<span style="color:#c05010;font-size:10px;font-weight:700;"> （${fmtDate(t.dueDate)} 超過）</span>`:''}
+        </label>
+      </div>`;
+    }),
+    ...vdTodos.map(t=>{
+      const overdue = t.dueDate < todayStr;
+      return `<div class="task-item" style="padding:8px 12px;margin-bottom:5px;">
+        <input type="checkbox" onchange="toggleVideoTodo('${t.pid}',${t.ti})">
+        <label onclick="toggleVideoTodo('${t.pid}',${t.ti})" style="font-size:12px;flex:1;cursor:pointer;">
+          <span class="badge badge-blue" style="font-size:10px;">案件</span>
+          ${esc(t.text)} <span style="color:#1f4a7a;font-size:10px;">/ ${esc(t.projName)}</span>
+          ${overdue?`<span style="color:#c05010;font-size:10px;font-weight:700;"> （${fmtDate(t.dueDate)} 超過）</span>`:''}
+        </label>
+      </div>`;
+    }),
+    ...szTodos.map(t=>{
+      const overdue = t.dueDate < todayStr;
+      const tog = t.ivId ? `toggleShuzaiIvTodo('${t.ivId}',${t.ti})` : `toggleShuzaiTodo('${t.leadId}',${t.ti})`;
+      return `<div class="task-item" style="padding:8px 12px;margin-bottom:5px;">
+        <input type="checkbox" onchange="${tog}">
+        <label onclick="${tog}" style="font-size:12px;flex:1;cursor:pointer;">
+          <span class="badge badge-purple" style="font-size:10px;">取材</span>
+          ${esc(t.text)} <span style="color:#5a2f7a;font-size:10px;">/ ${esc(t.leadName)}</span>
+          ${overdue?`<span style="color:#c05010;font-size:10px;font-weight:700;"> （${fmtDate(t.dueDate)} 超過）</span>`:''}
+        </label>
+      </div>`;
+    }),
+    ...hdTodos.map(t=>{
+      const overdue = t.dueDate < todayStr;
+      return `<div class="task-item" style="padding:8px 12px;margin-bottom:5px;">
+        <input type="checkbox" onchange="toggleHotdogTodo(${t.ti})">
+        <label onclick="toggleHotdogTodo(${t.ti})" style="font-size:12px;flex:1;cursor:pointer;">
+          <span class="badge badge-yellow" style="font-size:10px;">飲食</span>
+          ${esc(t.text)}
+          ${overdue?`<span style="color:#c05010;font-size:10px;font-weight:700;"> （${fmtDate(t.dueDate)} 超過）</span>`:''}
+        </label>
+      </div>`;
+    }),
+    ...routines.map(r=>{
+      const done = donelist.includes(r.id);
+      return `<div class="task-item ${done?'done':''}" style="padding:8px 12px;margin-bottom:5px;">
+        <input type="checkbox" ${done?'checked':''} onchange="toggleRoutineFromDash('${r.id}')">
+        <label onclick="toggleRoutineFromDash('${r.id}')" style="font-size:12px;flex:1;cursor:pointer;">${esc(r.text)}</label>
+      </div>`;
+    })
+  ].join('');
+}
+
+function toggleRoutineFromDash(id){
+  const ts=today();
+  if(!G.routineDone[ts]) G.routineDone[ts]=[];
+  const idx=G.routineDone[ts].indexOf(id);
+  if(idx>=0) G.routineDone[ts].splice(idx,1); else G.routineDone[ts].push(id);
+  saveG(); renderDashSchedule();
+}
+
+// ─── GOOGLE CALENDAR ──────────────────────────────────────────────────────────
+function makeGcalAddUrl(title, date, client){
+  // Google Calendar "add event" URL
+  const d = date ? date.replace(/-/g,'') : '';
+  const nextDay = date ? (()=>{
+    const dt = new Date(date);
+    dt.setDate(dt.getDate()+1);
+    return dt.toISOString().slice(0,10).replace(/-/g,'');
+  })() : '';
+  const details = client ? `クライアント：${client}` : '';
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('【締切】'+title)}&dates=${d}/${nextDay}&details=${encodeURIComponent(details)}`;
+}
+
+
+function renderLinks(){
+  document.getElementById('linkChips').innerHTML = G.links.map((l,i)=>`
+    <a href="${esc(l.url)}" target="_blank" rel="noopener" class="link-chip">${esc(l.name)}</a>
+    <span onclick="deleteLink(${i})" style="cursor:pointer;color:#8b6820;font-size:10px;margin-left:-4px;margin-right:4px;">✕</span>
+  `).join('');
+}
+
+function openLinkModal(){ document.getElementById('linkModal').classList.add('open'); }
+function addLink(e){
+  e.preventDefault();
+  G.links.push({name:document.getElementById('linkName').value,url:document.getElementById('linkUrl').value});
+  saveG(); closeModal('linkModal'); renderLinks();
+  document.getElementById('linkName').value=''; document.getElementById('linkUrl').value='';
+  showToast('リンクを追加しました');
+}
+function deleteLink(i){ G.links.splice(i,1); saveG(); renderLinks(); }
+
+// ─── TODAY ────────────────────────────────────────────────────────────────────
+function renderToday(){
+  loadVideo();
+  // Auto tasks from upcoming deadlines
+  const projects = Object.entries(videoState).map(([id,p])=>({id,name:p.name,s:p.schedule||null}));
+  const near = projects.filter(p=>p.s&&p.s.deadline&&daysUntil(p.s.deadline)!==null&&daysUntil(p.s.deadline)<=7);
+  document.getElementById('autoTaskList').innerHTML = near.length===0
+    ? '<div style="color:#8b6820;font-size:13px;">今後7日以内に締切の案件はありません。</div>'
+    : near.map(p=>{
+        const d=daysUntil(p.s.deadline);
+        return `<div class="task-item">
+          <div style="flex:1;">
+            <span style="font-size:13px;font-weight:700;">${esc(p.name)}</span>
+            <span class="${deadlineClass(d)}" style="font-size:11px;margin-left:10px;">${deadlineLabel(d)}</span>
+          </div>
+          <a href="tools.html" style="font-size:11px;color:#c8880a;text-decoration:none;">制作ツールを開く →</a>
+        </div>`;
+      }).join('');
+
+  // Manual tasks (today's date)
+  renderManualTasks();
+
+  // Routine
+  renderRoutineToday();
+}
+
+function renderManualTasks(){
+  document.getElementById('manualTaskList').innerHTML = G.manualTasks.map((t,i)=>`
+    <div class="task-item ${t.done?'done':''}">
+      <input type="checkbox" ${t.done?'checked':''} onchange="toggleManualTask(${i})">
+      <label onclick="toggleManualTask(${i})" style="cursor:pointer;">${esc(t.text)}</label>
+      <button class="btn-danger" onclick="deleteManualTask(${i})">削除</button>
+    </div>
+  `).join('') || '<div style="color:#8b6820;font-size:13px;">タスクがありません。</div>';
+}
+
+function addManualTask(e){
+  e.preventDefault();
+  const v=document.getElementById('manualTaskInput').value.trim();
+  if(!v) return;
+  G.manualTasks.push({id:uid(),text:v,done:false});
+  saveG(); renderManualTasks();
+  document.getElementById('manualTaskInput').value='';
+}
+function toggleManualTask(i){ G.manualTasks[i].done=!G.manualTasks[i].done; saveG(); renderManualTasks(); }
+function deleteManualTask(i){ G.manualTasks.splice(i,1); saveG(); renderManualTasks(); }
+
+function renderRoutineToday(){
+  const todayDow = new Date().getDay();
+  const todayStr = today();
+  const todayRoutines = G.routines.filter(r=>!r.days||r.days.includes(todayDow));
+  if(!G.routineDone[todayStr]) G.routineDone[todayStr]=[];
+  document.getElementById('routineList').innerHTML = todayRoutines.length===0
+    ? '<div style="color:#8b6820;font-size:13px;">定期タスクがありません。設定から追加してください。</div>'
+    : todayRoutines.map(r=>{
+        const done=G.routineDone[todayStr].includes(r.id);
+        return `<div class="task-item ${done?'done':''}">
+          <input type="checkbox" ${done?'checked':''} onchange="toggleRoutine('${r.id}')">
+          <label onclick="toggleRoutine('${r.id}')" style="cursor:pointer;">${esc(r.text)}</label>
+        </div>`;
+      }).join('');
+}
+function toggleRoutine(id){
+  const ts=today();
+  if(!G.routineDone[ts]) G.routineDone[ts]=[];
+  const idx=G.routineDone[ts].indexOf(id);
+  if(idx>=0) G.routineDone[ts].splice(idx,1); else G.routineDone[ts].push(id);
+  saveG(); renderRoutineToday();
+}
+
+function openRoutineModal(){
+  renderRoutineManage();
+  document.getElementById('routineModal').classList.add('open');
+}
+function renderRoutineManage(){
+  document.getElementById('routineManageList').innerHTML = G.routines.map((r,i)=>`
+    <div class="list-item" style="padding:10px 14px;">
+      <div class="list-item-body">${esc(r.text)}</div>
+      <button class="btn-danger" onclick="deleteRoutine(${i})">削除</button>
+    </div>
+  `).join('') || '<div style="color:#8b6820;font-size:13px;">定期タスクがありません。</div>';
+}
+function addRoutine(e){
+  e.preventDefault();
+  const v=document.getElementById('routineInput').value.trim();
+  if(!v) return;
+  G.routines.push({id:uid(),text:v,days:[0,1,2,3,4,5,6]});
+  saveG(); renderRoutineManage();
+  document.getElementById('routineInput').value='';
+}
+function deleteRoutine(i){ G.routines.splice(i,1); saveG(); renderRoutineManage(); }
+
+// ─── PROJECTS ─────────────────────────────────────────────────────────────────
+function renderProjects(){
+  loadVideo();
+  const projects = Object.entries(videoState).map(([id,p])=>({id,name:p.name,s:p.schedule||null}));
+  const sorted = [...projects].sort((a,b)=>{
+    const da=a.s?.deadline||'9999', db=b.s?.deadline||'9999';
+    return da.localeCompare(db);
+  });
+  document.getElementById('projectList').innerHTML = sorted.length===0
+    ? '<div style="color:#8b6820;font-size:13px;">案件がありません。制作ツールから追加してください。</div>'
+    : sorted.map(p=>{
+        const d=p.s?.deadline?daysUntil(p.s.deadline):null;
+        const meta=G.projectMeta[p.id]||{};
+        const payBadge=meta.payment==='入金済'?'badge-green':meta.payment==='請求済'?'badge-yellow':'badge-gray';
+        return `<div class="list-item">
+          <div class="list-item-body">
+            <div class="list-item-title">${esc(p.name)}</div>
+            <div class="list-item-meta">
+              ${p.s?.client?`クライアント：${esc(p.s.client)}　／　`:''}
+              ${p.s?.deadline?`締切：${fmtDate(p.s.deadline)}<span class="${deadlineClass(d)}" style="margin-left:8px;">${deadlineLabel(d)}</span>`:'締切未設定'}
+              ${meta.payDate?`　／　入金予定：${fmtDate(meta.payDate)}`:''}
+              ${p.s?.content?`<br>${esc(p.s.content)}`:''}
+            </div>
+          </div>
+          <div class="list-item-actions">
+            <span class="badge ${payBadge}">${meta.payment||'未請求'}</span>
+            <button class="btn btn-outline btn-sm" onclick="openProjectModal('${p.id}','${esc(p.name)}')">編集</button>
+          </div>
+        </div>`;
+      }).join('');
+}
+
+function openProjectModal(id, name){
+  const meta = G.projectMeta[id]||{};
+  document.getElementById('projEditId').value=id;
+  document.getElementById('projModalTitle').textContent=name;
+  document.getElementById('p-payment').value=meta.payment||'未請求';
+  document.getElementById('p-payDate').value=meta.payDate||'';
+  document.getElementById('p-bizNote').value=meta.bizNote||'';
+  document.getElementById('projectModal').classList.add('open');
+}
+function saveProjectMeta(){
+  const id=document.getElementById('projEditId').value;
+  G.projectMeta[id]={
+    payment:document.getElementById('p-payment').value,
+    payDate:document.getElementById('p-payDate').value,
+    bizNote:document.getElementById('p-bizNote').value
+  };
+  saveG(); closeModal('projectModal'); renderProjects();
+  showToast('保存しました');
+}
+
+// ─── CLIENTS ─────────────────────────────────────────────────────────────────
+function renderClients(){
+  document.getElementById('clientList').innerHTML = G.clients.length===0
+    ? '<div style="color:#8b6820;font-size:13px;">顧客がいません。追加してください。</div>'
+    : G.clients.map((c,i)=>`
+        <div class="list-item">
+          <div class="list-item-body">
+            <div class="list-item-title">${esc(c.name)}${c.contact?` <span style="font-size:11px;font-weight:400;color:#8b6820;">（${esc(c.contact)}）</span>`:''}</div>
+            <div class="list-item-meta">
+              ${c.tel?`📞 ${esc(c.tel)}　`:''}${c.email?`✉ ${esc(c.email)}　`:''}${c.address?`📍 ${esc(c.address)}`:''}
+              ${c.notes?`<br>${esc(c.notes)}`:''}
+            </div>
+          </div>
+          <div class="list-item-actions">
+            <button class="btn btn-outline btn-sm" onclick="openClientModal(${i})">編集</button>
+            <button class="btn-danger" onclick="deleteClient(${i})">削除</button>
+          </div>
+        </div>
+      `).join('');
+}
+
+function openClientModal(i){
+  const c = i!==undefined ? G.clients[i] : null;
+  document.getElementById('clientModalTitle').textContent = c?'顧客を編集':'顧客を追加';
+  document.getElementById('clientEditId').value = i!==undefined ? i : '';
+  document.getElementById('c-name').value=c?.name||'';
+  document.getElementById('c-contact').value=c?.contact||'';
+  document.getElementById('c-tel').value=c?.tel||'';
+  document.getElementById('c-email').value=c?.email||'';
+  document.getElementById('c-address').value=c?.address||'';
+  document.getElementById('c-notes').value=c?.notes||'';
+  document.getElementById('clientModal').classList.add('open');
+}
+function saveClient(){
+  const i=document.getElementById('clientEditId').value;
+  const obj={
+    name:document.getElementById('c-name').value,
+    contact:document.getElementById('c-contact').value,
+    tel:document.getElementById('c-tel').value,
+    email:document.getElementById('c-email').value,
+    address:document.getElementById('c-address').value,
+    notes:document.getElementById('c-notes').value
+  };
+  if(!obj.name){ showToast('顧客名を入力してください'); return; }
+  if(i!=='') G.clients[Number(i)]=obj; else G.clients.push(obj);
+  saveG(); closeModal('clientModal'); renderClients();
+  showToast('顧客情報を保存しました');
+}
+function deleteClient(i){
+  if(!confirm('この顧客を削除しますか？')) return;
+  G.clients.splice(i,1); saveG(); renderClients();
+}
+
+// ─── EXPENSES ─────────────────────────────────────────────────────────────────
+const EXP_CATS=['機材','交通費','通信費','消耗品','外注費','会議・打ち合わせ','その他'];
+
+function renderExpenses(){
+  // Month selector
+  const months=[...new Set(G.expenses.map(e=>e.date.slice(0,7)))].sort().reverse();
+  const now=new Date().toISOString().slice(0,7);
+  if(!months.includes(now)) months.unshift(now);
+  const sel=document.getElementById('expMonthSel');
+  const cur=sel.value||now;
+  sel.innerHTML=months.map(m=>`<option value="${m}" ${m===cur?'selected':''}>${m.replace('-','年')}月</option>`).join('');
+  const selMonth=sel.value;
+
+  // Summary by category
+  const filtered=G.expenses.filter(e=>e.date.startsWith(selMonth));
+  const total=filtered.reduce((a,e)=>a+Number(e.amount),0);
+  document.getElementById('expSummary').innerHTML=`
+    <div class="exp-cat-card"><div class="exp-cat-name">合計</div><div class="exp-cat-amount">¥${fmt(total)}</div></div>
+    ${EXP_CATS.map(cat=>{
+      const s=filtered.filter(e=>e.cat===cat).reduce((a,e)=>a+Number(e.amount),0);
+      return s>0?`<div class="exp-cat-card"><div class="exp-cat-name">${cat}</div><div class="exp-cat-amount">¥${fmt(s)}</div></div>`:'';
+    }).join('')}
+  `;
+
+  // Table
+  const sorted=[...filtered].sort((a,b)=>b.date.localeCompare(a.date));
+  document.getElementById('expBody').innerHTML=sorted.length===0
+    ? '<tr><td colspan="5" style="text-align:center;color:#8b6820;">経費がありません</td></tr>'
+    : sorted.map((e,i)=>`<tr>
+        <td>${fmtDate(e.date)}</td><td>${esc(e.cat)}</td>
+        <td>${esc(e.desc)}</td><td style="text-align:right;">¥${fmt(e.amount)}</td>
+        <td><button class="btn-danger" onclick="deleteExpense('${e.id}')">削除</button></td>
+      </tr>`).join('');
+}
+
+function openExpenseModal(){
+  document.getElementById('e-date').value=today();
+  document.getElementById('e-desc').value='';
+  document.getElementById('e-amount').value='';
+  document.getElementById('expenseModal').classList.add('open');
+}
+function saveExpense(){
+  const d=document.getElementById('e-date').value;
+  const a=document.getElementById('e-amount').value;
+  if(!d||!a){ showToast('日付と金額を入力してください'); return; }
+  G.expenses.push({id:uid(),date:d,cat:document.getElementById('e-cat').value,desc:document.getElementById('e-desc').value,amount:Number(a)});
+  saveG(); closeModal('expenseModal'); renderExpenses();
+  showToast('経費を記録しました');
+}
+function deleteExpense(id){
+  G.expenses=G.expenses.filter(e=>e.id!==id); saveG(); renderExpenses();
+}
+
+// ─── DOCS ─────────────────────────────────────────────────────────────────────
+let docType='請求書';
+let docItems=[{name:'',qty:1,unit:0}];
+
+function renderDocTab(){
+  loadVideo();
+  // Fill project select
+  const sel=document.getElementById('docProject');
+  sel.innerHTML='<option value="">— 選択しない —</option>'+
+    Object.entries(videoState).map(([id,p])=>`<option value="${id}">${esc(p.name)}</option>`).join('');
+  document.getElementById('docIssueDate').value=today();
+  renderDocItems();
+  updateDocPreview();
+}
+
+function setDocType(t){
+  docType=t;
+  document.getElementById('docTypeLabel').textContent=t;
+  ['見積書','請求書','領収書'].forEach(x=>{
+    document.getElementById('docBtn-'+x).className='btn '+(x===t?'btn-gold':'btn-outline');
+  });
+  document.getElementById('docItemsBlock').style.display=t==='領収書'?'none':'block';
+  document.getElementById('docReceiptBlock').style.display=t==='領収書'?'block':'none';
+  updateDocPreview();
+}
+
+function fillDocFromProject(){
+  const id=document.getElementById('docProject').value;
+  if(!id) return;
+  const p=videoState[id];
+  if(!p) return;
+  const s=p.schedule||{};
+  if(s.client) document.getElementById('docTo').value=s.client+' 様';
+  if(s.content) document.getElementById('docSubject').value=s.content;
+  updateDocPreview();
+}
+
+function renderDocItems(){
+  document.getElementById('docItemsTbody').innerHTML=docItems.map((it,i)=>`
+    <tr>
+      <td><input type="text" value="${esc(it.name)}" placeholder="例：撮影・編集費" oninput="docItems[${i}].name=this.value;calcDocTotal()" style="min-width:140px;"></td>
+      <td><input type="number" value="${it.qty}" min="1" oninput="docItems[${i}].qty=Number(this.value);calcDocTotal()" style="width:60px;"></td>
+      <td><input type="number" value="${it.unit}" min="0" oninput="docItems[${i}].unit=Number(this.value);calcDocTotal()" style="width:90px;"></td>
+      <td style="text-align:right;">¥${fmt(it.qty*it.unit)}</td>
+    </tr>
+    <tr><td colspan="4"><button class="btn-danger" onclick="removeDocItem(${i})" style="font-size:10px;padding:2px 8px;">行を削除</button></td></tr>
+  `).join('');
+  calcDocTotal();
+}
+function addDocItem(){ docItems.push({name:'',qty:1,unit:0}); renderDocItems(); }
+function removeDocItem(i){ if(docItems.length===1) return; docItems.splice(i,1); renderDocItems(); }
+function calcDocTotal(){
+  const sub=docItems.reduce((a,it)=>a+it.qty*it.unit,0);
+  const rate=Number(document.getElementById('docTaxRate').value);
+  const tax=Math.floor(sub*rate/100);
+  document.getElementById('docSubtotal').textContent='¥'+fmt(sub);
+  document.getElementById('docTax').textContent='¥'+fmt(tax);
+  document.getElementById('docTotal').textContent='¥'+fmt(sub+tax);
+  updateDocPreview();
+}
+function calcReceiptTax(){
+  const a=Number(document.getElementById('docReceiptAmt').value)||0;
+  document.getElementById('docReceiptTax').value='¥'+fmt(Math.floor(a*10/110));
+  updateDocPreview();
+}
+function resetDoc(){
+  docItems=[{name:'',qty:1,unit:0}];
+  document.getElementById('docTo').value='';
+  document.getElementById('docSubject').value='';
+  document.getElementById('docProject').value='';
+  document.getElementById('docReceiptAmt').value='';
+  document.getElementById('docReceiptPurpose').value='';
+  renderDocItems(); updateDocPreview();
+}
+
+function updateDocPreview(){
+  const s=G.settings;
+  const to=document.getElementById('docTo')?.value||'';
+  const subj=document.getElementById('docSubject')?.value||'';
+  const issueDate=document.getElementById('docIssueDate')?.value||today();
+  const sub=docItems.reduce((a,it)=>a+it.qty*it.unit,0);
+  const rate=Number(document.getElementById('docTaxRate')?.value||10);
+  const tax=Math.floor(sub*rate/100);
+  const total=sub+tax;
+
+  let body='';
+  if(docType==='領収書'){
+    const amt=Number(document.getElementById('docReceiptAmt')?.value)||0;
+    const purpose=document.getElementById('docReceiptPurpose')?.value||'';
+    const itax=Math.floor(amt*10/110);
+    body=`
+      <div style="text-align:center;font-size:32px;font-weight:700;margin:32px 0;border:2px solid #333;padding:16px;">
+        ¥${fmt(amt)}
+      </div>
+      <p style="font-size:13px;">ただし　${esc(purpose)||'　　　　　　　　　　　として'}</p>
+      <p style="font-size:12px;margin-top:8px;color:#555;">内消費税（10%）：¥${fmt(itax)}</p>
+    `;
+  } else {
+    body=`
+      <table class="doc-table">
+        <thead><tr><th>品目</th><th>数量</th><th>単価</th><th>金額</th></tr></thead>
+        <tbody>${docItems.map(it=>`<tr><td>${esc(it.name)}</td><td style="text-align:right;">${it.qty}</td><td style="text-align:right;">¥${fmt(it.unit)}</td><td style="text-align:right;">¥${fmt(it.qty*it.unit)}</td></tr>`).join('')}</tbody>
+      </table>
+      <div class="doc-total">
+        小計：¥${fmt(sub)}<br>
+        消費税（${rate}%）：¥${fmt(tax)}<br>
+        <span style="font-size:16px;">合計：¥${fmt(total)}</span>
+      </div>
+      ${s.bizBank?`<p style="font-size:12px;margin-top:16px;color:#333;">【振込先】${esc(s.bizBank)}</p>`:''}
+    `;
+  }
+
+  document.getElementById('docPreview').innerHTML=`
+    <div class="doc-title">${docType}</div>
+    <div class="doc-meta">
+      <div>発行日：${fmtDate(issueDate)}</div>
+    </div>
+    <div class="doc-to">${esc(to)||'　'}</div>
+    ${subj?`<p style="font-size:13px;margin-bottom:16px;">件名：${esc(subj)}</p>`:''}
+    ${body}
+    <div class="doc-from">
+      ${esc(s.bizName||'')}<br>
+      ${s.bizOwner?esc(s.bizOwner)+'<br>':''}
+      ${s.bizAddr?esc(s.bizAddr)+'<br>':''}
+      ${s.bizTel?`TEL：${esc(s.bizTel)}<br>`:''}
+      ${s.bizEmail?esc(s.bizEmail):''}
+    </div>
+  `;
+}
+
+function printDoc(){
+  const preview=document.getElementById('docPreview').innerHTML;
+  const w=window.open('','_blank','width=800,height=900');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${docType}</title>
+  <style>
+    body{font-family:'Hiragino Mincho ProN','Yu Mincho',serif;padding:40px;font-size:13px;line-height:1.8;}
+    .doc-title{text-align:center;font-size:22px;font-weight:700;margin-bottom:24px;letter-spacing:.2em;}
+    .doc-meta{display:flex;justify-content:space-between;margin-bottom:20px;font-size:12px;}
+    .doc-to{font-size:16px;border-bottom:1px solid #333;padding-bottom:6px;margin-bottom:16px;}
+    .doc-table{width:100%;border-collapse:collapse;margin-bottom:16px;}
+    .doc-table th{background:#f0f0f0;border:1px solid #ccc;padding:6px 10px;font-size:12px;}
+    .doc-table td{border:1px solid #ccc;padding:6px 10px;font-size:12px;}
+    .doc-total{text-align:right;font-size:14px;font-weight:700;margin-top:8px;}
+    .doc-from{font-size:12px;text-align:right;margin-top:16px;line-height:1.9;}
+  </style></head><body>${preview}</body></html>`);
+  w.document.close(); w.focus(); w.print(); w.close();
+}
+
+// ─── MEMOS ────────────────────────────────────────────────────────────────────
+function renderMemos(){
+  document.getElementById('memoGrid').innerHTML=G.memos.length===0
+    ? '<div style="color:#8b6820;font-size:13px;">メモがありません。</div>'
+    : G.memos.map((m,i)=>`
+        <div class="memo-card" onclick="openMemoModal(${i})">
+          <div class="memo-card-title">${esc(m.title||'無題')}</div>
+          <div class="memo-card-body">${esc(m.body||'')}</div>
+          <div class="memo-card-date">${m.updated?fmtDate(m.updated.slice(0,10)):''}</div>
+        </div>
+      `).join('');
+}
+
+function openMemoModal(i){
+  const m=i!==null?G.memos[i]:null;
+  document.getElementById('memoModalTitle').textContent=m?'メモを編集':'新規メモ';
+  document.getElementById('memoEditId').value=i!==null?i:'';
+  document.getElementById('m-title').value=m?.title||'';
+  document.getElementById('m-body').value=m?.body||'';
+  document.getElementById('memoDeleteBtn').style.display=m?'block':'none';
+  document.getElementById('memoModal').classList.add('open');
+}
+function saveMemo(){
+  const i=document.getElementById('memoEditId').value;
+  const obj={title:document.getElementById('m-title').value,body:document.getElementById('m-body').value,updated:new Date().toISOString()};
+  if(i!=='') G.memos[Number(i)]=obj; else G.memos.unshift(obj);
+  saveG(); closeModal('memoModal'); renderMemos();
+}
+function deleteMemo(){
+  const i=Number(document.getElementById('memoEditId').value);
+  if(!confirm('このメモを削除しますか？')) return;
+  G.memos.splice(i,1); saveG(); closeModal('memoModal'); renderMemos();
+}
+
+// ─── SETTINGS ─────────────────────────────────────────────────────────────────
+function renderSettings(){
+  const s=G.settings;
+  document.getElementById('s-bizName').value=s.bizName||'';
+  document.getElementById('s-bizOwner').value=s.bizOwner||'';
+  document.getElementById('s-bizAddr').value=s.bizAddr||'';
+  document.getElementById('s-bizTel').value=s.bizTel||'';
+  document.getElementById('s-bizEmail').value=s.bizEmail||'';
+  document.getElementById('s-bizBank').value=s.bizBank||'';
+  document.getElementById('s-watchDays').value=s.watchDays||5;
+  document.getElementById('s-voiceInterval').value=s.voiceInterval!==undefined?s.voiceInterval:15;
+  document.getElementById('s-voiceStrict').value=s.voiceStrict||'strict';
+}
+function saveSettings(){
+  G.settings={
+    bizName:document.getElementById('s-bizName').value,
+    bizOwner:document.getElementById('s-bizOwner').value,
+    bizAddr:document.getElementById('s-bizAddr').value,
+    bizTel:document.getElementById('s-bizTel').value,
+    bizEmail:document.getElementById('s-bizEmail').value,
+    bizBank:document.getElementById('s-bizBank').value,
+    watchDays:Number(document.getElementById('s-watchDays').value),
+    voiceInterval:Number(document.getElementById('s-voiceInterval').value),
+    voiceStrict:document.getElementById('s-voiceStrict').value
+  };
+  saveG();
+  resetVoiceTimer();
+  showToast('設定を保存しました');
+}
+
+// ─── VOICE ALERT ──────────────────────────────────────────────────────────────
+let voiceEnabled = false;
+let voiceTimer = null;
+
+function enableVoice(){
+  // Trigger speech synthesis user gesture requirement
+  const u = new SpeechSynthesisUtterance('音声アラートを有効にしました');
+  u.lang = 'ja-JP';
+  u.volume = 0.5;
+  window.speechSynthesis.speak(u);
+  voiceEnabled = true;
+  document.getElementById('voiceEnableBtn').textContent = '🔊 音声：有効';
+  document.getElementById('voiceEnableBtn').className = 'btn btn-outline btn-sm';
+  document.getElementById('voiceStatus').textContent = '音声アラート：有効';
+  document.getElementById('voiceStatus').style.color = '#2f6040';
+  resetVoiceTimer();
+}
+
+function resetVoiceTimer(){
+  if(voiceTimer) clearInterval(voiceTimer);
+  const mins = Number(G.settings.voiceInterval||15);
+  if(!voiceEnabled || mins===0) return;
+  voiceTimer = setInterval(()=>{ if(voiceEnabled) runVoiceCheck(); }, mins*60*1000);
+}
+
+function manualVoiceCheck(){
+  if(!voiceEnabled){
+    // First time - enable voice
+    enableVoice();
+    setTimeout(()=>runVoiceCheck(), 1000);
+    return;
+  }
+  runVoiceCheck();
+}
+
+function runVoiceCheck(){
+  loadVideo();
+  const projects = Object.entries(videoState).map(([id,p])=>({id,name:p.name,s:p.schedule||null}));
+  const watchDays = Number(G.settings.watchDays)||5;
+  const strict = G.settings.voiceStrict||'strict';
+
+  const alerts = projects
+    .filter(p=>p.s&&p.s.deadline)
+    .map(p=>({name:p.name, days:daysUntil(p.s.deadline)}))
+    .filter(p=>p.days!==null && p.days<=watchDays)
+    .sort((a,b)=>a.days-b.days);
+
+  // やることリスト（期日つき・未完了）
+  const todoAlerts = (G.manualTasks||[])
+    .filter(t=>!t.done && t.dueDate)
+    .map(t=>({name:t.text, days:daysUntil(t.dueDate)}))
+    .filter(t=>t.days!==null && t.days<=watchDays)
+    .sort((a,b)=>a.days-b.days);
+
+  // 取材TODO（取材ノートと連携）
+  getShuzaiTodos()
+    .filter(t=>!t.done && t.dueDate)
+    .forEach(t=>{
+      const days = daysUntil(t.dueDate);
+      if(days!==null && days<=watchDays) todoAlerts.push({name:t.leadName+'の取材「'+t.text+'」', days});
+    });
+  // 案件TODO（制作ツールと連携）
+  getVideoTodos()
+    .filter(t=>!t.done && t.dueDate)
+    .forEach(t=>{
+      const days = daysUntil(t.dueDate);
+      if(days!==null && days<=watchDays) todoAlerts.push({name:t.projName+'の「'+t.text+'」', days});
+    });
+  // 飲食部門TODO
+  getHotdogTodos()
+    .filter(t=>!t.done && t.dueDate)
+    .forEach(t=>{
+      const days = daysUntil(t.dueDate);
+      if(days!==null && days<=watchDays) todoAlerts.push({name:'飲食部門の「'+t.text+'」', days});
+    });
+  todoAlerts.sort((a,b)=>a.days-b.days);
+
+  // Reset overdue message rotation each check
+  overdueIdx = 0;
+
+  if(alerts.length===0 && todoAlerts.length===0){
+    speak('現在、締切が近い案件もやることもありません。順調です。');
+    return;
+  }
+
+  const msgs = [
+    ...alerts.map(p=>{
+      const d = p.days;
+      if(d<0) return buildMsg(p.name, `すでに${Math.abs(d)}日超過しています`, 'overdue', strict);
+      if(d===0) return buildMsg(p.name, '本日が締切です', 'today', strict);
+      if(d<=3)  return buildMsg(p.name, `締切まであと${d}日です`, 'urgent', strict);
+      return buildMsg(p.name, `締切まであと${d}日です`, 'near', strict);
+    }),
+    ...todoAlerts.map(t=>{
+      const d = t.days;
+      if(d<0) return buildTodoMsg(t.name, `${Math.abs(d)}日`, 'overdue', strict);
+      if(d===0) return buildTodoMsg(t.name, '今日', 'today', strict);
+      if(d<=3)  return buildTodoMsg(t.name, `${d}日`, 'urgent', strict);
+      return buildTodoMsg(t.name, `${d}日`, 'near', strict);
+    })
+  ];
+
+  speakSequence(msgs);
+}
+
+function buildTodoMsg(name, num, level, strict){
+  if(strict==='soft'){
+    if(level==='overdue') return `やることの「${name}」が${num}過ぎています。やっておきましょう。`;
+    if(level==='today')   return `やることの「${name}」は${num}が期限です。忘れずに。`;
+    return `やることの「${name}」は期限まであと${num}です。`;
+  }
+  if(strict==='normal'){
+    if(level==='overdue') return `「${name}」の期限が${num}過ぎています！早く片付けてください！`;
+    if(level==='today')   return `「${name}」は${num}が期限です！今日中にやってください！`;
+    return `「${name}」は期限まであと${num}！忘れないように！`;
+  }
+  // strict
+  if(level==='overdue') return `「${name}」をまだやっていないんですか！${num}も過ぎていますよ！先延ばしにする癖は身を滅ぼします！今すぐやりなさい！`;
+  if(level==='today')   return `「${name}」は今日が期限です！後回しにせず今すぐ手をつけなさい！`;
+  return `「${name}」は期限まであと${num}！早めに終わらせなさい！`;
+}
+
+const OVERDUE_MSGS = [
+  '納期を過ぎたら、生活できなくなりますよ！今すぐ動いてください！',
+  '待っているお客さんの気持ちを考えてください！信頼を失う前に今すぐ連絡を！',
+  'クライアントはずっと待っています！あなたの仕事を信じて待っているんです！早く！',
+  '締切を守れない仕事人は、次の仕事がなくなります！今すぐ対応してください！',
+  'お金をもらって仕事を引き受けたんです！責任を果たしてください！'
+];
+let overdueIdx = 0;
+
+function buildMsg(name, timeStr, level, strict){
+  if(strict==='soft'){
+    if(level==='overdue') return `${name}の締切が${timeStr}。早めに確認と連絡をお願いします。`;
+    if(level==='today')   return `${name}は${timeStr}。今日中に完成させましょう。`;
+    if(level==='urgent')  return `${name}の${timeStr}。そろそろ仕上げましょう。`;
+    return `${name}の${timeStr}。進めていきましょう。`;
+  }
+  if(strict==='normal'){
+    if(level==='overdue') return `警告！${name}の締切が${timeStr}！クライアントへの連絡と対応を急いでください！`;
+    if(level==='today')   return `${name}は${timeStr}！今日中に必ず完成させてください！`;
+    if(level==='urgent')  return `${name}の${timeStr}！急いでください！`;
+    return `${name}の${timeStr}。対応を進めてください。`;
+  }
+  // strict
+  if(level==='overdue'){
+    const extra = OVERDUE_MSGS[overdueIdx % OVERDUE_MSGS.length];
+    overdueIdx++;
+    return `緊急警告！${name}の締切が${timeStr}！${extra}`;
+  }
+  if(level==='today') return `${name}は本日締切です！絶対に今日中に終わらせてください！待っているクライアントのことを考えてください！`;
+  if(level==='urgent') return `${name}の締切まであと${timeStr.replace('締切まであと','')}！残り時間がありません！今すぐ取り掛かってください！`;
+  return `${name}の${timeStr}。余裕を持って進めてください。`;
+}
+
+function speak(text){
+  if(!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'ja-JP';
+  u.rate = 1.0;
+  u.pitch = 1.0;
+  window.speechSynthesis.speak(u);
+}
+
+function speakSequence(msgs){
+  if(!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  msgs.forEach((msg, i)=>{
+    const u = new SpeechSynthesisUtterance(msg);
+    u.lang = 'ja-JP';
+    u.rate = G.settings.voiceStrict==='strict' ? 1.1 : 1.0;
+    u.pitch = G.settings.voiceStrict==='strict' ? 1.2 : 1.0;
+    window.speechSynthesis.speak(u);
+  });
+}
+
+// ─── CALENDAR ─────────────────────────────────────────────────────────────────
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth();
+let calSelectedDate = null;
+let dashCalYear = new Date().getFullYear();
+let dashCalMonth = new Date().getMonth();
+let dashCalSelectedDate = null;
+
+const CAL_COLORS = {撮影:'#c8880a',納品:'#8b2010',打ち合わせ:'#1f4a7a',その他:'#2f6040',取材:'#5a2f7a'};
+
+function switchTab_calendar(){
+  if(!G.calEvents) G.calEvents = [];
+  renderCalendar();
+}
+
+function calPrev(){ calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCalendar(); }
+function calNext(){ calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCalendar(); }
+function calToday(){ calYear=new Date().getFullYear(); calMonth=new Date().getMonth(); renderCalendar(); }
+
+function renderCalendar(){
+  if(!G.calEvents) G.calEvents = [];
+  document.getElementById('calTitle').textContent = `${calYear}年${calMonth+1}月`;
+
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const lastDate = new Date(calYear, calMonth+1, 0).getDate();
+  const prevLast = new Date(calYear, calMonth, 0).getDate();
+
+  // Gather all events for this month
+  const eventsMap = {}; // date string -> [{...}]
+
+  // User-created events
+  (G.calEvents||[]).forEach(ev => {
+    const d = ev.date;
+    if(!eventsMap[d]) eventsMap[d] = [];
+    eventsMap[d].push({...ev, src:'user'});
+  });
+
+  // From tools.html projects
+  loadVideo();
+  Object.entries(videoState).forEach(([id,p]) => {
+    const s = p.schedule||{};
+    getShootDates(s).forEach(sd=>{
+      if(!eventsMap[sd]) eventsMap[sd]=[];
+      eventsMap[sd].push({id:'proj_shoot_'+id+'_'+sd, title:'📷 '+p.name, type:'撮影', src:'project', projectId:id});
+    });
+    if(s.deadline){
+      if(!eventsMap[s.deadline]) eventsMap[s.deadline]=[];
+      eventsMap[s.deadline].push({id:'proj_dl_'+id, title:'🔴 '+p.name+' 締切', type:'納品', src:'project', projectId:id});
+    }
+  });
+
+  // From shuzai.html 取材予定
+  getShuzaiEvents().forEach(ev=>{
+    if(!eventsMap[ev.date]) eventsMap[ev.date]=[];
+    eventsMap[ev.date].push({id:'sz_'+ev.date+'_'+ev.title, title:ev.title, type:'取材', src:'shuzai'});
+  });
+
+  const todayStr = today();
+  const DOW = ['日','月','火','水','木','金','土'];
+
+  let html = `<div class="cal-head">${DOW.map(d=>`<div class="cal-dow">${d}</div>`).join('')}</div><div class="cal-body">`;
+
+  // Prev month cells
+  for(let i=0; i<firstDay; i++){
+    const d = prevLast - firstDay + i + 1;
+    html += `<div class="cal-cell other-month"><span class="cal-date">${d}</span></div>`;
+  }
+
+  // This month
+  for(let d=1; d<=lastDate; d++){
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = dateStr===todayStr;
+    const isSelected = dateStr===calSelectedDate;
+    const evs = eventsMap[dateStr]||[];
+    html += `<div class="cal-cell${isToday?' today':''}${isSelected?' selected':''}" onclick="selectCalDay('${dateStr}')">
+      <span class="cal-date">${d}</span>
+      ${evs.slice(0,3).map(ev=>`<div class="cal-event ${ev.type}" onclick="event.stopPropagation();${ev.src==='user'?`openCalEventModal('${ev.id}')`:`selectCalDay('${dateStr}')`}">${ev.title}</div>`).join('')}
+      ${evs.length>3?`<div style="font-size:9px;color:#8b6820;">＋${evs.length-3}件</div>`:''}
+    </div>`;
+  }
+
+  // Next month cells
+  const total = firstDay + lastDate;
+  const remaining = total % 7 === 0 ? 0 : 7 - (total % 7);
+  for(let i=1; i<=remaining; i++){
+    html += `<div class="cal-cell other-month"><span class="cal-date">${i}</span></div>`;
+  }
+
+  html += '</div>';
+  document.getElementById('calGrid').innerHTML = html;
+
+  if(calSelectedDate) showCalDay(calSelectedDate, eventsMap);
+}
+
+function selectCalDay(dateStr){
+  calSelectedDate = dateStr;
+  renderCalendar();
+}
+
+function showCalDay(dateStr, eventsMap){
+  const panel = document.getElementById('calDayPanel');
+  const d = new Date(dateStr);
+  const dow = ['日','月','火','水','木','金','土'][d.getDay()];
+  document.getElementById('calDayTitle').textContent = `${d.getMonth()+1}月${d.getDate()}日（${dow}）`;
+  panel.style.display = 'block';
+
+  const evs = eventsMap[dateStr]||[];
+  if(evs.length===0){
+    document.getElementById('calDayEvents').innerHTML = '<div style="color:#8b6820;font-size:13px;">予定がありません。「＋ 予定を追加」から追加してください。</div>';
+    return;
+  }
+  document.getElementById('calDayEvents').innerHTML = evs.map(ev=>{
+    const gcalUrl=makeGcalAddUrl(ev.title, ev.date||dateStr, [ev.place?'場所：'+ev.place:'',ev.memo||''].filter(Boolean).join(' / '));
+    return `<div class="list-item" style="border-left:4px solid ${CAL_COLORS[ev.type]||'#c8880a'};">
+      <div class="list-item-body">
+        <div class="list-item-title">${esc(ev.title)}</div>
+        <div class="list-item-meta">
+          ${ev.time?ev.time+(ev.endTime?'〜'+ev.endTime:'')+'　':''}
+          <span class="badge" style="background:${CAL_COLORS[ev.type]||'#c8880a'};color:#fff;">${ev.type}</span>
+          ${ev.place?`　📍 ${esc(ev.place)}`:''}
+          ${ev.memo?`　${esc(ev.memo)}`:''}
+          ${ev.src==='project'?'<span style="font-size:10px;color:#8b6820;"> （制作ツールから）</span>':''}
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <a href="${gcalUrl}" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="text-decoration:none;white-space:nowrap;">📅 Googleに追加</a>
+        ${ev.src==='user'?`<button class="btn btn-outline btn-sm" onclick="openCalEventModal('${ev.id}')">編集</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openCalEventModal(id){
+  loadVideo();
+  // Fill project select
+  const sel = document.getElementById('ce-project');
+  sel.innerHTML = '<option value="">— なし —</option>' +
+    Object.entries(videoState).map(([pid,p])=>`<option value="${pid}">${esc(p.name)}</option>`).join('');
+
+  if(id){
+    const ev = (G.calEvents||[]).find(e=>e.id===id);
+    if(!ev) return;
+    document.getElementById('calEventModalTitle').textContent = '予定を編集';
+    document.getElementById('calEventEditId').value = id;
+    document.getElementById('ce-title').value = ev.title;
+    document.getElementById('ce-date').value = ev.date;
+    document.getElementById('ce-endDate').value = ev.endDate||'';
+    document.getElementById('ce-time').value = ev.time||'';
+    document.getElementById('ce-endTime').value = ev.endTime||'';
+    document.getElementById('ce-type').value = ev.type;
+    document.getElementById('ce-project').value = ev.projectId||'';
+    document.getElementById('ce-place').value = ev.place||'';
+    document.getElementById('ce-memo').value = ev.memo||'';
+    document.getElementById('calEventDeleteBtn').style.display = 'block';
+  } else {
+    document.getElementById('calEventModalTitle').textContent = '予定を追加';
+    document.getElementById('calEventEditId').value = '';
+    document.getElementById('ce-title').value = '';
+    document.getElementById('ce-date').value = calSelectedDate||today();
+    document.getElementById('ce-endDate').value = '';
+    document.getElementById('ce-time').value = '';
+    document.getElementById('ce-endTime').value = '';
+    document.getElementById('ce-type').value = '打ち合わせ';
+    document.getElementById('ce-project').value = '';
+    document.getElementById('ce-place').value = '';
+    document.getElementById('ce-memo').value = '';
+    document.getElementById('calEventDeleteBtn').style.display = 'none';
+  }
+  document.getElementById('calEventModal').classList.add('open');
+}
+
+function saveCalEvent(){
+  if(!G.calEvents) G.calEvents = [];
+  const id = document.getElementById('calEventEditId').value;
+  const obj = {
+    id: id || uid(),
+    title: document.getElementById('ce-title').value,
+    date: document.getElementById('ce-date').value,
+    endDate: document.getElementById('ce-endDate').value,
+    time: document.getElementById('ce-time').value,
+    endTime: document.getElementById('ce-endTime').value,
+    type: document.getElementById('ce-type').value,
+    projectId: document.getElementById('ce-project').value,
+    place: document.getElementById('ce-place').value,
+    memo: document.getElementById('ce-memo').value
+  };
+  if(!obj.title||!obj.date){ showToast('タイトルと日付を入力してください'); return; }
+  if(id){
+    const idx = G.calEvents.findIndex(e=>e.id===id);
+    if(idx>=0) G.calEvents[idx]=obj;
+  } else {
+    G.calEvents.push(obj);
+  }
+  calSelectedDate = obj.date;
+  saveG(); closeModal('calEventModal'); renderCalendar();
+  showToast('予定を保存しました');
+}
+
+function deleteCalEvent(){
+  const id = document.getElementById('calEventEditId').value;
+  if(!confirm('この予定を削除しますか？')) return;
+  G.calEvents = (G.calEvents||[]).filter(e=>e.id!==id);
+  saveG(); closeModal('calEventModal'); renderCalendar();
+  showToast('予定を削除しました');
+}
+
+// ─── DASHBOARD MINI CALENDAR ──────────────────────────────────────────────────
+function dashCalPrev(){ dashCalMonth--; if(dashCalMonth<0){dashCalMonth=11;dashCalYear--;} renderDashCal(); }
+function dashCalNext(){ dashCalMonth++; if(dashCalMonth>11){dashCalMonth=0;dashCalYear++;} renderDashCal(); }
+function dashCalGoToday(){ dashCalYear=new Date().getFullYear(); dashCalMonth=new Date().getMonth(); renderDashCal(); }
+
+function renderDashCal(){
+  if(!G.calEvents) G.calEvents=[];
+  document.getElementById('dashCalTitle').textContent=`${dashCalYear}年${dashCalMonth+1}月`;
+
+  const firstDay=new Date(dashCalYear,dashCalMonth,1).getDay();
+  const lastDate=new Date(dashCalYear,dashCalMonth+1,0).getDate();
+  const prevLast=new Date(dashCalYear,dashCalMonth,0).getDate();
+  const todayStr=today();
+
+  // Build events map
+  const evMap={};
+  (G.calEvents||[]).forEach(ev=>{ if(!evMap[ev.date]) evMap[ev.date]=[]; evMap[ev.date].push(ev); });
+  loadVideo();
+  Object.entries(videoState).forEach(([id,p])=>{
+    const s=p.schedule||{};
+    getShootDates(s).forEach(sd=>{if(!evMap[sd])evMap[sd]=[];evMap[sd].push({id:'ps_'+id+'_'+sd,title:'📷 '+p.name,type:'撮影',src:'project'});});
+    if(s.deadline){if(!evMap[s.deadline])evMap[s.deadline]=[];evMap[s.deadline].push({id:'pd_'+id,title:'🔴 '+p.name,type:'納品',src:'project'});}
+  });
+  getShuzaiEvents().forEach(ev=>{ if(!evMap[ev.date])evMap[ev.date]=[]; evMap[ev.date].push(ev); });
+
+  const DOW=['日','月','火','水','木','金','土'];
+  let html=`<div class="cal-head">${DOW.map(d=>`<div class="cal-dow">${d}</div>`).join('')}</div><div class="cal-body">`;
+
+  for(let i=0;i<firstDay;i++){
+    html+=`<div class="cal-cell other-month" style="min-height:60px;"><span class="cal-date" style="font-size:11px;">${prevLast-firstDay+i+1}</span></div>`;
+  }
+  for(let d=1;d<=lastDate;d++){
+    const ds=`${dashCalYear}-${String(dashCalMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday=ds===todayStr;
+    const isSel=ds===dashCalSelectedDate;
+    const evs=evMap[ds]||[];
+    html+=`<div class="cal-cell${isToday?' today':''}${isSel?' selected':''}" style="min-height:60px;" onclick="selectDashCalDay('${ds}')">
+      <span class="cal-date" style="font-size:12px;">${d}</span>
+      ${evs.slice(0,2).map(ev=>`<div class="cal-event ${ev.type}" style="font-size:9px;">${ev.title}</div>`).join('')}
+      ${evs.length>2?`<div style="font-size:9px;color:#8b6820;">＋${evs.length-2}</div>`:''}
+    </div>`;
+  }
+  const total=firstDay+lastDate;
+  const rem=total%7===0?0:7-(total%7);
+  for(let i=1;i<=rem;i++) html+=`<div class="cal-cell other-month" style="min-height:60px;"><span class="cal-date" style="font-size:11px;">${i}</span></div>`;
+  html+='</div>';
+  document.getElementById('dashCalGrid').innerHTML=html;
+
+  if(dashCalSelectedDate) showDashCalDay(dashCalSelectedDate, evMap);
+}
+
+function selectDashCalDay(ds){
+  dashCalSelectedDate=ds;
+  renderDashCal();
+}
+
+function showDashCalDay(ds, evMap){
+  const panel=document.getElementById('dashCalDayPanel');
+  const d=new Date(ds);
+  const dow=['日','月','火','水','木','金','土'][d.getDay()];
+  document.getElementById('dashCalDayTitle').textContent=`${d.getMonth()+1}月${d.getDate()}日（${dow}）`;
+  panel.style.display='block';
+  const evs=evMap[ds]||[];
+  if(evs.length===0){
+    document.getElementById('dashCalDayEvents').innerHTML='<div style="color:#8b6820;font-size:12px;">予定がありません。</div>';
+    return;
+  }
+  document.getElementById('dashCalDayEvents').innerHTML=evs.map(ev=>{
+    const gcalUrl=makeGcalAddUrl(ev.title, ds, '');
+    return `<div class="list-item" style="border-left:3px solid ${CAL_COLORS[ev.type]||'#c8880a'};padding:10px 14px;">
+      <div class="list-item-body">
+        <div style="font-size:13px;font-weight:700;">${esc(ev.title)}</div>
+        <div style="font-size:11px;color:#8b6820;">${ev.time?ev.time+' ':''}<span class="badge" style="background:${CAL_COLORS[ev.type]||'#c8880a'};color:#fff;font-size:10px;">${ev.type}</span>${ev.place?` 📍${esc(ev.place)}`:''}${ev.memo?` ${esc(ev.memo)}`:''}</div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;">
+        <a href="${gcalUrl}" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="text-decoration:none;white-space:nowrap;font-size:10px;">📅 Googleに追加</a>
+        ${ev.src==='user'?`<button class="btn btn-outline btn-sm" onclick="openCalEventModal('${ev.id}');return false;" style="font-size:10px;">編集</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openCalEventModalFromDash(){
+  openCalEventModal(null);
+  if(dashCalSelectedDate) document.getElementById('ce-date').value=dashCalSelectedDate;
+}
+
+// ─── SNS ──────────────────────────────────────────────────────────────────────
+function renderSns(){
+  renderSnsAcc();
+  renderSnsTpl();
+}
+
+// Instagram accounts
+function renderSnsAcc(){
+  const el = document.getElementById('snsAccList');
+  if((G.snsAccounts||[]).length===0){
+    el.innerHTML = '<div style="color:#8b6820;font-size:12px;margin-bottom:8px;">アカウントが登録されていません。「＋ アカウント追加」から登録してください。</div>';
+    return;
+  }
+  el.innerHTML = G.snsAccounts.map((a,i)=>{
+    const url = a.handle ? `https://www.instagram.com/${encodeURIComponent(a.handle)}/` : 'https://www.instagram.com/';
+    return `<div class="list-item" style="padding:10px 14px;">
+      <div class="list-item-body">
+        <div class="list-item-title">${esc(a.name)}</div>
+        ${a.handle?`<div class="list-item-meta">@${esc(a.handle)}</div>`:''}
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <a href="${url}" target="_blank" rel="noopener" class="btn btn-gold btn-sm" style="text-decoration:none;white-space:nowrap;">📷 開く</a>
+        <button class="btn btn-outline btn-sm" onclick="openSnsAccModal(${i})">編集</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openSnsAccModal(i){
+  const a = i!==null ? G.snsAccounts[i] : null;
+  document.getElementById('snsAccModalTitle').textContent = a?'アカウントを編集':'アカウント追加';
+  document.getElementById('snsAccEditId').value = i!==null ? i : '';
+  document.getElementById('sa-name').value = a?.name||'';
+  document.getElementById('sa-handle').value = a?.handle||'';
+  document.getElementById('snsAccDeleteBtn').style.display = a?'block':'none';
+  document.getElementById('snsAccModal').classList.add('open');
+}
+function saveSnsAcc(){
+  const i = document.getElementById('snsAccEditId').value;
+  const obj = {name:document.getElementById('sa-name').value, handle:document.getElementById('sa-handle').value.replace(/^@/,'')};
+  if(!obj.name){ showToast('アカウント名を入力してください'); return; }
+  if(i!=='') G.snsAccounts[Number(i)]=obj; else G.snsAccounts.push(obj);
+  saveG(); closeModal('snsAccModal'); renderSnsAcc();
+  showToast('保存しました');
+}
+function deleteSnsAcc(){
+  const i = Number(document.getElementById('snsAccEditId').value);
+  if(!confirm('このアカウントを削除しますか？')) return;
+  G.snsAccounts.splice(i,1); saveG(); closeModal('snsAccModal'); renderSnsAcc();
+}
+
+// Hashtag / templates
+function renderSnsTpl(){
+  const el = document.getElementById('snsTplList');
+  if((G.snsTemplates||[]).length===0){
+    el.innerHTML = '<div style="color:#8b6820;font-size:12px;">定型文が登録されていません。「＋ 追加」から登録してください。</div>';
+    return;
+  }
+  el.innerHTML = G.snsTemplates.map((t,i)=>`
+    <div class="card" style="margin-bottom:12px;padding:14px 16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div style="font-size:14px;font-weight:700;color:#1c0f02;">${esc(t.title)}</div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-gold btn-sm" onclick="copySnsTpl(${i})">📋 コピー</button>
+          <button class="btn btn-outline btn-sm" onclick="openSnsTplModal(${i})">編集</button>
+        </div>
+      </div>
+      <div style="font-size:12px;color:#5a3a10;line-height:1.7;white-space:pre-wrap;word-break:break-word;">${esc(t.body)}</div>
+    </div>
+  `).join('');
+}
+
+function openSnsTplModal(i){
+  const t = i!==null ? G.snsTemplates[i] : null;
+  document.getElementById('snsTplModalTitle').textContent = t?'定型文を編集':'定型文を追加';
+  document.getElementById('snsTplEditId').value = i!==null ? i : '';
+  document.getElementById('st-title').value = t?.title||'';
+  document.getElementById('st-body').value = t?.body||'';
+  document.getElementById('snsTplDeleteBtn').style.display = t?'block':'none';
+  document.getElementById('snsTplModal').classList.add('open');
+}
+function saveSnsTpl(){
+  const i = document.getElementById('snsTplEditId').value;
+  const obj = {title:document.getElementById('st-title').value, body:document.getElementById('st-body').value};
+  if(!obj.title){ showToast('タイトルを入力してください'); return; }
+  if(i!=='') G.snsTemplates[Number(i)]=obj; else G.snsTemplates.push(obj);
+  saveG(); closeModal('snsTplModal'); renderSnsTpl();
+  showToast('保存しました');
+}
+function deleteSnsTpl(){
+  const i = Number(document.getElementById('snsTplEditId').value);
+  if(!confirm('この定型文を削除しますか？')) return;
+  G.snsTemplates.splice(i,1); saveG(); closeModal('snsTplModal'); renderSnsTpl();
+}
+function copySnsTpl(i){
+  const text = G.snsTemplates[i].body;
+  navigator.clipboard.writeText(text).then(()=>showToast('コピーしました')).catch(()=>{
+    // Fallback
+    const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select();
+    try{document.execCommand('copy');showToast('コピーしました');}catch(e){showToast('コピーに失敗しました');}
+    document.body.removeChild(ta);
+  });
+}
+
+// Thumbnail converter (horizontal -> vertical)
+let thumbImg = null;
+function loadThumbImage(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = ()=>{ thumbImg = img; renderThumb(); };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function renderThumb(){
+  if(!thumbImg) return;
+  const canvas = document.getElementById('thumbCanvas');
+  const ratio = document.getElementById('thumbRatio').value;
+  const bg = document.getElementById('thumbBg').value;
+  const scale = Number(document.getElementById('thumbScale').value)/100;
+
+  // Output size
+  let W, H;
+  if(ratio==='9:16'){ W=1080; H=1920; }
+  else if(ratio==='4:5'){ W=1080; H=1350; }
+  else { W=1080; H=1080; }
+  canvas.width=W; canvas.height=H;
+  const ctx = canvas.getContext('2d');
+
+  // Background
+  if(bg==='white'){ ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H); }
+  else if(bg==='black'){ ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H); }
+  else {
+    // Blurred cover of the image
+    const cover = Math.max(W/thumbImg.width, H/thumbImg.height);
+    const bw = thumbImg.width*cover, bh = thumbImg.height*cover;
+    ctx.filter = 'blur(30px)';
+    ctx.drawImage(thumbImg, (W-bw)/2, (H-bh)/2, bw, bh);
+    ctx.filter = 'none';
+    // Slight dark overlay so foreground stands out
+    ctx.fillStyle = 'rgba(0,0,0,0.15)';
+    ctx.fillRect(0,0,W,H);
+  }
+
+  // Foreground: fit image inside, centered, with scale
+  const fit = Math.min(W/thumbImg.width, H/thumbImg.height) * scale;
+  const fw = thumbImg.width*fit, fh = thumbImg.height*fit;
+  ctx.drawImage(thumbImg, (W-fw)/2, (H-fh)/2, fw, fh);
+}
+
+function downloadThumb(){
+  if(!thumbImg){ showToast('先に画像を選んでください'); return; }
+  const canvas = document.getElementById('thumbCanvas');
+  const a = document.createElement('a');
+  a.href = canvas.toDataURL('image/jpeg', 0.92);
+  a.download = `thumb_vertical_${Date.now()}.jpg`;
+  a.click();
+  showToast('画像を保存しました');
+}
+
+// ─── BACKUP / RESTORE ─────────────────────────────────────────────────────────
+function exportData(){
+  const data = {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    gyomuData: G,
+    videoTools: videoState
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const d = new Date();
+  const fname = `gyomu_backup_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.json`;
+  a.href = url; a.download = fname; a.click();
+  URL.revokeObjectURL(url);
+  showToast('バックアップを保存しました');
+}
+
+function importData(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if(!data.gyomuData) throw new Error('無効なファイルです');
+      if(!confirm('現在のデータをバックアップファイルで上書きします。よろしいですか？')) return;
+      localStorage.setItem(GYOMU_KEY, JSON.stringify(data.gyomuData));
+      if(data.videoTools) localStorage.setItem(VIDEO_KEY, JSON.stringify(data.videoTools));
+      loadG(); loadVideo();
+      document.getElementById('backupStatus').textContent = `✓ 復元完了：${data.exportedAt ? new Date(data.exportedAt).toLocaleString('ja-JP') + ' のバックアップ' : 'バックアップ'}`;
+      showToast('データを復元しました');
+    } catch(err) {
+      alert('ファイルの読み込みに失敗しました。正しいバックアップファイルを選んでください。');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+loadG();
+loadVideo();
+renderDashboard();
+updateClock();
+setInterval(updateClock, 30000);
+
+// Modal close on backdrop click
+document.querySelectorAll('.modal-bg').forEach(bg=>{
+  bg.addEventListener('click', e=>{ if(e.target===bg) bg.classList.remove('open'); });
+});
+</script>
+</body>
+</html>
