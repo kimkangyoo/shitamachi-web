@@ -1,0 +1,39 @@
+{
+  "name": "shitamachi-web",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"node server.js\" \"vite\"",
+    "server": "node server.js",
+    "vite": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kimkangyoo/shitamachi-web.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kimkangyoo/shitamachi-web/issues"
+  },
+  "homepage": "https://github.com/kimkangyoo/shitamachi-web#readme",
+  "dependencies": {
+    "@vitejs/plugin-react": "^6.0.5",
+    "basic-ftp": "^6.2.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "multer": "^2.2.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "vite": "^8.2.1"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.5"
+  }
+}
