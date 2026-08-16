@@ -2,9 +2,15 @@
   "name": "shitamachi-web",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "electron/main.js",
+  "homepage": "https://github.com/kimkangyoo/shitamachi-web#readme",
   "scripts": {
     "dev": "concurrently \"node server.js\" \"vite\"",
+    "electron-dev": "concurrently \"npm run vite\" \"wait-on http://localhost:5173 && electron .\"",
+    "electron-build": "npm run build && electron-builder",
+    "electron-build-win": "npm run build && electron-builder --win",
+    "electron-build-mac": "npm run build && electron-builder --mac",
+    "electron-build-linux": "npm run build && electron-builder --linux",
     "server": "node server.js",
     "vite": "vite",
     "build": "vite build",
@@ -21,7 +27,6 @@
   "bugs": {
     "url": "https://github.com/kimkangyoo/shitamachi-web/issues"
   },
-  "homepage": "https://github.com/kimkangyoo/shitamachi-web#readme",
   "dependencies": {
     "@vitejs/plugin-react": "^6.0.5",
     "basic-ftp": "^6.2.0",
@@ -34,6 +39,47 @@
     "vite": "^8.2.1"
   },
   "devDependencies": {
-    "concurrently": "^10.0.5"
+    "concurrently": "^10.0.5",
+    "electron": "^43.4.0",
+    "electron-builder": "^26.15.3",
+    "electron-is-dev": "^3.0.1",
+    "wait-on": "^8.0.5"
+  },
+  "build": {
+    "appId": "com.shitamachi-kiroku.dashboard",
+    "productName": "下町きろく 管理ダッシュボード",
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "node_modules/**/*"
+    ],
+    "directories": {
+      "buildResources": "assets",
+      "output": "release"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    }
   }
 }
