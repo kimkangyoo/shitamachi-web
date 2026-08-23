@@ -118,6 +118,10 @@ nav{background:rgba(255,255,255,.92);backdrop-filter:blur(6px);padding:20px 56px
 .profile-role{font-size:11px;letter-spacing:.18em;color:var(--orange-600);margin-bottom:20px;font-weight:500;}
 .profile-desc{font-size:14px;color:var(--ink-soft);line-height:2.2;margin-bottom:24px;max-width:480px;}
 
+/* FLYER IMAGE */
+.flyer-img{width:100%;border-radius:16px;box-shadow:0 10px 30px rgba(36,29,23,.14);border:1px solid var(--line);display:block;margin:28px 0 8px;}
+.flyer-caption{font-size:11.5px;color:var(--ink-soft);text-align:center;letter-spacing:.02em;}
+
 /* MENU / SERVICE BLOCKS */
 .service-block{margin-bottom:64px;padding-bottom:64px;border-bottom:1px solid var(--line);}
 .service-block:last-of-type{border-bottom:none;margin-bottom:0;padding-bottom:0;}
