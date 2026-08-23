@@ -146,6 +146,11 @@ nav{background:var(--white);padding:26px 56px;display:flex;align-items:center;ju
 .effect-cell li{font-size:11.5px;color:var(--ink-soft);line-height:2;padding-left:12px;position:relative;}
 .effect-cell li::before{content:'';position:absolute;left:0;top:9px;width:4px;height:4px;background:var(--orange);}
 
+/* HIGHLIGHT BOX (e.g. ヨーガ療法で介護ストレス・ケア) */
+.highlight-box{background:var(--paper);border:1px solid var(--line);border-left:3px solid var(--orange);padding:36px 38px;margin-top:8px;}
+.highlight-box-title{font-family:'Zen Old Mincho',serif;font-size:18px;font-weight:600;color:var(--ink);margin-bottom:14px;letter-spacing:.02em;}
+.highlight-box-desc{font-size:13.5px;color:var(--ink-soft);line-height:2.1;}
+
 /* FLYER IMAGE */
 .flyer-img{width:100%;border-radius:0;border:1px solid var(--line);display:block;margin:32px 0 10px;}
 .flyer-caption{font-size:11px;color:var(--ink-soft);text-align:center;letter-spacing:.1em;}
