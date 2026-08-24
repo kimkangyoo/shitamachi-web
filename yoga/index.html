@@ -35,8 +35,17 @@
       </div>
     </div>
     <div class="hero-photo-wrap">
-      <img src="assets/class-photo.jpg" alt="レッスン風景" class="hero-photo">
-      <span class="hero-photo-caption">レッスンの様子</span>
+      <div class="hero-slideshow">
+        <img src="assets/class-photo.jpg" alt="レッスン風景" class="hero-photo is-active" data-caption="レッスンの様子">
+        <img src="assets/shrine-photo.jpg" alt="弥栄神社でのレッスン" class="hero-photo" data-caption="弥栄神社でのイスヨガ">
+        <img src="assets/lakeside-photo.jpg" alt="屋外でのレッスン" class="hero-photo" data-caption="屋外でのレッスン">
+        <div class="hero-dots">
+          <span class="hero-dot is-active"></span>
+          <span class="hero-dot"></span>
+          <span class="hero-dot"></span>
+        </div>
+      </div>
+      <span class="hero-photo-caption" id="heroCaption">レッスンの様子</span>
     </div>
   </div>
 </div>
@@ -316,6 +325,26 @@
   <div class="foot-logo">ほっとヨガ教室</div>
   <div class="foot-meta">認定ヨーガ療法士　金栄子<br>教室情報は準備中です。詳細はお問い合わせください。</div>
 </footer>
+
+<script>
+(function(){
+  var slides = document.querySelectorAll('.hero-photo');
+  var dots = document.querySelectorAll('.hero-dot');
+  var caption = document.getElementById('heroCaption');
+  if(slides.length < 2) return;
+  var i = 0;
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduceMotion) return;
+  setInterval(function(){
+    slides[i].classList.remove('is-active');
+    if(dots[i]) dots[i].classList.remove('is-active');
+    i = (i + 1) % slides.length;
+    slides[i].classList.add('is-active');
+    if(dots[i]) dots[i].classList.add('is-active');
+    if(caption) caption.textContent = slides[i].getAttribute('data-caption') || '';
+  }, 4500);
+})();
+</script>
 
 </body>
 </html>
