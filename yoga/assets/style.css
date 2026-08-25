@@ -46,7 +46,7 @@ nav{background:var(--white);padding:26px 56px;display:flex;align-items:center;ju
 
 /* HERO (home) */
 .hero{position:relative;padding:72px 48px 0;overflow:hidden;background:var(--white);}
-.hero-inner{max-width:1240px;margin:0 auto;position:relative;z-index:2;display:flex;align-items:flex-end;gap:56px;padding-bottom:72px;border-bottom:1px solid var(--line);}
+.hero-inner{max-width:1440px;margin:0 auto;position:relative;z-index:2;display:flex;align-items:flex-end;gap:48px;padding-bottom:72px;border-bottom:1px solid var(--line);}
 .hero-text{flex:0 1 700px;min-width:0;}
 .hero-eyebrow{font-size:12px;letter-spacing:.5em;color:var(--orange-deep);margin-bottom:26px;font-family:'Noto Sans JP',sans-serif;font-weight:500;}
 .hero-title{font-family:'Zen Old Mincho',serif;font-size:39px;font-weight:600;letter-spacing:.01em;color:var(--ink);line-height:1.5;margin-bottom:30px;text-wrap:balance;}
