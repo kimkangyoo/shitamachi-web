@@ -11,6 +11,7 @@
   --ink-soft:#655c4c;
   --line:#d7c497;
   --navy:#2a4d94;
+  --accent-orange:#e0722e;
 }
 
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -21,8 +22,10 @@ a{color:inherit;}
 
 /* NAV */
 nav{background:var(--white);padding:26px 56px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50;}
+.nav-brand{display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
 .nav-logo{font-family:'Zen Old Mincho',serif;font-size:20px;font-weight:600;letter-spacing:.14em;color:var(--ink);text-decoration:none;display:flex;align-items:center;gap:7px;white-space:nowrap;}
 .nav-logo span{color:var(--navy);}
+.nav-badge{font-size:11px;letter-spacing:.08em;color:var(--accent-orange);font-weight:600;white-space:nowrap;padding-left:18px;border-left:1px solid var(--line);}
 .nav-links{display:flex;gap:34px;flex-wrap:wrap;}
 .nav-links a{font-size:11.5px;letter-spacing:.18em;color:var(--ink-soft);text-decoration:none;font-family:'Noto Sans JP',sans-serif;font-weight:500;}
 .nav-links a:hover{color:var(--orange);}
@@ -85,11 +88,6 @@ nav{background:var(--white);padding:26px 56px;display:flex;align-items:center;ju
 .photo-break{position:relative;}
 .photo-break-img{width:100%;height:560px;object-fit:cover;display:block;}
 .photo-break-caption{position:absolute;left:48px;bottom:28px;color:var(--white);font-size:11px;letter-spacing:.24em;text-shadow:0 1px 10px rgba(0,0,0,.5);}
-
-/* TOP BANNER — small statement bar at the very top of the page */
-.top-banner{background:var(--paper);text-align:center;padding:16px 20px;border-bottom:1px solid var(--line);}
-.top-banner-text{font-family:'Zen Old Mincho',serif;font-size:18px;font-weight:600;letter-spacing:.08em;color:var(--ink);}
-.top-banner-text span{color:var(--navy);}
 
 /* STAT STRIP — the human-numbers moment right after the hero */
 .stat-strip{background:var(--paper);padding:60px 48px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
@@ -229,7 +227,7 @@ footer{background:var(--white);padding:36px 48px;display:flex;justify-content:sp
   .photo-break-caption{left:20px;bottom:16px;}
   .profile-photo{width:100%;height:340px;}
   .profile-photo-lg{width:100%;height:380px;}
-  .top-banner-text{font-size:14px;}
+  .nav-badge{font-size:10px;padding-left:0;border-left:none;}
   .stat-strip{padding:40px 20px;}
   .stat-grid{grid-template-columns:1fr;gap:24px;}
   .stat-item{border-left:none!important;border-top:1px solid var(--line);padding:24px 0 0;}
