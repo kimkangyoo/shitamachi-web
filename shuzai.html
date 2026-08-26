@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>取材ノート｜下町きろくの動画屋</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;700&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans JP',sans-serif;background:#f7f0e2;color:#1e1006;min-height:100vh;}
+
+/* NAV */
+nav{background:#150c02;padding:18px 48px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #7a5218;position:sticky;top:0;z-index:100;}
+.nav-logo{font-family:'Shippori Mincho',serif;font-size:16px;letter-spacing:.22em;color:#f0ddb0;text-decoration:none;}
+.nav-logo span{color:#d4920a;}
+.nav-links{display:flex;gap:24px;align-items:center;}
+.nav-links a{font-size:11px;letter-spacing:.2em;color:rgba(240,221,176,.5);text-decoration:none;}
+.nav-links a:hover{color:#d4920a;}
+.nav-links a.active{color:#d4920a;}
+
+/* TABS */
+.tabs{background:#1e1204;border-bottom:1px solid #3a2208;padding:0 48px;display:flex;gap:0;overflow-x:auto;}
+.tab{padding:14px 20px;font-size:11px;letter-spacing:.18em;color:rgba(240,221,176,.4);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;}
+.tab:hover{color:rgba(240,221,176,.7);}
+.tab.active{color:#d4920a;border-bottom-color:#d4920a;}
+
+/* CONTENT */
+.tab-content{display:none;padding:40px 48px;max-width:1100px;}
+.tab-content.active{display:block;}
+
+/* SECTION TITLE */
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:24px;padding-bottom:12px;border-bottom:1px solid #b89848;flex-wrap:wrap;gap:10px;}
+.sec-head h2{font-family:'Shippori Mincho',serif;font-size:18px;font-weight:400;letter-spacing:.1em;}
+.sec-sub{font-size:11px;color:#8b6820;letter-spacing:.08em;}
+
+/* CARDS */
+.card{background:#fff9ee;border:1px solid #d4b870;border-radius:6px;padding:20px;margin-bottom:16px;}
+.card-label{font-size:10px;letter-spacing:.3em;color:#8b6820;margin-bottom:6px;}
+.card-value{font-family:'Shippori Mincho',serif;font-size:24px;color:#1c0f02;}
+.card-value.warn{color:#c05010;}
+.card-value.ok{color:#2f6040;}
+
+/* DASHBOARD GRID */
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-bottom:32px;}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;margin-bottom:16px;}
+.form-grid.one{grid-template-columns:1fr;}
+.form-grid.three{grid-template-columns:1fr 1fr 1fr;}
+label.fl{font-size:11px;letter-spacing:.15em;color:#5a3a10;display:block;margin-bottom:4px;}
+input[type=text],input[type=date],input[type=number],input[type=email],input[type=tel],input[type=url],textarea,select{
+  font-family:'Noto Sans JP',sans-serif;font-size:13px;padding:8px 10px;border:1px solid #c8a860;
+  border-radius:4px;background:#fffdf5;color:#1e1006;width:100%;}
+textarea{resize:vertical;min-height:72px;}
+input:focus,textarea:focus,select:focus{outline:2px solid #c8880a;border-color:#c8880a;}
+.span2{grid-column:span 2;}
+
+/* BUTTONS */
+.btn{font-family:'Noto Sans JP',sans-serif;font-size:12px;letter-spacing:.1em;padding:9px 20px;border:none;border-radius:4px;cursor:pointer;transition:opacity .15s;}
+.btn:hover{opacity:.82;}
+.btn-gold{background:#c8880a;color:#fff8e8;}
+.btn-outline{background:transparent;border:1px solid #c8880a;color:#c8880a;}
+.btn-sm{padding:5px 12px;font-size:11px;}
+.btn-danger{background:transparent;border:1px solid #c05010;color:#c05010;font-size:11px;padding:4px 10px;border-radius:4px;cursor:pointer;}
+.btn-danger:hover{background:#c05010;color:#fff;}
+.btn-row{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+
+/* LIST ITEMS */
+.list-item{background:#fffdf5;border:1px solid #ddc890;border-radius:5px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;}
+.list-item:hover{border-color:#c8880a;}
+.list-item-body{flex:1;min-width:200px;}
+.list-item-title{font-size:14px;font-weight:700;color:#1c0f02;margin-bottom:3px;}
+.list-item-meta{font-size:11px;color:#8b6820;line-height:1.8;}
+.list-item-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+
+/* BADGE */
+.badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;letter-spacing:.05em;}
+.badge-red{background:#fde8e8;color:#9a2010;}
+.badge-yellow{background:#fdf3e0;color:#8b5e0a;}
+.badge-green{background:#e4f0e8;color:#2f6040;}
+.badge-gray{background:#ede8dd;color:#6b5840;}
+.badge-blue{background:#e0eaf5;color:#1f4a7a;}
+.badge-purple{background:#ece0f0;color:#5a2f7a;}
+
+/* TASK CHECKBOX */
+.task-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fffdf5;border:1px solid #ddc890;border-radius:5px;margin-bottom:6px;}
+.task-item input[type=checkbox]{width:16px;height:16px;accent-color:#c8880a;cursor:pointer;flex-shrink:0;}
+.task-item label{flex:1;font-size:13px;cursor:pointer;}
+.task-item.done label{text-decoration:line-through;color:#a09080;}
+.task-item .task-date{font-size:10px;color:#8b6820;white-space:nowrap;}
+
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;align-items:center;justify-content:center;padding:20px;}
+.modal-bg.open{display:flex;}
+.modal{background:#f7f0e2;border:1px solid #b89848;border-radius:8px;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;}
+.modal-head{background:#150c02;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;border-radius:8px 8px 0 0;position:sticky;top:0;}
+.modal-head h3{font-family:'Shippori Mincho',serif;font-size:16px;color:#f0ddb0;font-weight:400;}
+.modal-close{background:none;border:none;color:#a09080;font-size:20px;cursor:pointer;line-height:1;}
+.modal-body{padding:24px;}
+
+/* FILTER BAR */
+.filter-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;align-items:flex-end;}
+.filter-bar .fitem{min-width:140px;}
+.filter-bar select,.filter-bar input{width:auto;min-width:140px;}
+
+/* HINT BOX */
+.hint-box{background:#fdf3e0;border:1px dashed #c8a860;border-radius:6px;padding:14px 18px;font-size:12px;color:#6a5020;line-height:1.9;margin-bottom:24px;}
+.hint-box a{color:#8b5e0a;}
+
+/* TOAST */
+#toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:#1c0f02;color:#f0ddb0;font-size:12px;letter-spacing:.1em;padding:10px 24px;border-radius:20px;border:1px solid #c8880a;opacity:0;transition:opacity .3s;z-index:9999;pointer-events:none;}
+#toast.show{opacity:1;}
+
+/* RESPONSIVE */
+@media(max-width:700px){
+  nav,.tabs,.tab-content{padding-left:16px;padding-right:16px;}
+  .form-grid,.form-grid.three{grid-template-columns:1fr;}
+  .span2{grid-column:span 1;}
+  .dash-grid{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">下町きろくの<span>動画屋</span></a>
+  <div class="nav-links">
+    <a href="gyomu.html">業務管理</a>
+    <a href="shuzai.html" class="active">取材ノート</a>
+    <a href="index.html#contact">お問い合わせ</a>
+  </div>
+</nav>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('dashboard')">ダッシュボード</div>
+  <div class="tab" onclick="switchTab('civic')">市民活動情報</div>
+  <div class="tab" onclick="switchTab('leads')">取材候補</div>
+  <div class="tab" onclick="switchTab('interviews')">取材記録</div>
+  <div class="tab" onclick="switchTab('settings')">設定・バックアップ</div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="tab-content active" id="tab-dashboard">
+  <div class="sec-head"><h2>ダッシュボード</h2></div>
+  <div class="dash-grid" id="dashCards"></div>
+
+  <div class="sec-head" style="margin-top:8px;"><h2>取材予定が近い候補</h2></div>
+  <div id="dashUpcoming"></div>
+
+  <div class="sec-head" style="margin-top:24px;"><h2>最近追加した市民活動情報</h2>
+    <button class="btn btn-outline btn-sm" onclick="switchTab('civic')">一覧へ →</button>
+  </div>
+  <div id="dashRecentCivic"></div>
+</div>
+
+<!-- CIVIC ACTIVITY INFO -->
+<div class="tab-content" id="tab-civic">
+  <div class="sec-head"><h2>大阪市 市民活動情報</h2>
+    <button class="btn btn-gold btn-sm" onclick="openCivicModal()">＋ 情報を追加</button>
+  </div>
+
+  <div class="hint-box">
+    町内会・自治会、NPO法人、ボランティア団体、商店会、お祭り・伝統芸能など、大阪市内で見聞きした市民活動の情報をここに記録していきます。
+    区の広報紙やウェブサイト、SNS、口コミなどで見つけたものを都度手入力してください。気になる団体は「取材候補にする」でそのまま取材ノートに引き継げます。
+    大阪市公式サイト：<a href="https://www.city.osaka.lg.jp/" target="_blank" rel="noopener">city.osaka.lg.jp</a>
+  </div>
+
+  <div class="filter-bar">
+    <div class="fitem">
+      <label class="fl">区で絞り込み</label>
+      <select id="civicFilterWard" onchange="renderCivicList()"><option value="">すべての区</option></select>
+    </div>
+    <div class="fitem">
+      <label class="fl">カテゴリで絞り込み</label>
+      <select id="civicFilterCat" onchange="renderCivicList()"><option value="">すべてのカテゴリ</option></select>
+    </div>
+    <div class="fitem" style="flex:1;">
+      <label class="fl">キーワード検索</label>
+      <input type="text" id="civicFilterKw" placeholder="名称・活動内容・メモから検索" oninput="renderCivicList()">
+    </div>
+  </div>
+
+  <div class="sec-sub" id="civicCount" style="margin-bottom:12px;"></div>
+  <div id="civicList"></div>
+</div>
+
+<!-- LEADS -->
+<div class="tab-content" id="tab-leads">
+  <div class="sec-head"><h2>取材候補（リード）</h2>
+    <button class="btn btn-gold btn-sm" onclick="openLeadModal()">＋ 候補を追加</button>
+  </div>
+  <div class="filter-bar">
+    <div class="fitem">
+      <label class="fl">状況で絞り込み</label>
+      <select id="leadFilterStatus" onchange="renderLeads()">
+        <option value="">すべての状況</option>
+      </select>
+    </div>
+  </div>
+  <div id="leadList"></div>
+</div>
+
+<!-- INTERVIEWS -->
+<div class="tab-content" id="tab-interviews">
+  <div class="sec-head"><h2>取材記録</h2>
+    <button class="btn btn-gold btn-sm" onclick="openIvModal()">＋ 取材記録を追加</button>
+  </div>
+  <div id="ivList"></div>
+</div>
+
+<!-- SETTINGS / BACKUP -->
+<div class="tab-content" id="tab-settings">
+  <div class="sec-head"><h2>設定</h2></div>
+  <div class="form-grid">
+    <div>
+      <label class="fl">よく使う区（デフォルト表示）</label>
+      <select id="st-defaultWard"></select>
+    </div>
+  </div>
+  <div class="btn-row"><button class="btn btn-gold" onclick="saveSettings()">設定を保存</button></div>
+
+  <div class="sec-head" style="margin-top:32px;"><h2>バックアップ</h2></div>
+  <p style="font-size:12px;color:#6a5020;line-height:1.9;margin-bottom:16px;">
+    このページのデータはブラウザ内（localStorage）にのみ保存されています。端末を変える前や、誤って消してしまいそうなときは、こまめにバックアップを保存してください。
+  </p>
+  <div class="btn-row">
+    <button class="btn btn-outline" onclick="exportShuzai()">バックアップを保存</button>
+    <label class="btn btn-outline" style="display:inline-flex;align-items:center;cursor:pointer;">
+      バックアップから復元
+      <input type="file" accept=".json" onchange="importShuzai(event)" style="display:none;">
+    </label>
+  </div>
+  <p class="sec-sub" id="backupStatus" style="margin-top:10px;"></p>
+</div>
+
+<!-- CIVIC MODAL -->
+<div class="modal-bg" id="civicModal">
+  <div class="modal">
+    <div class="modal-head"><h3 id="civicModalTitle">市民活動情報を追加</h3>
+      <button class="modal-close" onclick="closeModal('civicModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="civicEditId">
+      <div class="form-grid">
+        <div class="span2">
+          <label class="fl">名称</label>
+          <input type="text" id="cv-name" placeholder="例：桃谷本通商店街振興組合">
+        </div>
+        <div>
+          <label class="fl">区</label>
+          <select id="cv-ward"></select>
+        </div>
+        <div>
+          <label class="fl">カテゴリ</label>
+          <select id="cv-category"></select>
+        </div>
+        <div class="span2">
+          <label class="fl">活動内容</label>
+          <textarea id="cv-desc" placeholder="どんな活動をしているか、わかる範囲でメモ"></textarea>
+        </div>
+        <div>
+          <label class="fl">連絡先・リンク</label>
+          <input type="text" id="cv-contact" placeholder="URL、電話番号、SNSアカウントなど">
+        </div>
+        <div>
+          <label class="fl">情報源</label>
+          <input type="text" id="cv-source" placeholder="例：区広報紙、口コミ、SNS">
+        </div>
+        <div class="span2">
+          <label class="fl">メモ</label>
+          <textarea id="cv-memo" placeholder="取材に活かせそうなポイントなど自由に"></textarea>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-gold" onclick="saveCivic()">保存</button>
+        <button class="btn btn-outline" onclick="promoteCivicFromModal()">保存して取材候補にする →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LEAD MODAL -->
+<div class="modal-bg" id="leadModal">
+  <div class="modal">
+    <div class="modal-head"><h3 id="leadModalTitle">取材候補を追加</h3>
+      <button class="modal-close" onclick="closeModal('leadModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="ld-editId">
+      <input type="hidden" id="ld-civicId">
+      <div class="form-grid">
+        <div class="span2">
+          <label class="fl">名称</label>
+          <input type="text" id="ld-name" placeholder="人物名・団体名など">
+        </div>
+        <div>
+          <label class="fl">状況</label>
+          <select id="ld-status"></select>
+        </div>
+        <div>
+          <label class="fl">取材予定日</label>
+          <input type="date" id="ld-date">
+        </div>
+        <div>
+          <label class="fl">区</label>
+          <select id="ld-ward"><option value="">—</option></select>
+        </div>
+        <div>
+          <label class="fl">カテゴリ</label>
+          <select id="ld-category"><option value="">—</option></select>
+        </div>
+        <div class="span2">
+          <label class="fl">メモ</label>
+          <textarea id="ld-memo" placeholder="連絡状況、きっかけ、次にやることなど"></textarea>
+        </div>
+      </div>
+
+      <div class="sec-head" style="margin-top:20px;font-size:13px;"><h2 style="font-size:13px;">やること</h2></div>
+      <div id="ld-todoList"></div>
+      <div style="display:flex;gap:6px;margin-top:8px;">
+        <input type="text" id="ld-todoText" placeholder="やること" style="flex:1;">
+        <input type="date" id="ld-todoDate" style="width:150px;">
+        <button class="btn btn-outline btn-sm" onclick="addLeadTodo()">追加</button>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-gold" onclick="saveLead()">保存</button>
+        <button class="btn btn-outline" onclick="promoteLeadToInterview()">取材記録を作成 →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- INTERVIEW MODAL -->
+<div class="modal-bg" id="ivModal">
+  <div class="modal">
+    <div class="modal-head"><h3 id="ivModalTitle">取材記録を追加</h3>
+      <button class="modal-close" onclick="closeModal('ivModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="iv-editId">
+      <div class="form-grid">
+        <div class="span2">
+          <label class="fl">タイトル</label>
+          <input type="text" id="iv-title" placeholder="例：桃谷本通商店街振興組合 取材">
+        </div>
+        <div>
+          <label class="fl">関連する取材候補</label>
+          <select id="iv-leadId"><option value="">— なし —</option></select>
+        </div>
+        <div>
+          <label class="fl">取材日</label>
+          <input type="date" id="iv-date">
+        </div>
+        <div>
+          <label class="fl">公開状況</label>
+          <select id="iv-publishStatus">
+            <option value="未着手">未着手</option>
+            <option value="編集中">編集中</option>
+            <option value="公開済み">公開済み</option>
+          </select>
+        </div>
+        <div class="span2">
+          <label class="fl">内容メモ</label>
+          <textarea id="iv-content" placeholder="話を聞いた内容、写真・動画の候補カットなど" style="min-height:120px;"></textarea>
+        </div>
+      </div>
+
+      <div class="sec-head" style="margin-top:20px;font-size:13px;"><h2 style="font-size:13px;">やること</h2></div>
+      <div id="iv-todoList"></div>
+      <div style="display:flex;gap:6px;margin-top:8px;">
+        <input type="text" id="iv-todoText" placeholder="やること" style="flex:1;">
+        <input type="date" id="iv-todoDate" style="width:150px;">
+        <button class="btn btn-outline btn-sm" onclick="addIvTodo()">追加</button>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-gold" onclick="saveIv()">保存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ─── CONSTANTS ──────────────────────────────────────────────────────────────
+const WARDS = ['北区','都島区','福島区','此花区','中央区','西区','港区','大正区','天王寺区','浪速区',
+  '西淀川区','淀川区','東淀川区','東成区','生野区','旭区','城東区','鶴見区','阿倍野区','住之江区',
+  '住吉区','東住吉区','平野区','西成区'];
+const CIVIC_CATS = ['町内会・自治会','NPO法人','ボランティア団体','商店会・商店街','サークル・同好会',
+  '福祉・子育て支援','伝統芸能・祭り','まちづくり協議会','その他'];
+const LEAD_STATUSES = ['候補','打診中','日程調整中','取材決定','取材済み','記事化済','見送り'];
+const STATUS_BADGE = {候補:'badge-gray',打診中:'badge-yellow',日程調整中:'badge-blue',取材決定:'badge-purple',
+  取材済み:'badge-green','記事化済':'badge-green','見送り':'badge-red'};
+
+// ─── STATE ──────────────────────────────────────────────────────────────────
+let S = {};
+const SHUZAI_KEY = 'shuzaiData';
+
+function loadS(){
+  S = JSON.parse(localStorage.getItem(SHUZAI_KEY) || '{}');
+  if(!S.civic) S.civic = [];
+  if(!S.leads) S.leads = [];
+  if(!S.interviews) S.interviews = [];
+  if(!S.settings) S.settings = {defaultWard:'生野区'};
+}
+function saveS(){ localStorage.setItem(SHUZAI_KEY, JSON.stringify(S)); }
+
+// ─── HELPERS ────────────────────────────────────────────────────────────────
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function fmtDate(d){ if(!d) return ''; const p=d.split('-'); return `${p[0]}年${p[1]}月${p[2]}日`; }
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+function uid(){ return 'id_'+Date.now()+'_'+Math.random().toString(36).slice(2,7); }
+function optHtml(list, cur){ return list.map(v=>`<option value="${esc(v)}" ${v===cur?'selected':''}>${esc(v)}</option>`).join(''); }
+
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelector(`.tab[onclick="switchTab('${name}')"]`).classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+  if(name==='dashboard') renderDashboard();
+  if(name==='civic') renderCivicList();
+  if(name==='leads') renderLeads();
+  if(name==='interviews') renderIvList();
+}
+
+// ─── DASHBOARD ──────────────────────────────────────────────────────────────
+function renderDashboard(){
+  const activeLeads = S.leads.filter(l=>l.status!=='記事化済' && l.status!=='見送り');
+  const today = new Date().toISOString().slice(0,10);
+  const upcoming = S.leads.filter(l=>l.date && l.date>=today && l.status!=='記事化済' && l.status!=='見送り')
+    .sort((a,b)=>a.date.localeCompare(b.date)).slice(0,5);
+
+  document.getElementById('dashCards').innerHTML = `
+    <div class="card"><div class="card-label">市民活動情報</div><div class="card-value">${S.civic.length}<span style="font-size:12px;">件</span></div></div>
+    <div class="card"><div class="card-label">取材候補（進行中）</div><div class="card-value">${activeLeads.length}<span style="font-size:12px;">件</span></div></div>
+    <div class="card"><div class="card-label">取材記録</div><div class="card-value">${S.interviews.length}<span style="font-size:12px;">件</span></div></div>
+    <div class="card"><div class="card-label">記事化済み</div><div class="card-value ok">${S.leads.filter(l=>l.status==='記事化済').length}<span style="font-size:12px;">件</span></div></div>
+  `;
+
+  document.getElementById('dashUpcoming').innerHTML = upcoming.length===0
+    ? '<div style="color:#8b6820;font-size:13px;">取材予定はまだありません。</div>'
+    : upcoming.map(l=>`
+      <div class="list-item">
+        <div class="list-item-body">
+          <div class="list-item-title">${esc(l.name)}</div>
+          <div class="list-item-meta">🎤 ${fmtDate(l.date)}　<span class="badge ${STATUS_BADGE[l.status]||'badge-gray'}">${esc(l.status)}</span></div>
+        </div>
+        <div class="list-item-actions"><button class="btn btn-outline btn-sm" onclick="openLeadModal('${l.id}')">開く</button></div>
+      </div>
+    `).join('');
+
+  const recentCivic = [...S.civic].sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||'')).slice(0,5);
+  document.getElementById('dashRecentCivic').innerHTML = recentCivic.length===0
+    ? '<div style="color:#8b6820;font-size:13px;">まだ市民活動情報が登録されていません。</div>'
+    : recentCivic.map(c=>`
+      <div class="list-item">
+        <div class="list-item-body">
+          <div class="list-item-title">${esc(c.name)}</div>
+          <div class="list-item-meta">${c.ward?esc(c.ward)+'　':''}${c.category?esc(c.category):''}</div>
+        </div>
+        <div class="list-item-actions"><button class="btn btn-outline btn-sm" onclick="openCivicModal('${c.id}')">開く</button></div>
+      </div>
+    `).join('');
+}
+
+// ─── CIVIC ACTIVITY INFO ────────────────────────────────────────────────────
+function initCivicSelects(){
+  document.getElementById('civicFilterWard').innerHTML += optHtml(WARDS);
+  document.getElementById('civicFilterCat').innerHTML += optHtml(CIVIC_CATS);
+  document.getElementById('cv-ward').innerHTML = optHtml(WARDS);
+  document.getElementById('cv-category').innerHTML = optHtml(CIVIC_CATS);
+  document.getElementById('ld-ward').innerHTML += optHtml(WARDS);
+  document.getElementById('ld-category').innerHTML += optHtml(CIVIC_CATS);
+  document.getElementById('st-defaultWard').innerHTML = optHtml(WARDS);
+}
+
+function renderCivicList(){
+  const wardF = document.getElementById('civicFilterWard').value;
+  const catF = document.getElementById('civicFilterCat').value;
+  const kw = document.getElementById('civicFilterKw').value.trim().toLowerCase();
+  const filtered = S.civic.filter(c=>{
+    if(wardF && c.ward!==wardF) return false;
+    if(catF && c.category!==catF) return false;
+    if(kw){
+      const hay = [c.name,c.desc,c.memo,c.source].join(' ').toLowerCase();
+      if(!hay.includes(kw)) return false;
+    }
+    return true;
+  }).sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
+
+  document.getElementById('civicCount').textContent = `${filtered.length} 件（全 ${S.civic.length} 件）`;
+
+  document.getElementById('civicList').innerHTML = filtered.length===0
+    ? '<div style="color:#8b6820;font-size:13px;">情報がありません。「＋ 情報を追加」から登録してください。</div>'
+    : filtered.map(c=>`
+      <div class="list-item">
+        <div class="list-item-body">
+          <div class="list-item-title">${esc(c.name)}</div>
+          <div class="list-item-meta">
+            ${c.ward?`<span class="badge badge-blue">${esc(c.ward)}</span> `:''}${c.category?`<span class="badge badge-gray">${esc(c.category)}</span>`:''}
+            ${c.desc?`<br>${esc(c.desc)}`:''}
+            ${c.contact?`<br>🔗 ${esc(c.contact)}`:''}
+            ${c.source?`<br>情報源：${esc(c.source)}`:''}
+            ${c.leadId?`<br><span style="color:#5a2f7a;">→ 取材候補に登録済み</span>`:''}
+          </div>
+        </div>
+        <div class="list-item-actions">
+          <button class="btn btn-outline btn-sm" onclick="openCivicModal('${c.id}')">編集</button>
+          ${!c.leadId?`<button class="btn btn-outline btn-sm" onclick="promoteCivicToLead('${c.id}')">取材候補にする</button>`:''}
+          <button class="btn-danger" onclick="deleteCivic('${c.id}')">削除</button>
+        </div>
+      </div>
+    `).join('');
+}
+
+function openCivicModal(id){
+  const c = id ? S.civic.find(x=>x.id===id) : null;
+  document.getElementById('civicModalTitle').textContent = c?'市民活動情報を編集':'市民活動情報を追加';
+  document.getElementById('civicEditId').value = id||'';
+  document.getElementById('cv-name').value = c?.name||'';
+  document.getElementById('cv-ward').value = c?.ward || S.settings.defaultWard || WARDS[0];
+  document.getElementById('cv-category').value = c?.category || CIVIC_CATS[0];
+  document.getElementById('cv-desc').value = c?.desc||'';
+  document.getElementById('cv-contact').value = c?.contact||'';
+  document.getElementById('cv-source').value = c?.source||'';
+  document.getElementById('cv-memo').value = c?.memo||'';
+  document.getElementById('civicModal').classList.add('open');
+}
+function readCivicForm(){
+  return {
+    name: document.getElementById('cv-name').value.trim(),
+    ward: document.getElementById('cv-ward').value,
+    category: document.getElementById('cv-category').value,
+    desc: document.getElementById('cv-desc').value.trim(),
+    contact: document.getElementById('cv-contact').value.trim(),
+    source: document.getElementById('cv-source').value.trim(),
+    memo: document.getElementById('cv-memo').value.trim()
+  };
+}
+function saveCivic(){
+  const id = document.getElementById('civicEditId').value;
+  const form = readCivicForm();
+  if(!form.name){ showToast('名称を入力してください'); return; }
+  if(id){
+    const c = S.civic.find(x=>x.id===id);
+    Object.assign(c, form);
+  } else {
+    S.civic.push({id:uid(), ...form, createdAt:new Date().toISOString()});
+  }
+  saveS(); closeModal('civicModal'); renderCivicList(); renderDashboard();
+  showToast('市民活動情報を保存しました');
+}
+function deleteCivic(id){
+  if(!confirm('この情報を削除しますか？')) return;
+  S.civic = S.civic.filter(x=>x.id!==id);
+  saveS(); renderCivicList(); renderDashboard();
+}
+function promoteCivicToLead(id){
+  const c = S.civic.find(x=>x.id===id);
+  if(!c) return;
+  const lead = {
+    id:uid(), name:c.name, date:'', status:'候補', ward:c.ward, category:c.category,
+    memo:`市民活動情報より：${c.desc||''}`.trim(), civicId:c.id, todos:[], createdAt:new Date().toISOString()
+  };
+  S.leads.push(lead);
+  c.leadId = lead.id;
+  saveS(); renderCivicList(); renderDashboard();
+  showToast('取材候補に追加しました');
+  switchTab('leads');
+}
+function promoteCivicFromModal(){
+  saveCivic();
+  const id = document.getElementById('civicEditId').value;
+  // find by name since a new item has no id captured after save; re-read latest matching entry
+  const c = id ? S.civic.find(x=>x.id===id) : [...S.civic].sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''))[0];
+  if(c && !c.leadId) promoteCivicToLead(c.id);
+}
+
+// ─── LEADS ──────────────────────────────────────────────────────────────────
+let ldTodosDraft = [];
+function initLeadSelects(){
+  document.getElementById('ld-status').innerHTML = optHtml(LEAD_STATUSES);
+  document.getElementById('leadFilterStatus').innerHTML += optHtml(LEAD_STATUSES);
+}
+function renderLeads(){
+  const statusF = document.getElementById('leadFilterStatus').value;
+  const filtered = S.leads.filter(l=>!statusF || l.status===statusF)
+    .sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999'));
+
+  document.getElementById('leadList').innerHTML = filtered.length===0
+    ? '<div style="color:#8b6820;font-size:13px;">取材候補がありません。市民活動情報から「取材候補にする」か、「＋ 候補を追加」で登録してください。</div>'
+    : filtered.map(l=>{
+      const openTodos = (l.todos||[]).filter(t=>!t.done).length;
+      return `
+      <div class="list-item">
+        <div class="list-item-body">
+          <div class="list-item-title">${esc(l.name)}</div>
+          <div class="list-item-meta">
+            <span class="badge ${STATUS_BADGE[l.status]||'badge-gray'}">${esc(l.status)}</span>
+            ${l.date?` 🎤 ${fmtDate(l.date)}`:''}
+            ${l.ward?` <span class="badge badge-blue">${esc(l.ward)}</span>`:''}
+            ${openTodos>0?` <span style="color:#c05010;">未完了タスク ${openTodos}件</span>`:''}
+            ${l.memo?`<br>${esc(l.memo)}`:''}
+          </div>
+        </div>
+        <div class="list-item-actions">
+          <button class="btn btn-outline btn-sm" onclick="openLeadModal('${l.id}')">編集</button>
+          <button class="btn-danger" onclick="deleteLead('${l.id}')">削除</button>
+        </div>
+      </div>
+    `;}).join('');
+}
+function openLeadModal(id){
+  const l = id ? S.leads.find(x=>x.id===id) : null;
+  document.getElementById('leadModalTitle').textContent = l?'取材候補を編集':'取材候補を追加';
+  document.getElementById('ld-editId').value = id||'';
+  document.getElementById('ld-civicId').value = l?.civicId||'';
+  document.getElementById('ld-name').value = l?.name||'';
+  document.getElementById('ld-status').value = l?.status||'候補';
+  document.getElementById('ld-date').value = l?.date||'';
+  document.getElementById('ld-ward').value = l?.ward||'';
+  document.getElementById('ld-category').value = l?.category||'';
+  document.getElementById('ld-memo').value = l?.memo||'';
+  ldTodosDraft = l ? JSON.parse(JSON.stringify(l.todos||[])) : [];
+  renderLdTodos();
+  document.getElementById('leadModal').classList.add('open');
+}
+function renderLdTodos(){
+  document.getElementById('ld-todoList').innerHTML = ldTodosDraft.length===0
+    ? '<div style="color:#8b6820;font-size:12px;">やることはまだありません。</div>'
+    : ldTodosDraft.map((t,i)=>`
+      <div class="task-item ${t.done?'done':''}">
+        <input type="checkbox" ${t.done?'checked':''} onchange="ldTodosDraft[${i}].done=this.checked;renderLdTodos();">
+        <label>${esc(t.text)}</label>
+        <span class="task-date">${t.dueDate?fmtDate(t.dueDate):''}</span>
+        <button class="btn-danger" onclick="ldTodosDraft.splice(${i},1);renderLdTodos();">削除</button>
+      </div>
+    `).join('');
+}
+function addLeadTodo(){
+  const text = document.getElementById('ld-todoText').value.trim();
+  if(!text) return;
+  const dueDate = document.getElementById('ld-todoDate').value;
+  ldTodosDraft.push({text, dueDate, done:false});
+  document.getElementById('ld-todoText').value='';
+  document.getElementById('ld-todoDate').value='';
+  renderLdTodos();
+}
+function saveLead(){
+  const id = document.getElementById('ld-editId').value;
+  const name = document.getElementById('ld-name').value.trim();
+  if(!name){ showToast('名称を入力してください'); return; }
+  const form = {
+    name,
+    status: document.getElementById('ld-status').value,
+    date: document.getElementById('ld-date').value,
+    ward: document.getElementById('ld-ward').value,
+    category: document.getElementById('ld-category').value,
+    memo: document.getElementById('ld-memo').value.trim(),
+    civicId: document.getElementById('ld-civicId').value || undefined,
+    todos: ldTodosDraft
+  };
+  if(id){
+    const l = S.leads.find(x=>x.id===id);
+    Object.assign(l, form);
+  } else {
+    S.leads.push({id:uid(), ...form, createdAt:new Date().toISOString()});
+  }
+  saveS(); closeModal('leadModal'); renderLeads(); renderDashboard();
+  showToast('取材候補を保存しました');
+}
+function deleteLead(id){
+  if(!confirm('この取材候補を削除しますか？')) return;
+  S.leads = S.leads.filter(x=>x.id!==id);
+  saveS(); renderLeads(); renderDashboard();
+}
+function promoteLeadToInterview(){
+  saveLead();
+  const id = document.getElementById('ld-editId').value;
+  const l = id ? S.leads.find(x=>x.id===id) : [...S.leads].sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''))[0];
+  if(!l) return;
+  closeModal('leadModal');
+  switchTab('interviews');
+  openIvModal(null, l.id);
+}
+
+// ─── INTERVIEWS ─────────────────────────────────────────────────────────────
+let ivTodosDraft = [];
+function renderIvList(){
+  const leadName = id => (S.leads.find(x=>x.id===id)||{}).name;
+  const sorted = [...S.interviews].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  document.getElementById('ivList').innerHTML = sorted.length===0
+    ? '<div style="color:#8b6820;font-size:13px;">取材記録がありません。</div>'
+    : sorted.map(iv=>`
+      <div class="list-item">
+        <div class="list-item-body">
+          <div class="list-item-title">${esc(iv.title)}</div>
+          <div class="list-item-meta">
+            ${iv.date?`🎤 ${fmtDate(iv.date)}　`:''}<span class="badge badge-gray">${esc(iv.publishStatus||'未着手')}</span>
+            ${iv.leadId?`　関連：${esc(leadName(iv.leadId)||'')}`:''}
+          </div>
+        </div>
+        <div class="list-item-actions">
+          <button class="btn btn-outline btn-sm" onclick="openIvModal('${iv.id}')">編集</button>
+          <button class="btn-danger" onclick="deleteIv('${iv.id}')">削除</button>
+        </div>
+      </div>
+    `).join('');
+}
+function refreshIvLeadOptions(cur){
+  const sel = document.getElementById('iv-leadId');
+  sel.innerHTML = '<option value="">— なし —</option>' + S.leads.map(l=>`<option value="${l.id}" ${l.id===cur?'selected':''}>${esc(l.name)}</option>`).join('');
+}
+function openIvModal(id, leadId){
+  const iv = id ? S.interviews.find(x=>x.id===id) : null;
+  document.getElementById('ivModalTitle').textContent = iv?'取材記録を編集':'取材記録を追加';
+  document.getElementById('iv-editId').value = id||'';
+  refreshIvLeadOptions(iv?.leadId || leadId || '');
+  const linkedLead = leadId ? S.leads.find(x=>x.id===leadId) : null;
+  document.getElementById('iv-title').value = iv?.title || (linkedLead?linkedLead.name+' 取材':'');
+  document.getElementById('iv-date').value = iv?.date || (linkedLead?linkedLead.date:'') || '';
+  document.getElementById('iv-publishStatus').value = iv?.publishStatus||'未着手';
+  document.getElementById('iv-content').value = iv?.content||'';
+  ivTodosDraft = iv ? JSON.parse(JSON.stringify(iv.todos||[])) : [];
+  renderIvTodos();
+  document.getElementById('ivModal').classList.add('open');
+}
+function renderIvTodos(){
+  document.getElementById('iv-todoList').innerHTML = ivTodosDraft.length===0
+    ? '<div style="color:#8b6820;font-size:12px;">やることはまだありません。</div>'
+    : ivTodosDraft.map((t,i)=>`
+      <div class="task-item ${t.done?'done':''}">
+        <input type="checkbox" ${t.done?'checked':''} onchange="ivTodosDraft[${i}].done=this.checked;renderIvTodos();">
+        <label>${esc(t.text)}</label>
+        <span class="task-date">${t.dueDate?fmtDate(t.dueDate):''}</span>
+        <button class="btn-danger" onclick="ivTodosDraft.splice(${i},1);renderIvTodos();">削除</button>
+      </div>
+    `).join('');
+}
+function addIvTodo(){
+  const text = document.getElementById('iv-todoText').value.trim();
+  if(!text) return;
+  const dueDate = document.getElementById('iv-todoDate').value;
+  ivTodosDraft.push({text, dueDate, done:false});
+  document.getElementById('iv-todoText').value='';
+  document.getElementById('iv-todoDate').value='';
+  renderIvTodos();
+}
+function saveIv(){
+  const id = document.getElementById('iv-editId').value;
+  const title = document.getElementById('iv-title').value.trim();
+  if(!title){ showToast('タイトルを入力してください'); return; }
+  const form = {
+    title,
+    leadId: document.getElementById('iv-leadId').value || undefined,
+    date: document.getElementById('iv-date').value,
+    publishStatus: document.getElementById('iv-publishStatus').value,
+    content: document.getElementById('iv-content').value.trim(),
+    todos: ivTodosDraft
+  };
+  if(id){
+    const iv = S.interviews.find(x=>x.id===id);
+    Object.assign(iv, form);
+  } else {
+    S.interviews.push({id:uid(), ...form, createdAt:new Date().toISOString()});
+  }
+  saveS(); closeModal('ivModal'); renderIvList(); renderDashboard();
+  showToast('取材記録を保存しました');
+}
+function deleteIv(id){
+  if(!confirm('この取材記録を削除しますか？')) return;
+  S.interviews = S.interviews.filter(x=>x.id!==id);
+  saveS(); renderIvList(); renderDashboard();
+}
+
+// ─── SETTINGS ───────────────────────────────────────────────────────────────
+function renderSettings(){
+  document.getElementById('st-defaultWard').value = S.settings.defaultWard || WARDS[0];
+}
+function saveSettings(){
+  S.settings.defaultWard = document.getElementById('st-defaultWard').value;
+  saveS();
+  showToast('設定を保存しました');
+}
+
+// ─── BACKUP / RESTORE ───────────────────────────────────────────────────────
+function exportShuzai(){
+  const data = { version:1, exportedAt:new Date().toISOString(), shuzaiData:S };
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const d = new Date();
+  a.href = url;
+  a.download = `shuzai_backup_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('バックアップを保存しました');
+}
+function importShuzai(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if(!data.shuzaiData) throw new Error('無効なファイルです');
+      if(!confirm('現在のデータをバックアップファイルで上書きします。よろしいですか？')) return;
+      localStorage.setItem(SHUZAI_KEY, JSON.stringify(data.shuzaiData));
+      loadS();
+      document.getElementById('backupStatus').textContent = `✓ 復元完了：${data.exportedAt ? new Date(data.exportedAt).toLocaleString('ja-JP') + ' のバックアップ' : 'バックアップ'}`;
+      renderAll();
+      showToast('データを復元しました');
+    } catch(err) {
+      alert('ファイルの読み込みに失敗しました。正しいバックアップファイルを選んでください。');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ─── INIT ───────────────────────────────────────────────────────────────────
+function renderAll(){
+  renderDashboard(); renderCivicList(); renderLeads(); renderIvList(); renderSettings();
+}
+loadS();
+initCivicSelects();
+initLeadSelects();
+renderAll();
+
+document.querySelectorAll('.modal-bg').forEach(bg=>{
+  bg.addEventListener('click', e=>{ if(e.target===bg) bg.classList.remove('open'); });
+});
+</script>
+</body>
+</html>
