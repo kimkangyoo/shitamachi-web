@@ -1,0 +1,3200 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<!-- v20260627 -->
+<title>制作ツール — 下町きろくの動画屋</title><!-- v2 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;700&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Shippori Mincho',serif;background:#e8dcc8;color:#2a1a08;min-height:100vh;}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.6;}
+
+nav{background:#150c02;padding:22px 64px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #7a5218;}
+.nav-logo{font-family:'Shippori Mincho',serif;font-size:20px;letter-spacing:.25em;color:#e8d090;text-decoration:none;}
+.nav-logo span{color:#c8880a;}
+.nav-links{display:flex;gap:36px;}
+.nav-links a{font-size:14px;letter-spacing:.15em;color:rgba(232,208,144,.7);text-decoration:none;font-family:'Shippori Mincho',serif;}
+.nav-links a:hover{color:#c8880a;}
+
+.page-header{background:#150c02;border-bottom:1px solid #3a2208;padding:40px 64px 32px;}
+.page-eyebrow{font-size:9px;letter-spacing:.6em;color:#8b6820;margin-bottom:10px;font-family:'Noto Sans JP',sans-serif;font-weight:300;}
+.page-title{font-family:'Shippori Mincho',serif;font-size:26px;font-weight:400;letter-spacing:.2em;color:#e8d090;}
+.page-title span{color:#c8880a;}
+
+/* PROJECT SELECTOR */
+.project-bar{background:#1e1004;border-bottom:1px solid #3a2208;padding:16px 64px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.project-bar label{font-size:11px;letter-spacing:.3em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;white-space:nowrap;}
+.project-select{background:#0d0700;border:1px solid #5a3c18;color:#e8d090;font-family:'Shippori Mincho',serif;font-size:14px;padding:8px 14px;letter-spacing:.1em;cursor:pointer;min-width:200px;}
+.btn-new-project{background:transparent;border:1px solid rgba(200,136,10,.5);color:#c8880a;font-family:'Shippori Mincho',serif;font-size:11px;letter-spacing:.25em;padding:8px 20px;cursor:pointer;}
+.btn-new-project:hover{background:rgba(200,136,10,.1);}
+.btn-del-project{background:transparent;border:1px solid rgba(120,48,16,.5);color:#7a3010;font-family:'Noto Sans JP',sans-serif;font-size:11px;padding:8px 16px;cursor:pointer;letter-spacing:.05em;}
+.btn-del-project:hover{background:rgba(120,48,16,.1);}
+
+/* TABS */
+.tabs{display:flex;border-bottom:2px solid #b89848;background:#f0e4cc;padding:0 64px;}
+.tab{padding:18px 32px;font-family:'Shippori Mincho',serif;font-size:15px;letter-spacing:.2em;color:#8b6820;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:color .2s;}
+.tab:hover{color:#c8880a;}
+.tab.active{color:#c8880a;border-bottom-color:#c8880a;}
+
+.tab-content{display:none;padding:48px 64px;max-width:1100px;}
+.tab-content.active{display:block;}
+
+/* SECTION HEADS */
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:28px;padding-bottom:16px;border-bottom:1px solid #b89848;}
+.sec-title{font-family:'Shippori Mincho',serif;font-size:18px;font-weight:400;letter-spacing:.15em;color:#1a0e04;}
+.sec-eyebrow{font-size:9px;letter-spacing:.5em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;font-weight:300;margin-bottom:6px;}
+
+/* BUTTONS */
+.btn{font-family:'Shippori Mincho',serif;font-size:12px;letter-spacing:.2em;padding:10px 24px;cursor:pointer;border:none;transition:background .2s;}
+.btn-primary{background:#c8880a;color:#0d0700;}
+.btn-primary:hover{background:#e09a10;}
+.btn-ghost{background:transparent;border:1px solid rgba(200,136,10,.5);color:#c8880a;}
+.btn-ghost:hover{background:rgba(200,136,10,.1);}
+.btn-danger{background:transparent;border:1px solid rgba(180,60,20,.4);color:#b43c14;font-family:'Noto Sans JP',sans-serif;font-size:11px;padding:6px 14px;}
+.btn-danger:hover{background:rgba(180,60,20,.08);}
+
+/* FORMS */
+input[type=text],input[type=number],textarea,select{background:#f8f0e4;border:1px solid #c8a850;color:#1a0e04;font-family:'Noto Sans JP',sans-serif;font-size:13px;padding:10px 14px;width:100%;}
+input[type=text]:focus,input[type=number]:focus,textarea:focus{outline:none;border-color:#c8880a;background:#fff8ec;}
+textarea{resize:vertical;line-height:1.8;}
+select{cursor:pointer;}
+
+/* CHECKLIST */
+.checklist-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-bottom:32px;}
+.checklist-col-title{font-size:11px;letter-spacing:.4em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;margin-bottom:14px;}
+.check-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid rgba(184,152,72,.3);}
+.check-item:last-child{border-bottom:none;}
+.check-item input[type=checkbox]{width:18px;height:18px;accent-color:#c8880a;margin-top:2px;flex-shrink:0;cursor:pointer;}
+.check-item label{font-size:13px;letter-spacing:.05em;color:#2a1a08;line-height:1.6;cursor:pointer;font-family:'Noto Sans JP',sans-serif;}
+.check-item label.checked{color:#8b6820;text-decoration:line-through;}
+.check-item .del-check{margin-left:auto;background:none;border:none;color:#c8a050;cursor:pointer;font-size:14px;padding:0 4px;flex-shrink:0;}
+.check-item .del-check:hover{color:#b43c14;}
+.add-check-row{display:flex;gap:10px;margin-top:16px;}
+.add-check-row input{flex:1;}
+
+/* SHOT LIST */
+.shot-table{width:100%;border-collapse:collapse;margin-bottom:24px;}
+.shot-table th{background:#150c02;color:#e8d090;font-family:'Noto Sans JP',sans-serif;font-size:11px;font-weight:300;letter-spacing:.3em;padding:12px 14px;text-align:left;}
+.shot-table td{padding:10px 14px;border-bottom:1px solid rgba(184,152,72,.3);vertical-align:top;}
+.shot-table tr:hover td{background:rgba(200,136,10,.04);}
+.shot-table input[type=text],.shot-table select,.shot-table textarea{padding:6px 10px;font-size:12px;}
+.shot-table textarea{height:56px;}
+.shot-num{font-family:'Shippori Mincho',serif;font-size:13px;color:#8b6820;text-align:center;}
+.shot-done input[type=checkbox]{width:18px;height:18px;accent-color:#c8880a;}
+tr.shot-complete td{opacity:.5;}
+.add-shot-row{display:flex;gap:12px;align-items:flex-end;}
+.add-shot-row .field{display:flex;flex-direction:column;gap:6px;}
+.add-shot-row .field label{font-size:10px;letter-spacing:.3em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;}
+
+/* CUT LIST */
+.cut-table{width:100%;border-collapse:collapse;margin-bottom:24px;}
+.cut-table th{background:#150c02;color:#e8d090;font-family:'Noto Sans JP',sans-serif;font-size:11px;font-weight:300;letter-spacing:.3em;padding:12px 14px;text-align:left;}
+.cut-table td{padding:8px 14px;border-bottom:1px solid rgba(184,152,72,.3);vertical-align:middle;}
+.cut-table tr:hover td{background:rgba(200,136,10,.04);}
+.cut-table input[type=text],.cut-table input[type=number],.cut-table textarea{padding:6px 10px;font-size:12px;}
+.cut-table textarea{height:48px;}
+.timecode{font-family:monospace;font-size:13px;color:#8b6820;letter-spacing:.05em;}
+.duration-input{width:80px;}
+.total-bar{background:#1e1004;border:1px solid #5a3c18;padding:18px 28px;display:flex;align-items:center;gap:32px;margin-bottom:24px;}
+.total-item{display:flex;flex-direction:column;gap:4px;}
+.total-label{font-size:9px;letter-spacing:.5em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;}
+.total-value{font-family:'Shippori Mincho',serif;font-size:22px;color:#e8d090;}
+.total-value span{font-size:13px;color:#8b6820;margin-left:4px;}
+
+/* TELOP */
+.telop-list{display:flex;flex-direction:column;gap:12px;margin-bottom:24px;}
+.telop-item{background:#f0e4cc;border:1px solid rgba(184,152,72,.4);padding:16px 20px;display:grid;grid-template-columns:140px 1fr auto;gap:16px;align-items:start;}
+.telop-tc{font-family:monospace;font-size:12px;color:#8b6820;}
+.telop-tc input{font-family:monospace;letter-spacing:.05em;}
+.telop-del{background:none;border:none;color:#c8a050;cursor:pointer;font-size:18px;padding:4px;}
+.telop-del:hover{color:#b43c14;}
+.add-telop-row{display:grid;grid-template-columns:140px 1fr auto;gap:16px;align-items:end;}
+.field-label{font-size:10px;letter-spacing:.3em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;margin-bottom:6px;display:block;}
+
+/* NOTES */
+.notes-area{background:#f8f0e4;border:1px solid #c8a850;color:#1a0e04;font-family:'Noto Sans JP',sans-serif;font-size:13px;padding:16px;width:100%;min-height:160px;resize:vertical;line-height:2;}
+.notes-area:focus{outline:none;border-color:#c8880a;}
+
+/* CAMERA SETTINGS */
+.camera-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:#b89848;margin-bottom:24px;}
+.camera-cell{background:#f0e4cc;padding:20px 18px;}
+.camera-cell-label{font-size:9px;letter-spacing:.5em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;margin-bottom:8px;}
+.camera-cell input,.camera-cell select{font-size:14px;font-family:'Shippori Mincho',serif;letter-spacing:.08em;}
+.camera-presets{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+.preset-chip{background:#150c02;color:#e8d090;font-family:'Noto Sans JP',sans-serif;font-size:11px;padding:6px 16px;cursor:pointer;letter-spacing:.1em;border:1px solid #3a2208;}
+.preset-chip:hover{border-color:#c8880a;color:#c8880a;}
+
+/* COMPRESS */
+.drop-zone{border:2px dashed #b89848;background:#f0e4cc;padding:64px 32px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;}
+.drop-zone:hover,.drop-zone.drag-over{border-color:#c8880a;background:#f8f0e4;}
+.drop-icon{font-size:48px;margin-bottom:16px;opacity:.5;}
+.drop-text{font-family:'Noto Sans JP',sans-serif;font-size:13px;color:#5a3c18;line-height:2;letter-spacing:.05em;}
+.drop-text strong{color:#c8880a;}
+.compress-settings{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:#b89848;margin:24px 0;}
+.cs-cell{background:#f0e4cc;padding:20px 18px;}
+.cs-label{font-size:9px;letter-spacing:.5em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;margin-bottom:8px;}
+.cs-cell select,.cs-cell input{font-size:13px;font-family:'Noto Sans JP',sans-serif;}
+.file-info{background:#1e1004;border:1px solid #5a3c18;padding:18px 24px;display:flex;gap:32px;margin-bottom:24px;flex-wrap:wrap;}
+.fi-item{display:flex;flex-direction:column;gap:4px;}
+.fi-label{font-size:9px;letter-spacing:.5em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;}
+.fi-value{font-family:'Shippori Mincho',serif;font-size:16px;color:#e8d090;}
+.compress-log{background:#0d0700;border:1px solid #3a2208;padding:16px;font-family:monospace;font-size:12px;color:#8b9878;line-height:1.8;max-height:160px;overflow-y:auto;margin:16px 0;}
+.compress-log p{margin:0;}
+.compress-log .log-ok{color:#80b850;}
+.compress-log .log-err{color:#c84020;}
+.progress-compress{height:6px;background:#d4c4a4;margin:16px 0;}
+.progress-compress-fill{height:100%;background:#c8880a;width:0%;transition:width .3s;}
+.video-preview{display:flex;gap:24px;margin-top:24px;flex-wrap:wrap;}
+.video-preview video{max-width:100%;height:200px;background:#000;border:1px solid #5a3c18;}
+.preview-label{font-size:10px;letter-spacing:.4em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;margin-bottom:8px;}
+.result-bar{background:#0d2010;border:1px solid #2a5020;padding:18px 24px;display:flex;gap:32px;align-items:center;flex-wrap:wrap;}
+.result-bar .fi-value{color:#80e850;}
+.saving-badge{background:#c8880a;color:#0d0700;font-family:'Noto Sans JP',sans-serif;font-size:12px;padding:6px 16px;letter-spacing:.1em;}
+
+/* FILE ORGANIZER */
+.folder-btn{display:flex;align-items:center;gap:16px;background:#150c02;border:1px solid #5a3c18;padding:24px 32px;cursor:pointer;width:100%;text-align:left;margin-bottom:24px;transition:border-color .2s;}
+.folder-btn:hover{border-color:#c8880a;}
+.folder-btn-icon{font-size:32px;}
+.folder-btn-text{font-family:'Shippori Mincho',serif;font-size:16px;color:#e8d090;letter-spacing:.15em;}
+.folder-btn-sub{font-family:'Noto Sans JP',sans-serif;font-size:11px;color:#8b6820;margin-top:4px;letter-spacing:.05em;}
+.rename-settings{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end;background:#f0e4cc;border:1px solid rgba(184,152,72,.4);padding:20px 24px;margin-bottom:24px;}
+.rename-preview-box{background:#1e1004;border:1px solid #5a3c18;padding:12px 20px;font-family:monospace;font-size:13px;color:#c8d080;letter-spacing:.05em;margin-bottom:24px;}
+.date-group{margin-bottom:32px;}
+.date-group-header{background:#150c02;color:#e8d090;font-family:'Shippori Mincho',serif;font-size:14px;letter-spacing:.2em;padding:12px 20px;border-left:4px solid #c8880a;margin-bottom:2px;display:flex;align-items:center;justify-content:space-between;}
+.date-group-count{font-size:11px;color:#8b6820;font-family:'Noto Sans JP',sans-serif;letter-spacing:.1em;}
+.file-row{display:grid;grid-template-columns:32px 1fr 1fr 80px 80px;gap:0;background:#b89848;margin-bottom:1px;}
+.file-row > div{background:#f0e4cc;padding:10px 14px;font-family:'Noto Sans JP',sans-serif;font-size:12px;display:flex;align-items:center;}
+.file-row-head > div{background:#2a1a08;color:#8b6820;font-size:10px;letter-spacing:.3em;padding:8px 14px;}
+.file-orig{color:#5a3c18;word-break:break-all;}
+.file-new{color:#c8880a;font-weight:700;word-break:break-all;}
+.file-size{color:#8b6820;justify-content:flex-end;}
+.file-type{color:#8b6820;}
+.file-check input{width:16px;height:16px;accent-color:#c8880a;}
+.script-output{background:#0d0700;border:1px solid #3a2208;padding:20px;font-family:monospace;font-size:11px;color:#8b9878;line-height:2;white-space:pre-wrap;word-break:break-all;max-height:240px;overflow-y:auto;margin:16px 0;}
+.dl-row{display:flex;gap:12px;flex-wrap:wrap;}
+
+/* ND FILTER */
+.nd-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px;}
+.nd-panel{background:#f0e4cc;border:1px solid rgba(184,152,72,.4);padding:24px;}
+.nd-panel-title{font-size:10px;letter-spacing:.5em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;margin-bottom:16px;}
+.nd-result{background:#1e1004;border:1px solid #5a3c18;padding:20px 24px;margin-top:16px;}
+.nd-result-main{font-family:'Shippori Mincho',serif;font-size:28px;color:#e8d090;margin-bottom:4px;}
+.nd-result-sub{font-family:'Noto Sans JP',sans-serif;font-size:11px;color:#8b6820;letter-spacing:.1em;}
+.nd-table{width:100%;border-collapse:collapse;margin-top:16px;}
+.nd-table th{background:#150c02;color:#8b6820;font-family:'Noto Sans JP',sans-serif;font-size:10px;letter-spacing:.3em;padding:8px 14px;text-align:left;}
+.nd-table td{padding:9px 14px;border-bottom:1px solid rgba(184,152,72,.2);font-family:'Noto Sans JP',sans-serif;font-size:12px;}
+.nd-table tr.nd-highlight td{background:rgba(200,136,10,.12);color:#c8880a;font-weight:700;}
+.nd-table tr:hover td{background:rgba(200,136,10,.06);}
+.rule180-box{background:#150c02;border-left:4px solid #c8880a;padding:14px 20px;margin-bottom:20px;display:flex;align-items:center;gap:16px;}
+.rule180-label{font-size:10px;letter-spacing:.4em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;}
+.rule180-value{font-family:'Shippori Mincho',serif;font-size:20px;color:#c8880a;}
+
+/* TIMELINE */
+.tl-date-row{display:flex;gap:12px;align-items:end;margin-bottom:24px;}
+.tl-add-row{display:grid;grid-template-columns:90px 1fr 80px 120px auto;gap:10px;align-items:end;background:#f0e4cc;border:1px solid rgba(184,152,72,.4);padding:16px 20px;margin-bottom:24px;}
+.tl-wrap{position:relative;margin-bottom:32px;}
+.tl-axis{display:flex;border-bottom:2px solid #b89848;margin-bottom:0;padding-bottom:0;}
+.tl-hour-label{font-family:monospace;font-size:10px;color:#8b6820;flex:1;text-align:left;padding-bottom:4px;}
+.tl-rows{position:relative;}
+.tl-grid-line{position:absolute;top:0;bottom:0;width:1px;background:rgba(184,152,72,.2);pointer-events:none;}
+.tl-item{position:absolute;height:44px;border-radius:2px;display:flex;align-items:center;padding:0 10px;font-family:'Noto Sans JP',sans-serif;font-size:11px;overflow:hidden;white-space:nowrap;cursor:default;box-sizing:border-box;}
+.tl-item:hover{z-index:10;overflow:visible;white-space:normal;}
+.tl-now-line{position:absolute;top:0;bottom:0;width:2px;background:#c8880a;z-index:20;pointer-events:none;}
+.tl-now-label{position:absolute;top:-18px;transform:translateX(-50%);font-family:monospace;font-size:10px;color:#c8880a;white-space:nowrap;}
+.tl-list{margin-top:16px;}
+.tl-list-row{display:grid;grid-template-columns:70px 70px 1fr 100px 100px 40px;gap:0;background:#b89848;margin-bottom:1px;}
+.tl-list-row>div{background:#f0e4cc;padding:9px 14px;font-family:'Noto Sans JP',sans-serif;font-size:12px;display:flex;align-items:center;}
+.tl-list-head>div{background:#150c02;color:#8b6820;font-size:10px;letter-spacing:.3em;}
+.tl-colors{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+.tl-color-chip{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;}
+.tl-color-chip.selected{border-color:#c8880a;}
+
+/* SCHEDULE */
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:2px;background:#b89848;margin-bottom:8px;}
+.dash-card{background:#f0e4cc;padding:20px 22px;cursor:pointer;transition:background .15s;}
+.dash-card:hover{background:#f8f0e4;}
+.dash-card.active-proj{background:#fdf0d0;border-left:4px solid #c8880a;box-shadow:inset 0 0 0 1px rgba(200,136,10,.5);}
+.dash-card.active-proj .dash-name{color:#1a0e04;}
+.dash-name{font-family:'Shippori Mincho',serif;font-size:15px;letter-spacing:.08em;color:#1a0e04;margin-bottom:6px;}
+.dash-client{font-family:'Noto Sans JP',sans-serif;font-size:11px;color:#8b6820;margin-bottom:10px;}
+.dash-badges{display:flex;gap:6px;flex-wrap:wrap;}
+.dash-badge{font-family:'Noto Sans JP',sans-serif;font-size:10px;padding:3px 10px;border-radius:2px;letter-spacing:.05em;}
+.badge-urgent{background:#7a1a08;color:#f0b090;}
+.badge-soon{background:#7a5a08;color:#f0d890;}
+.badge-ok{background:#1a4a1a;color:#90d090;}
+.badge-done{background:#3a3a3a;color:#a0a0a0;}
+.badge-shoot{background:#1a3a6a;color:#90b8f0;}
+.badge-closed{background:#2a4a2a;color:#a8d8a8;font-weight:700;letter-spacing:.12em;}
+.badge-over{background:#7a1a08;color:#f0b090;}
+
+/* 終了した案件のカード */
+.dash-card.closed-proj{background:#e2dac6;}
+.dash-card.closed-proj:hover{background:#ece4d0;}
+.dash-card.closed-proj .dash-name{color:#7a6a50;}
+.dash-card.closed-proj .dash-client,
+.dash-card.closed-proj .dash-desc{color:#9a8a6a;}
+.dash-card.closed-proj .dash-ribbon{position:absolute;top:0;right:0;background:#2a4a2a;color:#a8d8a8;font-family:'Noto Sans JP',sans-serif;font-size:10px;letter-spacing:.18em;padding:4px 12px;}
+.dash-card{position:relative;}
+.dash-closed-head{grid-column:1/-1;background:#e8dcc8;font-family:'Noto Sans JP',sans-serif;font-size:10px;letter-spacing:.2em;color:#8b6820;padding:10px 22px;display:flex;justify-content:space-between;align-items:center;gap:12px;}
+.dash-closed-head button{background:transparent;border:1px solid #b89848;color:#8b6820;font-family:'Noto Sans JP',sans-serif;font-size:10px;letter-spacing:.1em;padding:4px 12px;border-radius:3px;cursor:pointer;}
+.dash-closed-head button:hover{background:rgba(184,152,72,.15);}
+.dash-actions{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap;}
+.dash-actions button{white-space:nowrap;font-size:11px;padding:6px 12px;border-radius:4px;cursor:pointer;background:transparent;border:1px solid #b89848;color:#8b6820;}
+.dash-actions button:hover{background:rgba(184,152,72,.15);}
+.dash-actions .act-open{background:#c8880a;border-color:#c8880a;color:#fff8e8;padding:6px 18px;}
+.dash-actions .act-open:hover{background:#b07808;}
+.closed-proj .dash-actions .act-open{background:#8b7a58;border-color:#8b7a58;}
+.closed-proj .dash-actions .act-open:hover{background:#7a6a48;}
+.dash-actions .act-close{border-color:#2f6040;color:#2f6040;}
+.dash-actions .act-report{border-color:#2f6040;color:#2f6040;}
+.dash-actions .act-del{border-color:#a05030;color:#a05030;}
+.phase-list{display:flex;flex-direction:column;gap:2px;}
+.phase-row{display:grid;grid-template-columns:180px 130px 1fr 110px;gap:2px;background:#b89848;}
+.phase-row>div{background:#f0e4cc;padding:10px 14px;display:flex;align-items:center;}
+.phase-row.phase-head>div{background:#150c02;color:#8b6820;font-family:'Noto Sans JP',sans-serif;font-size:10px;letter-spacing:.3em;}
+.phase-name{font-family:'Noto Sans JP',sans-serif;font-size:13px;color:#1a0e04;}
+.phase-status{padding:4px 0;}
+.phase-status select{font-size:12px;padding:5px 8px;}
+.status-done{color:#2a7a2a;font-weight:700;}
+.status-wip{color:#c8880a;font-weight:700;}
+.status-todo{color:#8b6820;}
+.phase-due input{font-size:12px;padding:5px 8px;}
+.phase-note input{font-size:12px;padding:5px 8px;}
+
+/* STORYBOARD */
+.sb-drop{border:2px dashed #b89848;background:#f0e4cc;padding:40px;text-align:center;cursor:pointer;transition:border-color .2s;}
+.sb-drop:hover,.sb-drop.drag-over{border-color:#c8880a;background:#f8f0e4;}
+.sb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:24px;}
+.sb-card{background:#f0e4cc;border:1px solid rgba(184,152,72,.4);overflow:hidden;position:relative;}
+.sb-card-img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:#1e1004;cursor:pointer;}
+.sb-card-img-placeholder{width:100%;aspect-ratio:16/9;background:#1e1004;display:flex;align-items:center;justify-content:center;color:#3a2208;font-size:32px;}
+.sb-card-body{padding:12px 14px;}
+.sb-card-num{font-family:'Shippori Mincho',serif;font-size:11px;color:#8b6820;letter-spacing:.2em;margin-bottom:6px;}
+.sb-card-scene{font-family:'Noto Sans JP',sans-serif;font-size:13px;color:#1a0e04;font-weight:700;margin-bottom:4px;}
+.sb-card-meta{font-family:'Noto Sans JP',sans-serif;font-size:11px;color:#8b6820;margin-bottom:6px;}
+.sb-card-note{font-family:'Noto Sans JP',sans-serif;font-size:11px;color:#5a3c18;line-height:1.7;}
+.sb-card-actions{display:flex;gap:6px;padding:8px 14px;border-top:1px solid rgba(184,152,72,.3);background:#ece0c8;}
+.sb-card-del{background:none;border:none;color:#b43c14;cursor:pointer;font-size:12px;font-family:'Noto Sans JP',sans-serif;padding:4px 8px;}
+.sb-card-del:hover{text-decoration:underline;}
+.sb-card-edit{background:none;border:none;color:#8b6820;cursor:pointer;font-size:12px;font-family:'Noto Sans JP',sans-serif;padding:4px 8px;}
+.sb-card-edit:hover{color:#c8880a;}
+.sb-modal{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:10001;display:flex;align-items:center;justify-content:center;padding:24px;}
+.sb-modal-box{background:#e8dcc8;border:1px solid #b89848;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;}
+.sb-modal-head{background:#150c02;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;}
+.sb-modal-title{font-family:'Shippori Mincho',serif;font-size:16px;color:#e8d090;letter-spacing:.15em;}
+.sb-modal-close{background:none;border:none;color:#8b6820;font-size:22px;cursor:pointer;line-height:1;}
+.sb-modal-close:hover{color:#c8880a;}
+.sb-modal-body{padding:24px;}
+.sb-modal-img{width:100%;aspect-ratio:16/9;object-fit:cover;margin-bottom:16px;background:#1e1004;}
+.sb-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.sb-fullscreen{position:fixed;inset:0;background:#000;z-index:10002;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.sb-fullscreen img{max-width:100%;max-height:100%;object-fit:contain;}
+
+/* DOCS */
+.doc-tabs{display:flex;gap:2px;margin-bottom:24px;background:#b89848;}
+.doc-tab{padding:12px 24px;font-family:'Shippori Mincho',serif;font-size:13px;letter-spacing:.15em;color:#8b6820;cursor:pointer;background:#e8dcc8;}
+.doc-tab:hover{color:#c8880a;}
+.doc-tab.active{background:#150c02;color:#e8d090;}
+.doc-section{display:none;}
+.doc-section.active{display:block;}
+.doc-form{background:#f0e4cc;border:1px solid rgba(184,152,72,.4);padding:24px;margin-bottom:24px;}
+.doc-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.doc-form-grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;}
+.doc-item-row{display:grid;grid-template-columns:1fr 80px 100px 100px 40px;gap:6px;margin-bottom:6px;align-items:center;}
+.doc-item-row input,.doc-item-row select{font-size:12px;padding:7px 10px;}
+.doc-total-row{display:flex;justify-content:flex-end;gap:24px;padding:16px 0;border-top:1px solid #b89848;margin-top:12px;}
+.doc-total-item{display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
+.doc-total-label{font-size:10px;letter-spacing:.3em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;}
+.doc-total-value{font-family:'Shippori Mincho',serif;font-size:18px;color:#1a0e04;}
+
+/* PRINT PREVIEW */
+.print-preview{background:#fff;border:1px solid #ccc;padding:40px;max-width:720px;font-family:'Noto Sans JP',sans-serif;font-size:13px;color:#111;line-height:1.8;margin-bottom:24px;}
+.print-preview h1{font-family:'Shippori Mincho',serif;font-size:24px;text-align:center;margin-bottom:32px;letter-spacing:.2em;border-bottom:2px solid #111;padding-bottom:16px;}
+.print-preview h2{font-size:13px;letter-spacing:.2em;margin:20px 0 8px;border-left:3px solid #888;padding-left:10px;}
+.print-meta{display:flex;justify-content:space-between;margin-bottom:24px;}
+.print-meta-left{font-size:16px;font-weight:700;}
+.print-meta-right{text-align:right;font-size:12px;color:#555;}
+.print-table{width:100%;border-collapse:collapse;margin:12px 0;}
+.print-table th{background:#f5f5f5;font-size:11px;letter-spacing:.1em;padding:8px 10px;border:1px solid #ddd;text-align:left;}
+.print-table td{padding:8px 10px;border:1px solid #ddd;font-size:12px;}
+.print-table .num{text-align:right;}
+.print-total{text-align:right;margin-top:12px;}
+.print-total table{margin-left:auto;}
+.print-total td{padding:4px 12px;font-size:13px;}
+.print-total .grand{font-size:16px;font-weight:700;border-top:2px solid #111;}
+.print-seal{width:60px;height:60px;border:2px solid #c00;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#c00;font-size:11px;margin-left:16px;vertical-align:middle;}
+.print-notes{background:#f9f9f9;border:1px solid #eee;padding:12px 16px;font-size:12px;margin-top:16px;}
+@media print{
+  body > *:not(.print-modal){display:none !important;}
+  .print-modal{position:fixed;inset:0;background:#fff;z-index:99999;padding:24px;}
+  .print-modal .no-print{display:none !important;}
+}
+
+/* TOAST */
+.toast{position:fixed;bottom:32px;right:32px;background:#150c02;border:1px solid #c8880a;color:#e8d090;font-family:'Noto Sans JP',sans-serif;font-size:12px;letter-spacing:.1em;padding:14px 24px;z-index:10000;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;}
+.toast.show{opacity:1;transform:translateY(0);}
+
+/* PROGRESS BAR */
+.progress-wrap{display:flex;align-items:center;gap:16px;margin-bottom:32px;}
+.progress-track{flex:1;height:4px;background:#d4c4a4;position:relative;}
+.progress-fill{height:100%;background:#c8880a;transition:width .4s;}
+.progress-label{font-size:11px;letter-spacing:.2em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;white-space:nowrap;}
+
+@media(max-width:768px){
+  nav{padding:16px 24px;}
+  .project-bar,.page-header,.tabs,.tab-content{padding-left:24px;padding-right:24px;}
+  .checklist-grid{grid-template-columns:1fr;}
+  .camera-grid{grid-template-columns:1fr 1fr;}
+  .tab{padding:14px 16px;font-size:13px;}
+  .add-shot-row{flex-wrap:wrap;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">下町<span>きろく</span>の動画屋</a>
+  <div class="nav-links">
+    <a href="index.html">ホーム</a>
+    <a href="menu.html">メニュー</a>
+    <a href="about.html">制作者</a>
+    <a href="contact.php">お問い合わせ</a>
+    <a href="tools.html">制作ツール</a>
+    <a href="gyomu.html">業務管理</a>
+    <a href="shuzai.html">取材ノート</a>
+    <a href="hotdog.html">飲食部門</a>
+  </div>
+</nav>
+
+<div style="padding:28px 64px 4px;font-family:'Shippori Mincho',serif;font-size:24px;letter-spacing:.12em;color:#1c0f02;">制作<span style="color:#c8880a;">ツール</span></div>
+
+<select id="projectSelect" onchange="switchProject()" style="display:none;"></select>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('schedule')">スケジュール</div>
+  <div class="tab" onclick="switchTab('shoot')">撮影</div>
+  <div class="tab" onclick="switchTab('edit')">編集</div>
+  <div class="tab" onclick="switchTab('compress')">動画圧縮</div>
+  <div class="tab" onclick="switchTab('organizer')">ファイル整理</div>
+  <div class="tab" onclick="switchTab('nd')">NDフィルター</div>
+  <div class="tab" onclick="switchTab('timeline')">撮影タイムライン</div>
+  <div class="tab" onclick="switchTab('storyboard')">絵コンテ</div>
+  <div class="tab" onclick="switchTab('refs')">参考・素材</div>
+  <div class="tab" onclick="switchTab('docs')">書類</div>
+</div>
+
+<div id="currentProjBar" style="padding:10px 64px;background:#f0e4cc;border-bottom:1px solid #d4c4a4;font-family:'Noto Sans JP',sans-serif;font-size:12px;color:#5a3c18;display:flex;align-items:center;gap:8px;">
+  <span style="letter-spacing:.15em;">現在の案件</span>
+  <strong id="currentProjName" style="color:#1a0e04;font-size:14px;font-family:'Shippori Mincho',serif;">—</strong>
+</div>
+
+<!-- ======================== SHOOT TAB ======================== -->
+<div class="tab-content active" id="tab-schedule">
+  <!-- DASHBOARD -->
+  <div style="margin-bottom:48px;">
+    <div class="sec-head">
+      <div>
+        <div class="sec-eyebrow">ALL PROJECTS</div>
+        <div class="sec-title">案件ダッシュボード</div>
+      </div>
+      <button class="btn btn-ghost" onclick="newProject()">＋ 新しい案件</button>
+    </div>
+    <div id="schDashboard"></div>
+  </div>
+
+  <!-- CURRENT PROJECT SCHEDULE -->
+  <div>
+    <div class="sec-head">
+      <div>
+        <div class="sec-eyebrow">PROJECT SCHEDULE</div>
+        <div class="sec-title" id="schProjTitle">—</div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost" onclick="saveSchedule()">保存</button>
+        <button class="btn btn-ghost" onclick="saveAndNextProject()">保存して次の案件 ＋</button>
+      </div>
+    </div>
+
+    <!-- 案件基本情報 -->
+    <div class="camera-grid" style="margin-bottom:2px;">
+      <div class="camera-cell">
+        <div class="camera-cell-label">クライアント名</div>
+        <input type="text" id="sch-client" placeholder="例：田中様">
+      </div>
+      <div class="camera-cell">
+        <div class="camera-cell-label">撮影日（複数可）</div>
+        <div id="sch-shoot-dates"></div>
+        <button type="button" onclick="addShootDate()" style="margin-top:6px;background:transparent;border:1px solid #b89848;color:#8b6820;font-size:11px;padding:4px 10px;border-radius:4px;cursor:pointer;">＋ 撮影日を追加</button>
+      </div>
+      <div class="camera-cell">
+        <div class="camera-cell-label">納期</div>
+        <input type="date" id="sch-deadline">
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;background:#b89848;margin-bottom:24px;">
+      <div class="camera-cell" style="grid-column:1/-1;">
+        <div class="camera-cell-label">案件内容</div>
+        <input type="text" id="sch-content" placeholder="例：結婚式の記録映像・本編5分＋ハイライト90秒">
+      </div>
+      <div class="camera-cell">
+        <div class="camera-cell-label">目的・ゴール</div>
+        <textarea id="sch-goal" style="min-height:72px;font-size:13px;" placeholder="例：新郎新婦の思い出として残す&#10;参列できなかった親族へ届ける&#10;SNS投稿用のショートムービーも制作"></textarea>
+      </div>
+      <div class="camera-cell">
+        <div class="camera-cell-label">ターゲット・視聴者</div>
+        <textarea id="sch-target" style="min-height:72px;font-size:13px;" placeholder="例：新郎新婦・両家の家族&#10;YouTube公開予定（一般視聴者）"></textarea>
+      </div>
+    </div>
+
+    <!-- カウントダウン -->
+    <div id="schCountdown" style="display:none;margin-bottom:32px;">
+      <div style="display:flex;gap:16px;flex-wrap:wrap;">
+        <div class="total-bar" style="flex:1;min-width:200px;">
+          <div class="total-item">
+            <div class="total-label">撮影まで</div>
+            <div class="total-value" id="schShootDays">—</div>
+          </div>
+        </div>
+        <div class="total-bar" style="flex:1;min-width:200px;" id="schDeadlineBar">
+          <div class="total-item">
+            <div class="total-label">納期まで</div>
+            <div class="total-value" id="schDeadlineDays">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 案件TODO -->
+    <div style="margin-bottom:32px;">
+      <div class="sec-eyebrow" style="margin-bottom:12px;">案件TODO（業務管理アプリと連携）</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+        <input type="text" id="todoInput" placeholder="例：構成案をクライアントに送る" style="flex:1;min-width:160px;">
+        <input type="date" id="todoDate" style="width:150px;">
+        <button class="btn btn-ghost" type="button" onclick="setProjTodoToday()">今日</button>
+        <button class="btn btn-ghost" type="button" onclick="addProjTodo()">追加</button>
+      </div>
+      <div id="schTodoList"></div>
+    </div>
+
+    <!-- 作業工程 -->
+    <div class="sec-eyebrow" style="margin-bottom:16px;">作業工程</div>
+    <div id="schPhases"></div>
+
+    <!-- メモ -->
+    <div style="margin-top:24px;">
+      <span class="field-label">案件メモ</span>
+      <textarea class="notes-area" id="sch-memo" placeholder="特記事項・クライアント要望など" style="min-height:80px;"></textarea>
+    </div>
+    <div style="margin-top:12px;">
+      <button class="btn btn-primary" onclick="saveSchedule()">保存</button>
+    </div>
+  </div>
+</div>
+
+<div class="tab-content" id="tab-shoot">
+
+  <!-- CHECKLIST -->
+  <div style="margin-bottom:56px;">
+    <div class="sec-head">
+      <div>
+        <div class="sec-eyebrow">CHECKLIST</div>
+        <div class="sec-title">撮影チェックリスト</div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <div class="progress-label" id="checkProgress">0 / 0</div>
+        <button class="btn btn-ghost" onclick="resetChecks()">リセット</button>
+      </div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+    <div class="checklist-grid">
+      <div>
+        <div class="checklist-col-title">機材・カメラ</div>
+        <div id="checkList-gear"></div>
+        <div class="add-check-row">
+          <input type="text" id="newGear" placeholder="アイテムを追加" onkeydown="if(event.key==='Enter')addCheck('gear')">
+          <button class="btn btn-ghost" onclick="addCheck('gear')" style="white-space:nowrap;">追加</button>
+        </div>
+      </div>
+      <div>
+        <div class="checklist-col-title">ロケ・準備</div>
+        <div id="checkList-location"></div>
+        <div class="add-check-row">
+          <input type="text" id="newLocation" placeholder="アイテムを追加" onkeydown="if(event.key==='Enter')addCheck('location')">
+          <button class="btn btn-ghost" onclick="addCheck('location')" style="white-space:nowrap;">追加</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHOT LIST -->
+  <div style="margin-bottom:56px;">
+    <div class="sec-head">
+      <div>
+        <div class="sec-eyebrow">SHOT LIST</div>
+        <div class="sec-title">ショットリスト</div>
+      </div>
+      <button class="btn btn-ghost" onclick="exportShots()">テキスト出力</button>
+    </div>
+    <table class="shot-table" id="shotTable">
+      <thead>
+        <tr>
+          <th style="width:48px;">#</th>
+          <th style="width:80px;">完了</th>
+          <th>シーン・内容</th>
+          <th style="width:130px;">ショット種別</th>
+          <th style="width:100px;">カメラ角度</th>
+          <th>メモ</th>
+          <th style="width:48px;"></th>
+        </tr>
+      </thead>
+      <tbody id="shotBody"></tbody>
+    </table>
+    <div class="add-shot-row">
+      <div class="field" style="flex:2;">
+        <label>シーン・内容</label>
+        <input type="text" id="shotScene" placeholder="例：挨拶シーン">
+      </div>
+      <div class="field" style="width:130px;">
+        <label>ショット種別</label>
+        <select id="shotType">
+          <option>WS（ワイド）</option>
+          <option>MS（ミディアム）</option>
+          <option>CU（クローズアップ）</option>
+          <option>ECU（超クローズアップ）</option>
+          <option>バストアップ</option>
+          <option>ローアングル</option>
+          <option>ハイアングル</option>
+          <option>ドローン</option>
+          <option>インサート</option>
+          <option>その他</option>
+        </select>
+      </div>
+      <div class="field" style="width:100px;">
+        <label>カメラ角度</label>
+        <select id="shotAngle">
+          <option>正面</option>
+          <option>斜め</option>
+          <option>横</option>
+          <option>背面</option>
+          <option>俯瞰</option>
+          <option>アオリ</option>
+        </select>
+      </div>
+      <div class="field" style="flex:2;">
+        <label>メモ</label>
+        <input type="text" id="shotNote" placeholder="任意メモ">
+      </div>
+      <button class="btn btn-primary" onclick="addShot()" style="align-self:flex-end;white-space:nowrap;">追加</button>
+    </div>
+  </div>
+
+  <!-- CAMERA SETTINGS -->
+  <div>
+    <div class="sec-head">
+      <div>
+        <div class="sec-eyebrow">CAMERA SETTINGS</div>
+        <div class="sec-title">カメラ設定メモ</div>
+      </div>
+    </div>
+    <div style="margin-bottom:16px;">
+      <div style="font-size:11px;letter-spacing:.3em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;margin-bottom:10px;">プリセット呼び出し</div>
+      <div class="camera-presets">
+        <div class="preset-chip" onclick="applyPreset('outdoor-day')">屋外・昼</div>
+        <div class="preset-chip" onclick="applyPreset('indoor')">屋内</div>
+        <div class="preset-chip" onclick="applyPreset('night')">夜景</div>
+        <div class="preset-chip" onclick="applyPreset('interview')">インタビュー</div>
+        <div class="preset-chip" onclick="applyPreset('event')">イベント</div>
+      </div>
+    </div>
+    <div class="camera-grid">
+      <div class="camera-cell">
+        <div class="camera-cell-label">ISO</div>
+        <input type="text" id="cam-iso" placeholder="例：400">
+      </div>
+      <div class="camera-cell">
+        <div class="camera-cell-label">シャッタースピード</div>
+        <input type="text" id="cam-ss" placeholder="例：1/200">
+      </div>
+      <div class="camera-cell">
+        <div class="camera-cell-label">絞り（F値）</div>
+        <input type="text" id="cam-fstop" placeholder="例：2.8">
+      </div>
+      <div class="camera-cell">
+        <div class="camera-cell-label">ホワイトバランス</div>
+        <select id="cam-wb">
+          <option value="">—</option>
+          <option>オート（AWB）</option>
+          <option>太陽光 5500K</option>
+          <option>曇り 6500K</option>
+          <option>蛍光灯 4000K</option>
+          <option>タングステン 3200K</option>
+          <option>マニュアル</option>
+        </select>
+      </div>
+      <div class="camera-cell">
+        <div class="camera-cell-label">フォーカス</div>
+        <select id="cam-focus">
+          <option value="">—</option>
+          <option>MF（マニュアル）</option>
+          <option>AF-S（シングル）</option>
+          <option>AF-C（コンティニュアス）</option>
+        </select>
+      </div>
+      <div class="camera-cell">
+        <div class="camera-cell-label">ピクチャープロファイル</div>
+        <input type="text" id="cam-pp" placeholder="例：S-Log2, Cine4">
+      </div>
+    </div>
+    <div style="margin-top:8px;">
+      <span class="field-label">その他メモ</span>
+      <textarea id="cam-note" class="notes-area" style="min-height:80px;" placeholder="レンズ・フィルター・ND値など"></textarea>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:14px;">
+      <button class="btn btn-primary" onclick="saveCameraSettings()">保存</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ======================== EDIT TAB ======================== -->
+<div class="tab-content" id="tab-edit">
+
+  <!-- CUT LIST -->
+  <div style="margin-bottom:56px;">
+    <div class="sec-head">
+      <div>
+        <div class="sec-eyebrow">CUT STRUCTURE</div>
+        <div class="sec-title">カット構成・尺管理</div>
+      </div>
+      <button class="btn btn-ghost" onclick="exportCuts()">テキスト出力</button>
+    </div>
+    <div class="total-bar">
+      <div class="total-item">
+        <div class="total-label">合計尺</div>
+        <div class="total-value" id="totalDuration">0<span>秒</span></div>
+      </div>
+      <div class="total-item">
+        <div class="total-label">分換算</div>
+        <div class="total-value" id="totalMin">0:00</div>
+      </div>
+      <div class="total-item">
+        <div class="total-label">カット数</div>
+        <div class="total-value" id="totalCuts">0<span>カット</span></div>
+      </div>
+    </div>
+    <table class="cut-table" id="cutTable">
+      <thead>
+        <tr>
+          <th style="width:48px;">#</th>
+          <th>シーン名</th>
+          <th style="width:90px;">尺（秒）</th>
+          <th style="width:90px;">累計</th>
+          <th style="width:100px;">種別</th>
+          <th>メモ・テキスト</th>
+          <th style="width:48px;"></th>
+        </tr>
+      </thead>
+      <tbody id="cutBody"></tbody>
+    </table>
+    <div class="add-shot-row">
+      <div class="field" style="flex:2;">
+        <label>シーン名</label>
+        <input type="text" id="cutScene" placeholder="例：オープニング">
+      </div>
+      <div class="field" style="width:90px;">
+        <label>尺（秒）</label>
+        <input type="number" id="cutDur" placeholder="5" min="0" step="0.5">
+      </div>
+      <div class="field" style="width:110px;">
+        <label>種別</label>
+        <select id="cutType">
+          <option>映像</option>
+          <option>テロップ</option>
+          <option>タイトル</option>
+          <option>BGM転換</option>
+          <option>SE</option>
+          <option>暗転</option>
+          <option>その他</option>
+        </select>
+      </div>
+      <div class="field" style="flex:2;">
+        <label>メモ</label>
+        <input type="text" id="cutNote" placeholder="任意メモ">
+      </div>
+      <button class="btn btn-primary" onclick="addCut()" style="align-self:flex-end;white-space:nowrap;">追加</button>
+    </div>
+  </div>
+
+  <!-- TELOP -->
+  <div style="margin-bottom:56px;">
+    <div class="sec-head">
+      <div>
+        <div class="sec-eyebrow">TELOP / CAPTION</div>
+        <div class="sec-title">テロップメモ</div>
+      </div>
+      <button class="btn btn-ghost" onclick="exportTelop()">テキスト出力</button>
+    </div>
+    <div class="telop-list" id="telopList"></div>
+    <div class="add-telop-row">
+      <div>
+        <span class="field-label">タイムコード</span>
+        <input type="text" id="telopTc" placeholder="00:00:00">
+      </div>
+      <div>
+        <span class="field-label">テロップ文字</span>
+        <input type="text" id="telopText" placeholder="テロップ内容を入力" onkeydown="if(event.key==='Enter')addTelop()">
+      </div>
+      <div style="display:flex;align-items:flex-end;">
+        <button class="btn btn-primary" onclick="addTelop()" style="white-space:nowrap;">追加</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT NOTES -->
+  <div>
+    <div class="sec-head">
+      <div>
+        <div class="sec-eyebrow">EDIT NOTES</div>
+        <div class="sec-title">編集メモ</div>
+      </div>
+      <button class="btn btn-ghost" onclick="saveEditNotes()">保存</button>
+    </div>
+    <textarea class="notes-area" id="editNotes" placeholder="BGMのタイミング・カラーグレーディング方針・クライアント要望など"></textarea>
+  </div>
+
+</div>
+
+<!-- ======================== COMPRESS TAB ======================== -->
+<div class="tab-content" id="tab-compress">
+  <div class="sec-head">
+    <div>
+      <div class="sec-eyebrow">VIDEO COMPRESSOR</div>
+      <div class="sec-title">動画サイズ圧縮</div>
+    </div>
+  </div>
+  <p style="font-family:'Noto Sans JP',sans-serif;font-size:12px;color:#5a3c18;margin-bottom:24px;line-height:2;letter-spacing:.05em;">
+    動画はすべてブラウザ内で処理されます。サーバーへの送信はありません。<br>
+    初回利用時にFFmpegエンジン（約30MB）をダウンロードします。
+  </p>
+
+  <!-- DROP ZONE -->
+  <div class="drop-zone" id="dropZone" onclick="document.getElementById('videoInput').click()" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+    <div class="drop-icon">🎬</div>
+    <div class="drop-text">クリックまたはドラッグ＆ドロップで動画を選択<br><strong>MP4 / MOV / AVI / MKV / WebM</strong> に対応</div>
+  </div>
+  <input type="file" id="videoInput" accept="video/*" style="display:none" onchange="onFileSelect(this.files[0])">
+
+  <!-- FILE INFO -->
+  <div class="file-info" id="fileInfo" style="display:none;">
+    <div class="fi-item"><div class="fi-label">ファイル名</div><div class="fi-value" id="fiName">—</div></div>
+    <div class="fi-item"><div class="fi-label">元サイズ</div><div class="fi-value" id="fiSize">—</div></div>
+    <div class="fi-item"><div class="fi-label">解像度</div><div class="fi-value" id="fiRes">—</div></div>
+    <div class="fi-item"><div class="fi-label">長さ</div><div class="fi-value" id="fiDur">—</div></div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div id="compressSettings" style="display:none;">
+    <div style="font-size:11px;letter-spacing:.4em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;margin:24px 0 8px;">圧縮設定</div>
+    <div class="compress-settings">
+      <div class="cs-cell">
+        <div class="cs-label">出力解像度</div>
+        <select id="outRes">
+          <option value="original">元のまま</option>
+          <option value="1920x1080">1920×1080 (FHD)</option>
+          <option value="1280x720">1280×720 (HD)</option>
+          <option value="854x480">854×480 (SD)</option>
+          <option value="640x360">640×360</option>
+        </select>
+      </div>
+      <div class="cs-cell">
+        <div class="cs-label">品質（CRF）</div>
+        <select id="outCrf">
+          <option value="18">高品質（ファイル大）CRF 18</option>
+          <option value="23" selected>標準 CRF 23</option>
+          <option value="28">小サイズ CRF 28</option>
+          <option value="35">最小サイズ CRF 35</option>
+        </select>
+      </div>
+      <div class="cs-cell">
+        <div class="cs-label">出力フォーマット</div>
+        <select id="outFmt">
+          <option value="mp4">MP4 (H.264)</option>
+          <option value="webm">WebM (VP9)</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px;">
+      <button class="btn btn-primary" id="btnCompress" onclick="startCompress()">圧縮開始</button>
+      <button class="btn btn-ghost" onclick="resetCompress()">ファイルを変更</button>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div id="compressProgress" style="display:none;">
+    <div class="progress-compress"><div class="progress-compress-fill" id="compressFill"></div></div>
+    <div class="compress-log" id="compressLog"></div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="compressResult" style="display:none;">
+    <div class="result-bar" id="resultBar">
+      <div class="fi-item"><div class="fi-label">圧縮後サイズ</div><div class="fi-value" id="resSize">—</div></div>
+      <div class="fi-item"><div class="fi-label">削減量</div><div class="fi-value" id="resSaving">—</div></div>
+      <div class="fi-item"><div class="fi-label">削減率</div><div class="fi-value" id="resRatio">—</div></div>
+      <a id="downloadLink" class="btn btn-primary" style="text-decoration:none;margin-left:auto;">ダウンロード</a>
+    </div>
+    <div class="video-preview">
+      <div><div class="preview-label">元動画</div><video id="previewOrig" controls></video></div>
+      <div><div class="preview-label">圧縮後</div><video id="previewOut" controls></video></div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== ORGANIZER TAB ======================== -->
+<div class="tab-content" id="tab-organizer">
+  <div class="sec-head">
+    <div>
+      <div class="sec-eyebrow">FILE ORGANIZER</div>
+      <div class="sec-title">ファイル整理・リネーム</div>
+    </div>
+    <button class="btn btn-ghost" id="btnRescan" onclick="rescanFolder()" style="display:none;">再スキャン</button>
+  </div>
+  <p style="font-family:'Noto Sans JP',sans-serif;font-size:12px;color:#5a3c18;margin-bottom:24px;line-height:2;letter-spacing:.05em;">
+    SDカードやフォルダを選択すると動画ファイルを撮影日別に表示します。<br>
+    リネームはスクリプトファイルをダウンロードして実行します（ファイルは移動しません）。
+  </p>
+
+  <!-- FOLDER SELECT -->
+  <button class="folder-btn" id="folderBtn" onclick="selectFolder()">
+    <div class="folder-btn-icon">📁</div>
+    <div>
+      <div class="folder-btn-text">フォルダ / SDカードを選択</div>
+      <div class="folder-btn-sub">クリックしてフォルダを開く（サブフォルダも含めてスキャン）</div>
+    </div>
+  </button>
+
+  <div id="orgBody" style="display:none;">
+    <!-- RENAME SETTINGS -->
+    <div class="sec-head" style="margin-top:8px;">
+      <div>
+        <div class="sec-eyebrow">RENAME PATTERN</div>
+        <div class="sec-title" style="font-size:16px;">命名パターン設定</div>
+      </div>
+    </div>
+    <div class="rename-settings">
+      <div>
+        <span class="field-label">案件名（プレフィックス）</span>
+        <input type="text" id="orgPrefix" placeholder="例：結婚式_田中様" oninput="updateRenamePreview()">
+      </div>
+      <div>
+        <span class="field-label">連番の桁数</span>
+        <select id="orgDigits" onchange="updateRenamePreview()">
+          <option value="2">2桁（01〜）</option>
+          <option value="3" selected>3桁（001〜）</option>
+          <option value="4">4桁（0001〜）</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="applyRename()">プレビュー更新</button>
+    </div>
+    <div class="rename-preview-box" id="renamePreviewBox">
+      パターン例：<span id="renamePreviewText">案件名_20240615_001.mp4</span>
+    </div>
+
+    <!-- STATS -->
+    <div class="file-info" id="orgStats" style="margin-bottom:24px;">
+      <div class="fi-item"><div class="fi-label">動画ファイル数</div><div class="fi-value" id="orgTotal">0</div></div>
+      <div class="fi-item"><div class="fi-label">撮影日数</div><div class="fi-value" id="orgDays">0</div></div>
+      <div class="fi-item"><div class="fi-label">合計サイズ</div><div class="fi-value" id="orgSize">0</div></div>
+    </div>
+
+    <!-- FILE LIST -->
+    <div id="orgFileList"></div>
+
+    <!-- SCRIPT DOWNLOAD -->
+    <div id="orgScriptSection" style="display:none;margin-top:32px;">
+      <div class="sec-head">
+        <div>
+          <div class="sec-eyebrow">RENAME SCRIPT</div>
+          <div class="sec-title" style="font-size:16px;">リネームスクリプト</div>
+        </div>
+      </div>
+      <p style="font-family:'Noto Sans JP',sans-serif;font-size:12px;color:#5a3c18;margin-bottom:16px;line-height:2;">
+        スクリプトをダウンロードして、SDカード（またはコピー先フォルダ）に置いてダブルクリックで実行してください。<br>
+        <strong style="color:#c8880a;">元のファイルは上書きされません。</strong>同じフォルダ内でリネームします。
+      </p>
+      <div class="script-output" id="orgScript"></div>
+      <div class="dl-row">
+        <button class="btn btn-primary" onclick="downloadScript('sh')">Mac用 .sh をダウンロード</button>
+        <button class="btn btn-ghost" onclick="downloadScript('bat')">Windows用 .bat をダウンロード</button>
+        <button class="btn btn-ghost" onclick="copyScript()">スクリプトをコピー</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== ND FILTER TAB ======================== -->
+<div class="tab-content" id="tab-nd">
+  <div class="sec-head">
+    <div>
+      <div class="sec-eyebrow">ND FILTER CALCULATOR</div>
+      <div class="sec-title">NDフィルター計算</div>
+    </div>
+  </div>
+
+  <!-- 180度ルール -->
+  <div style="margin-bottom:32px;">
+    <div class="sec-eyebrow" style="margin-bottom:12px;">180度ルール — 推奨シャッタースピード</div>
+    <div style="display:flex;gap:12px;align-items:end;margin-bottom:12px;">
+      <div style="flex:1;">
+        <span class="field-label">フレームレート（fps）</span>
+        <select id="nd-fps" onchange="calcND()">
+          <option value="24">24fps（映画風）</option>
+          <option value="25">25fps</option>
+          <option value="30" selected>30fps</option>
+          <option value="50">50fps</option>
+          <option value="60">60fps</option>
+          <option value="120">120fps（スロー）</option>
+          <option value="240">240fps（超スロー）</option>
+        </select>
+      </div>
+    </div>
+    <div class="rule180-box">
+      <div><div class="rule180-label">推奨シャッタースピード</div><div class="rule180-value" id="rule180ss">1/60</div></div>
+      <div style="color:#5a3c18;font-size:12px;font-family:'Noto Sans JP',sans-serif;">→ fpsの2倍の分母（180度シャッター角）</div>
+    </div>
+  </div>
+
+  <div class="nd-grid">
+    <!-- 正引き：必要なND段数を計算 -->
+    <div class="nd-panel">
+      <div class="nd-panel-title">必要なNDを求める（現在の設定 → NDで暗くしたい）</div>
+      <div style="display:grid;gap:12px;">
+        <div>
+          <span class="field-label">現在のシャッタースピード</span>
+          <select id="nd-cur-ss" onchange="calcND()">
+            <option>1/30</option><option>1/50</option><option>1/60</option>
+            <option>1/100</option><option>1/125</option><option>1/200</option>
+            <option>1/250</option><option>1/500</option><option>1/1000</option>
+            <option>1/2000</option><option>1/4000</option>
+          </select>
+        </div>
+        <div>
+          <span class="field-label">目標シャッタースピード（180度ルール等）</span>
+          <select id="nd-target-ss" onchange="calcND()">
+            <option>1/30</option><option>1/50</option><option>1/60</option>
+            <option selected>1/60</option><option>1/100</option><option>1/125</option>
+            <option>1/200</option><option>1/250</option><option>1/500</option>
+          </select>
+        </div>
+      </div>
+      <div class="nd-result" id="nd-result-forward">
+        <div class="nd-result-sub">必要なND</div>
+        <div class="nd-result-main" id="nd-forward-main">—</div>
+        <div class="nd-result-sub" id="nd-forward-sub"></div>
+      </div>
+    </div>
+
+    <!-- 逆引き：手持ちNDで得られるSSを計算 -->
+    <div class="nd-panel">
+      <div class="nd-panel-title">手持ちNDから得られるSSを計算（逆引き）</div>
+      <div style="display:grid;gap:12px;">
+        <div>
+          <span class="field-label">NDなしのシャッタースピード</span>
+          <select id="nd-base-ss" onchange="calcNDReverse()">
+            <option>1/500</option><option>1/1000</option><option>1/2000</option>
+            <option selected>1/2000</option><option>1/4000</option>
+          </select>
+        </div>
+        <div>
+          <span class="field-label">使用するNDフィルター</span>
+          <select id="nd-filter-select" onchange="calcNDReverse()">
+            <option value="2">ND2（1段）</option>
+            <option value="4">ND4（2段）</option>
+            <option value="8">ND8（3段）</option>
+            <option value="16">ND16（4段）</option>
+            <option value="64">ND64（6段）</option>
+            <option value="128">ND128（7段）</option>
+            <option value="400">ND400（≒9段）</option>
+            <option value="1000">ND1000（10段）</option>
+            <option value="4000">ND4000（12段）</option>
+          </select>
+        </div>
+      </div>
+      <div class="nd-result">
+        <div class="nd-result-sub">得られるシャッタースピード</div>
+        <div class="nd-result-main" id="nd-reverse-main">—</div>
+        <div class="nd-result-sub" id="nd-reverse-sub"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NDフィルター一覧表 -->
+  <div>
+    <div class="sec-eyebrow" style="margin-bottom:12px;">NDフィルター早見表</div>
+    <table class="nd-table" id="ndTable">
+      <thead><tr><th>フィルター名</th><th>段数</th><th>光量</th><th>例：1/2000→</th><th>例：1/1000→</th><th>例：1/500→</th></tr></thead>
+      <tbody id="ndTableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ======================== TIMELINE TAB ======================== -->
+<div class="tab-content" id="tab-timeline">
+  <div class="sec-head">
+    <div>
+      <div class="sec-eyebrow">SHOOTING TIMELINE</div>
+      <div class="sec-title">撮影タイムライン</div>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-ghost" onclick="exportTimeline()">テキスト出力</button>
+      <button class="btn btn-ghost" onclick="clearTimeline()">クリア</button>
+    </div>
+  </div>
+
+  <!-- DATE & TIME RANGE -->
+  <div class="tl-date-row">
+    <div>
+      <span class="field-label">撮影日</span>
+      <input type="date" id="tl-date" style="width:160px;" onchange="saveTL();renderTimeline()">
+    </div>
+    <div>
+      <span class="field-label">開始時刻</span>
+      <input type="time" id="tl-start" value="08:00" style="width:110px;" onchange="saveTL();renderTimeline()">
+    </div>
+    <div>
+      <span class="field-label">終了時刻</span>
+      <input type="time" id="tl-end" value="18:00" style="width:110px;" onchange="saveTL();renderTimeline()">
+    </div>
+    <div>
+      <span class="field-label">場所メモ</span>
+      <input type="text" id="tl-venue" placeholder="例：渋谷区民会館" style="width:220px;" onchange="saveTL()">
+    </div>
+  </div>
+
+  <!-- ADD EVENT -->
+  <div class="tl-add-row">
+    <div>
+      <span class="field-label">開始時刻</span>
+      <input type="time" id="tl-ev-start" value="09:00">
+    </div>
+    <div>
+      <span class="field-label">シーン・内容</span>
+      <input type="text" id="tl-ev-name" placeholder="例：会場セットアップ" onkeydown="if(event.key==='Enter')addTLEvent()">
+    </div>
+    <div>
+      <span class="field-label">所要時間(分)</span>
+      <input type="number" id="tl-ev-dur" value="30" min="5" step="5">
+    </div>
+    <div>
+      <span class="field-label">種別</span>
+      <select id="tl-ev-type">
+        <option value="#4a7c3f">撮影</option>
+        <option value="#7a3c10">移動</option>
+        <option value="#1a4a7a">準備・セットアップ</option>
+        <option value="#6a3a7a">インタビュー</option>
+        <option value="#7a6a1a">休憩</option>
+        <option value="#3a6a7a">その他</option>
+      </select>
+    </div>
+    <div style="display:flex;align-items:flex-end;">
+      <button class="btn btn-primary" onclick="addTLEvent()">追加</button>
+    </div>
+  </div>
+
+  <!-- VISUAL TIMELINE -->
+  <div id="tlVisual" style="margin-bottom:24px;overflow-x:auto;"></div>
+
+  <!-- LIST -->
+  <div class="tl-list" id="tlList"></div>
+</div>
+
+<!-- ======================== REFS TAB ======================== -->
+<div class="tab-content" id="tab-refs">
+  <div class="sec-head">
+    <div>
+      <div class="sec-eyebrow">REFERENCES & ASSETS</div>
+      <div class="sec-title">参考・素材</div>
+    </div>
+  </div>
+
+  <!-- 参考リンク -->
+  <div style="margin-bottom:40px;">
+    <div class="sec-eyebrow" style="margin-bottom:12px;">参考リンク（参考動画・サイトなど）</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+      <input type="text" id="refLinkTitle" placeholder="タイトル（例：参考のMV）" style="flex:1;min-width:140px;">
+      <input type="text" id="refLinkUrl" placeholder="URL（https://...）" style="flex:2;min-width:180px;">
+      <button class="btn btn-ghost" type="button" onclick="addRefLink()">追加</button>
+    </div>
+    <div id="refLinkList"></div>
+  </div>
+
+  <!-- 参考画像・素材 -->
+  <div style="margin-bottom:40px;">
+    <div class="sec-eyebrow" style="margin-bottom:12px;">参考画像・素材</div>
+    <div class="sb-drop" id="refDrop"
+      onclick="document.getElementById('refFileInput').click()"
+      ondragover="refDragOver(event)" ondragleave="refDragLeave(event)" ondrop="refDropFiles(event)">
+      <div style="font-size:40px;margin-bottom:12px;opacity:.5;">🖼</div>
+      <div style="font-family:'Noto Sans JP',sans-serif;font-size:13px;color:#5a3c18;line-height:2;">
+        クリックまたはドラッグ＆ドロップで画像を追加<br>
+        <strong style="color:#c8880a;">JPG / PNG / WebP</strong>　参考写真・ロゴ・配色見本など
+      </div>
+    </div>
+    <input type="file" id="refFileInput" accept="image/*" multiple style="display:none" onchange="refAddFiles(this.files)">
+    <div class="sb-grid" id="refImgGrid"></div>
+  </div>
+
+  <!-- メモ -->
+  <div>
+    <div class="sec-eyebrow" style="margin-bottom:12px;">参考メモ</div>
+    <textarea class="notes-area" id="refNote" placeholder="参考にしたい雰囲気・トーン・気をつけることなど" style="min-height:100px;" onchange="saveRefNote()"></textarea>
+  </div>
+</div>
+
+<!-- ======================== DOCS TAB ======================== -->
+<div class="tab-content" id="tab-docs">
+  <div class="sec-head">
+    <div><div class="sec-eyebrow">DOCUMENTS</div><div class="sec-title">書類作成</div></div>
+  </div>
+
+  <div class="doc-tabs">
+    <div class="doc-tab active" onclick="switchDocTab('brief')">案件概要</div>
+    <div class="doc-tab" onclick="switchDocTab('rundown')">進行表</div>
+    <div class="doc-tab" onclick="switchDocTab('estimate')">見積書</div>
+    <div class="doc-tab" onclick="switchDocTab('invoice')">請求書</div>
+    <div class="doc-tab" onclick="switchDocTab('receipt')">領収書</div>
+  </div>
+
+  <!-- 案件概要 -->
+  <div class="doc-section active" id="docsec-brief">
+    <div class="doc-form">
+      <div class="doc-form-grid">
+        <div><span class="field-label">クライアント名</span><input type="text" id="br-client" placeholder="田中太郎 様"></div>
+        <div><span class="field-label">案件名・タイトル</span><input type="text" id="br-title" placeholder="結婚式映像制作"></div>
+        <div><span class="field-label">撮影日</span><input type="date" id="br-shoot"></div>
+        <div><span class="field-label">撮影場所</span><input type="text" id="br-location" placeholder="○○ホテル"></div>
+        <div><span class="field-label">納品日</span><input type="date" id="br-delivery"></div>
+        <div><span class="field-label">担当者</span><input type="text" id="br-staff" placeholder="自社担当者名"></div>
+      </div>
+      <div style="margin-bottom:12px;"><span class="field-label">撮影内容・概要</span><textarea id="br-overview" style="min-height:80px;" placeholder="撮影する内容の概要"></textarea></div>
+      <div style="margin-bottom:12px;"><span class="field-label">納品物</span><textarea id="br-deliverables" style="min-height:60px;" placeholder="例：本編動画 1本（約5分）&#10;ハイライト動画 1本（約90秒）&#10;写真スライドショー 1本"></textarea></div>
+      <div style="margin-bottom:12px;"><span class="field-label">特記事項・クライアント要望</span><textarea id="br-notes" style="min-height:60px;" placeholder="特記事項など"></textarea></div>
+      <button class="btn btn-primary" onclick="printDoc('brief')">印刷 / PDF保存</button>
+    </div>
+  </div>
+
+  <!-- 進行表 -->
+  <div class="doc-section" id="docsec-rundown">
+    <div class="doc-form">
+      <div class="doc-form-grid">
+        <div><span class="field-label">案件名</span><input type="text" id="rd-title" placeholder="結婚式映像制作"></div>
+        <div><span class="field-label">撮影日</span><input type="date" id="rd-date"></div>
+        <div><span class="field-label">集合場所</span><input type="text" id="rd-venue" placeholder="○○ホテル 正面玄関"></div>
+        <div><span class="field-label">スタッフ</span><input type="text" id="rd-staff" placeholder="例：撮影 田中・音声 鈴木"></div>
+      </div>
+      <div style="margin-bottom:8px;font-size:10px;letter-spacing:.4em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;">タイムスケジュール</div>
+      <div id="rd-items"></div>
+      <div style="display:grid;grid-template-columns:90px 1fr 80px auto;gap:8px;margin-top:8px;align-items:end;">
+        <div><span class="field-label">時刻</span><input type="time" id="rd-new-time" value="09:00"></div>
+        <div><span class="field-label">内容</span><input type="text" id="rd-new-name" placeholder="例：会場入り・機材セット" onkeydown="if(event.key==='Enter')addRdItem()"></div>
+        <div><span class="field-label">担当</span><input type="text" id="rd-new-who" placeholder="全員"></div>
+        <button class="btn btn-primary" onclick="addRdItem()" style="align-self:flex-end;">追加</button>
+      </div>
+      <div style="margin-top:16px;"><span class="field-label">備考・注意事項</span><textarea id="rd-notes" style="min-height:60px;" placeholder="駐車場・搬入口の案内など"></textarea></div>
+      <button class="btn btn-primary" onclick="printDoc('rundown')" style="margin-top:12px;">印刷 / PDF保存</button>
+    </div>
+  </div>
+
+  <!-- 見積書 -->
+  <div class="doc-section" id="docsec-estimate">
+    <div class="doc-form">
+      <div class="doc-form-grid">
+        <div><span class="field-label">宛先</span><input type="text" id="es-to" placeholder="田中太郎 様"></div>
+        <div><span class="field-label">見積番号</span><input type="text" id="es-no" placeholder="EST-001"></div>
+        <div><span class="field-label">発行日</span><input type="date" id="es-date"></div>
+        <div><span class="field-label">有効期限</span><input type="date" id="es-expire"></div>
+        <div><span class="field-label">件名</span><input type="text" id="es-title" placeholder="映像制作費用"></div>
+        <div><span class="field-label">支払条件</span><input type="text" id="es-payment" placeholder="例：納品後30日以内"></div>
+      </div>
+      <div style="margin-bottom:8px;font-size:10px;letter-spacing:.4em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;">明細</div>
+      <div id="es-items"></div>
+      <div class="doc-item-row" style="margin-top:8px;">
+        <input type="text" id="es-new-name" placeholder="品目名" onkeydown="if(event.key==='Enter')addDocItem('es')">
+        <input type="number" id="es-new-qty" placeholder="数量" value="1" min="1">
+        <input type="number" id="es-new-price" placeholder="単価" min="0">
+        <select id="es-new-tax"><option value="10">税10%</option><option value="8">税8%</option><option value="0">非課税</option></select>
+        <button class="btn btn-primary" onclick="addDocItem('es')">+</button>
+      </div>
+      <div class="doc-total-row" id="es-total"></div>
+      <div style="margin-top:8px;"><span class="field-label">備考</span><textarea id="es-notes" style="min-height:50px;" placeholder="特記事項など"></textarea></div>
+      <button class="btn btn-primary" onclick="printDoc('estimate')" style="margin-top:12px;">印刷 / PDF保存</button>
+    </div>
+  </div>
+
+  <!-- 請求書 -->
+  <div class="doc-section" id="docsec-invoice">
+    <div class="doc-form">
+      <div class="doc-form-grid">
+        <div><span class="field-label">宛先</span><input type="text" id="iv-to" placeholder="田中太郎 様"></div>
+        <div><span class="field-label">請求番号</span><input type="text" id="iv-no" placeholder="INV-001"></div>
+        <div><span class="field-label">発行日</span><input type="date" id="iv-date"></div>
+        <div><span class="field-label">支払期限</span><input type="date" id="iv-due"></div>
+        <div><span class="field-label">件名</span><input type="text" id="iv-title" placeholder="映像制作費用"></div>
+        <div><span class="field-label">振込先</span><input type="text" id="iv-bank" placeholder="○○銀行 ××支店 普通 1234567"></div>
+      </div>
+      <div style="margin-bottom:8px;font-size:10px;letter-spacing:.4em;color:#8b6820;font-family:'Noto Sans JP',sans-serif;">明細</div>
+      <div id="iv-items"></div>
+      <div class="doc-item-row" style="margin-top:8px;">
+        <input type="text" id="iv-new-name" placeholder="品目名" onkeydown="if(event.key==='Enter')addDocItem('iv')">
+        <input type="number" id="iv-new-qty" placeholder="数量" value="1" min="1">
+        <input type="number" id="iv-new-price" placeholder="単価" min="0">
+        <select id="iv-new-tax"><option value="10">税10%</option><option value="8">税8%</option><option value="0">非課税</option></select>
+        <button class="btn btn-primary" onclick="addDocItem('iv')">+</button>
+      </div>
+      <div class="doc-total-row" id="iv-total"></div>
+      <div style="margin-top:8px;"><span class="field-label">備考</span><textarea id="iv-notes" style="min-height:50px;" placeholder="特記事項など"></textarea></div>
+      <button class="btn btn-primary" onclick="printDoc('invoice')" style="margin-top:12px;">印刷 / PDF保存</button>
+    </div>
+  </div>
+
+  <!-- 領収書 -->
+  <div class="doc-section" id="docsec-receipt">
+    <div class="doc-form">
+      <div class="doc-form-grid">
+        <div><span class="field-label">宛先（上様）</span><input type="text" id="rc-to" placeholder="田中太郎 様"></div>
+        <div><span class="field-label">発行日</span><input type="date" id="rc-date"></div>
+        <div><span class="field-label">件名</span><input type="text" id="rc-title" placeholder="映像制作費用"></div>
+        <div><span class="field-label">金額（税込）</span><input type="number" id="rc-amount" placeholder="100000"></div>
+        <div><span class="field-label">うち消費税</span><input type="number" id="rc-tax" placeholder="9090"></div>
+        <div><span class="field-label">支払方法</span><select id="rc-method"><option>銀行振込</option><option>現金</option><option>クレジットカード</option><option>その他</option></select></div>
+      </div>
+      <div><span class="field-label">但し書き</span><input type="text" id="rc-note" placeholder="映像制作費として" style="margin-bottom:12px;"></div>
+      <button class="btn btn-primary" onclick="printDoc('receipt')">印刷 / PDF保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- PRINT MODAL -->
+<div id="printModal" class="print-modal" style="display:none;position:fixed;inset:0;background:#fff;z-index:99999;padding:32px;overflow-y:auto;">
+  <div class="no-print" style="margin-bottom:16px;display:flex;gap:12px;">
+    <button class="btn btn-primary" onclick="window.print()">印刷 / PDF保存</button>
+    <button class="btn btn-ghost" onclick="document.getElementById('printModal').style.display='none'">閉じる</button>
+  </div>
+  <div id="printContent"></div>
+</div>
+
+<!-- ======================== STORYBOARD TAB ======================== -->
+<div class="tab-content" id="tab-storyboard">
+  <div class="sec-head">
+    <div>
+      <div class="sec-eyebrow">STORYBOARD</div>
+      <div class="sec-title">絵コンテ</div>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <span id="sbCount" style="font-family:'Noto Sans JP',sans-serif;font-size:12px;color:#8b6820;align-self:center;"></span>
+      <button class="btn btn-ghost" onclick="document.getElementById('sbFileInput').click()">＋ 画像を追加</button>
+    </div>
+  </div>
+
+  <div class="sb-drop" id="sbDrop"
+    onclick="document.getElementById('sbFileInput').click()"
+    ondragover="sbDragOver(event)" ondragleave="sbDragLeave(event)" ondrop="sbDropFiles(event)">
+    <div style="font-size:40px;margin-bottom:12px;opacity:.5;">🎬</div>
+    <div style="font-family:'Noto Sans JP',sans-serif;font-size:13px;color:#5a3c18;line-height:2;">
+      クリックまたはドラッグ＆ドロップで絵コンテ画像を追加<br>
+      <strong style="color:#c8880a;">JPG / PNG / WebP</strong>　複数枚まとめて追加できます
+    </div>
+  </div>
+  <input type="file" id="sbFileInput" accept="image/*" multiple style="display:none" onchange="sbAddFiles(this.files)">
+
+  <div class="sb-grid" id="sbGrid"></div>
+</div>
+
+<!-- STORYBOARD EDIT MODAL -->
+<div class="sb-modal" id="sbModal" style="display:none;" onclick="if(event.target===this)closeSbModal()">
+  <div class="sb-modal-box">
+    <div class="sb-modal-head">
+      <div class="sb-modal-title">カット情報を編集</div>
+      <button class="sb-modal-close" onclick="closeSbModal()">×</button>
+    </div>
+    <div class="sb-modal-body">
+      <img id="sbModalImg" class="sb-modal-img" src="" alt="">
+      <div class="sb-form-grid">
+        <div>
+          <span class="field-label">シーン番号</span>
+          <input type="text" id="sbEditScene" placeholder="例：シーン1">
+        </div>
+        <div>
+          <span class="field-label">カット番号</span>
+          <input type="text" id="sbEditCut" placeholder="例：C01">
+        </div>
+        <div>
+          <span class="field-label">ショット種別</span>
+          <select id="sbEditType">
+            <option value="">—</option>
+            <option>WS（ワイド）</option>
+            <option>MS（ミディアム）</option>
+            <option>CU（クローズアップ）</option>
+            <option>ECU（超クローズアップ）</option>
+            <option>バストアップ</option>
+            <option>ローアングル</option>
+            <option>ハイアングル</option>
+            <option>ドローン</option>
+            <option>インサート</option>
+          </select>
+        </div>
+        <div>
+          <span class="field-label">尺（秒）</span>
+          <input type="number" id="sbEditDur" placeholder="例：5" min="0" step="0.5">
+        </div>
+      </div>
+      <div style="margin-bottom:12px;">
+        <span class="field-label">カメラワーク・動き</span>
+        <input type="text" id="sbEditMotion" placeholder="例：ゆっくりズームイン、固定">
+      </div>
+      <div style="margin-bottom:20px;">
+        <span class="field-label">セリフ・ナレーション・メモ</span>
+        <textarea id="sbEditNote" style="min-height:80px;" placeholder="セリフやシーンの説明など"></textarea>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-primary" onclick="saveSbEdit()">保存</button>
+        <button class="btn btn-ghost" onclick="closeSbModal()">キャンセル</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FULLSCREEN VIEW -->
+<div class="sb-fullscreen" id="sbFullscreen" style="display:none;" onclick="this.style.display='none'">
+  <img id="sbFullImg" src="" alt="">
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let state = {};
+let currentProject = null;
+
+const DEFAULT_GEAR = ['カメラ本体','バッテリー（予備含む）','メモリーカード（予備含む）','レンズ','三脚','マイク','ケーブル類','充電器'];
+const DEFAULT_LOCATION = ['ロケ地確認・許可','駐車場確認','天気確認','クライアントへの最終連絡','当日タイムスケジュール'];
+
+// ─── PROJECT ─────────────────────────────────────────────────────────────────
+function loadState(){
+  state = JSON.parse(localStorage.getItem('videoTools') || '{}');
+  if(Object.keys(state).length === 0) newProject(true);
+}
+
+function saveState(){
+  localStorage.setItem('videoTools', JSON.stringify(state));
+}
+
+function initProject(name){
+  return {
+    name,
+    checks: {
+      gear: DEFAULT_GEAR.map(t => ({text:t, done:false})),
+      location: DEFAULT_LOCATION.map(t => ({text:t, done:false}))
+    },
+    shots: [],
+    camera: {iso:'',ss:'',fstop:'',wb:'',focus:'',pp:'',note:''},
+    cuts: [],
+    telop: [],
+    editNotes: '',
+    storyboard: [],
+    todos: [],
+    refs: {links:[], images:[], note:''}
+  };
+}
+
+function newProject(silent=false){
+  const name = silent ? '新規案件' : prompt('案件名を入力してください', '新規案件 ' + (Object.keys(state).length + 1));
+  if(!name) return;
+  const id = 'p_' + Date.now();
+  state[id] = initProject(name);
+  saveState();
+  renderProjectSelect(id);
+  switchProject();
+  if(!silent) showToast('案件「' + name + '」を作成しました');
+}
+
+function renameProject(){
+  const cur = state[currentProject];
+  if(!cur) return;
+  const name = prompt('案件名を入力してください', cur.name);
+  if(name===null) return;
+  const trimmed = name.trim();
+  if(!trimmed){ showToast('案件名を入力してください'); return; }
+  cur.name = trimmed;
+  saveState();
+  renderProjectSelect(currentProject);
+  renderSchedule();
+  renderDashboard();
+  showToast('案件名を変更しました');
+}
+
+function deleteProject(){
+  const keys = Object.keys(state);
+  if(keys.length <= 1){ showToast('最後の案件は削除できません'); return; }
+  if(!confirm('この案件を削除しますか？')) return;
+  delete state[currentProject];
+  saveState();
+  renderProjectSelect(Object.keys(state)[0]);
+  switchProject();
+}
+
+function renderProjectSelect(selectId){
+  const sel = document.getElementById('projectSelect');
+  sel.innerHTML = '';
+  for(const id in state){
+    const opt = document.createElement('option');
+    opt.value = id;
+    opt.textContent = state[id].name + (isProjectClosed(state[id].schedule) ? '（終了）' : '');
+    if(id === selectId) opt.selected = true;
+    sel.appendChild(opt);
+  }
+  currentProject = sel.value;
+}
+
+function switchProject(){
+  currentProject = document.getElementById('projectSelect').value;
+  renderAll();
+}
+
+function proj(){ return state[currentProject]; }
+
+// ─── TABS ─────────────────────────────────────────────────────────────────────
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+  if(name==='schedule'){ renderSchedule(); renderDashboard(); }
+  if(name==='docs'){ renderRdItems(); }
+  if(name==='timeline') renderTimeline();
+  if(name==='nd') initND();
+  if(name==='storyboard') renderSB();
+  if(name==='refs') renderRefs();
+}
+
+// ─── CHECKLIST ───────────────────────────────────────────────────────────────
+function renderChecks(){
+  ['gear','location'].forEach(cat => {
+    const el = document.getElementById('checkList-' + cat);
+    el.innerHTML = '';
+    (proj().checks[cat] || []).forEach((item, i) => {
+      const div = document.createElement('div');
+      div.className = 'check-item';
+      div.innerHTML = `
+        <input type="checkbox" ${item.done?'checked':''} id="chk-${cat}-${i}" onchange="toggleCheck('${cat}',${i})">
+        <label for="chk-${cat}-${i}" class="${item.done?'checked':''}">${item.text}</label>
+        <button class="del-check" onclick="delCheck('${cat}',${i})">×</button>`;
+      el.appendChild(div);
+    });
+  });
+  updateProgress();
+}
+
+function updateProgress(){
+  const all = [...(proj().checks.gear||[]), ...(proj().checks.location||[])];
+  const done = all.filter(i=>i.done).length;
+  document.getElementById('checkProgress').textContent = `${done} / ${all.length}`;
+  document.getElementById('progressFill').style.width = all.length ? (done/all.length*100)+'%' : '0%';
+}
+
+function toggleCheck(cat, i){
+  proj().checks[cat][i].done = !proj().checks[cat][i].done;
+  saveState();
+  renderChecks();
+}
+
+function addCheck(cat){
+  const inp = document.getElementById('new' + cat.charAt(0).toUpperCase() + cat.slice(1));
+  const text = inp.value.trim();
+  if(!text) return;
+  proj().checks[cat].push({text, done:false});
+  inp.value = '';
+  saveState();
+  renderChecks();
+}
+
+function delCheck(cat, i){
+  proj().checks[cat].splice(i, 1);
+  saveState();
+  renderChecks();
+}
+
+function resetChecks(){
+  proj().checks.gear.forEach(i=>i.done=false);
+  proj().checks.location.forEach(i=>i.done=false);
+  saveState();
+  renderChecks();
+  showToast('チェックをリセットしました');
+}
+
+// ─── SHOT LIST ────────────────────────────────────────────────────────────────
+function renderShots(){
+  const tbody = document.getElementById('shotBody');
+  tbody.innerHTML = '';
+  (proj().shots||[]).forEach((s,i) => {
+    const tr = document.createElement('tr');
+    if(s.done) tr.className = 'shot-complete';
+    tr.innerHTML = `
+      <td class="shot-num">${i+1}</td>
+      <td class="shot-done" style="text-align:center;"><input type="checkbox" ${s.done?'checked':''} onchange="toggleShot(${i})"></td>
+      <td><input type="text" value="${esc(s.scene)}" onchange="updateShot(${i},'scene',this.value)"></td>
+      <td><select onchange="updateShot(${i},'type',this.value)">${shotTypeOpts(s.type)}</select></td>
+      <td><select onchange="updateShot(${i},'angle',this.value)">${shotAngleOpts(s.angle)}</select></td>
+      <td><input type="text" value="${esc(s.note)}" onchange="updateShot(${i},'note',this.value)"></td>
+      <td><button class="btn-danger" onclick="delShot(${i})">×</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+const SHOT_TYPES = ['WS（ワイド）','MS（ミディアム）','CU（クローズアップ）','ECU（超クローズアップ）','バストアップ','ローアングル','ハイアングル','ドローン','インサート','その他'];
+const SHOT_ANGLES = ['正面','斜め','横','背面','俯瞰','アオリ'];
+
+function shotTypeOpts(sel){ return SHOT_TYPES.map(t=>`<option ${t===sel?'selected':''}>${t}</option>`).join(''); }
+function shotAngleOpts(sel){ return SHOT_ANGLES.map(t=>`<option ${t===sel?'selected':''}>${t}</option>`).join(''); }
+
+function addShot(){
+  const scene = document.getElementById('shotScene').value.trim();
+  if(!scene){ showToast('シーン・内容を入力してください'); return; }
+  proj().shots.push({
+    scene,
+    type: document.getElementById('shotType').value,
+    angle: document.getElementById('shotAngle').value,
+    note: document.getElementById('shotNote').value,
+    done: false
+  });
+  document.getElementById('shotScene').value = '';
+  document.getElementById('shotNote').value = '';
+  saveState();
+  renderShots();
+}
+
+function toggleShot(i){ proj().shots[i].done=!proj().shots[i].done; saveState(); renderShots(); }
+function updateShot(i,k,v){ proj().shots[i][k]=v; saveState(); }
+function delShot(i){ proj().shots.splice(i,1); saveState(); renderShots(); }
+
+function exportShots(){
+  const lines = ['ショットリスト — ' + proj().name, ''];
+  (proj().shots||[]).forEach((s,i)=>{
+    lines.push(`#${i+1} [${s.done?'✓':'　'}] ${s.scene}　${s.type}　${s.angle}　${s.note}`);
+  });
+  copyText(lines.join('\n'));
+}
+
+// ─── CAMERA SETTINGS ─────────────────────────────────────────────────────────
+const PRESETS = {
+  'outdoor-day': {iso:'200',ss:'1/500',fstop:'5.6',wb:'太陽光 5500K',focus:'AF-S（シングル）',pp:''},
+  'indoor':      {iso:'800',ss:'1/100',fstop:'2.8',wb:'蛍光灯 4000K',focus:'MF（マニュアル）',pp:'Cine4'},
+  'night':       {iso:'3200',ss:'1/60',fstop:'1.8',wb:'タングステン 3200K',focus:'MF（マニュアル）',pp:'S-Log2'},
+  'interview':   {iso:'400',ss:'1/100',fstop:'2.8',wb:'オート（AWB）',focus:'MF（マニュアル）',pp:'Cine4'},
+  'event':       {iso:'1600',ss:'1/200',fstop:'4',wb:'オート（AWB）',focus:'AF-C（コンティニュアス）',pp:''},
+};
+
+function applyPreset(key){
+  const p = PRESETS[key];
+  ['iso','ss','fstop','note'].forEach(f=>{ const el=document.getElementById('cam-'+f); if(p[f]!==undefined) el.value=p[f]; });
+  document.getElementById('cam-wb').value = p.wb;
+  document.getElementById('cam-focus').value = p.focus;
+  document.getElementById('cam-pp').value = p.pp||'';
+  showToast('プリセットを適用しました');
+}
+
+function renderCamera(){
+  const c = proj().camera || {};
+  ['iso','ss','fstop','pp','note'].forEach(f=>{ document.getElementById('cam-'+f).value = c[f]||''; });
+  document.getElementById('cam-wb').value = c.wb||'';
+  document.getElementById('cam-focus').value = c.focus||'';
+}
+
+function saveCameraSettings(){
+  proj().camera = {
+    iso: document.getElementById('cam-iso').value,
+    ss: document.getElementById('cam-ss').value,
+    fstop: document.getElementById('cam-fstop').value,
+    wb: document.getElementById('cam-wb').value,
+    focus: document.getElementById('cam-focus').value,
+    pp: document.getElementById('cam-pp').value,
+    note: document.getElementById('cam-note').value,
+  };
+  saveState();
+  showToast('カメラ設定を保存しました');
+}
+
+// ─── CUT LIST ────────────────────────────────────────────────────────────────
+function renderCuts(){
+  const tbody = document.getElementById('cutBody');
+  tbody.innerHTML = '';
+  let cum = 0;
+  const cuts = proj().cuts || [];
+  cuts.forEach((c,i) => {
+    const dur = parseFloat(c.dur)||0;
+    cum += dur;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="shot-num">${i+1}</td>
+      <td><input type="text" value="${esc(c.scene)}" onchange="updateCut(${i},'scene',this.value)"></td>
+      <td><input type="number" class="duration-input" value="${c.dur}" min="0" step="0.5" onchange="updateCut(${i},'dur',this.value);renderCuts()"></td>
+      <td class="timecode">${fmtTime(cum)}</td>
+      <td><select onchange="updateCut(${i},'type',this.value)">${cutTypeOpts(c.type)}</select></td>
+      <td><input type="text" value="${esc(c.note)}" onchange="updateCut(${i},'note',this.value)"></td>
+      <td><button class="btn-danger" onclick="delCut(${i})">×</button></td>`;
+    tbody.appendChild(tr);
+  });
+  const total = cuts.reduce((s,c)=>s+(parseFloat(c.dur)||0),0);
+  document.getElementById('totalDuration').innerHTML = total.toFixed(1) + '<span>秒</span>';
+  document.getElementById('totalMin').textContent = fmtTime(total);
+  document.getElementById('totalCuts').innerHTML = cuts.length + '<span>カット</span>';
+}
+
+const CUT_TYPES = ['映像','テロップ','タイトル','BGM転換','SE','暗転','その他'];
+function cutTypeOpts(sel){ return CUT_TYPES.map(t=>`<option ${t===sel?'selected':''}>${t}</option>`).join(''); }
+
+function fmtTime(sec){
+  const s = Math.round(sec);
+  const m = Math.floor(s/60);
+  return m + ':' + String(s%60).padStart(2,'0');
+}
+
+function addCut(){
+  const scene = document.getElementById('cutScene').value.trim();
+  if(!scene){ showToast('シーン名を入力してください'); return; }
+  proj().cuts.push({
+    scene,
+    dur: document.getElementById('cutDur').value || '0',
+    type: document.getElementById('cutType').value,
+    note: document.getElementById('cutNote').value,
+  });
+  document.getElementById('cutScene').value = '';
+  document.getElementById('cutDur').value = '';
+  document.getElementById('cutNote').value = '';
+  saveState();
+  renderCuts();
+}
+
+function updateCut(i,k,v){ proj().cuts[i][k]=v; saveState(); }
+function delCut(i){ proj().cuts.splice(i,1); saveState(); renderCuts(); }
+
+function exportCuts(){
+  const lines = ['カット構成 — ' + proj().name, ''];
+  let cum = 0;
+  (proj().cuts||[]).forEach((c,i)=>{
+    const dur = parseFloat(c.dur)||0; cum += dur;
+    lines.push(`#${i+1} [${fmtTime(cum)}] ${c.scene}　${c.dur}秒　${c.type}　${c.note}`);
+  });
+  lines.push('', `合計：${(proj().cuts||[]).reduce((s,c)=>s+(parseFloat(c.dur)||0),0).toFixed(1)}秒`);
+  copyText(lines.join('\n'));
+}
+
+// ─── TELOP ───────────────────────────────────────────────────────────────────
+function renderTelop(){
+  const list = document.getElementById('telopList');
+  list.innerHTML = '';
+  (proj().telop||[]).forEach((t,i) => {
+    const div = document.createElement('div');
+    div.className = 'telop-item';
+    div.innerHTML = `
+      <div class="telop-tc"><span class="field-label">タイムコード</span><input type="text" value="${esc(t.tc)}" onchange="updateTelop(${i},'tc',this.value)" style="font-family:monospace;"></div>
+      <div><span class="field-label">テロップ</span><input type="text" value="${esc(t.text)}" onchange="updateTelop(${i},'text',this.value)"></div>
+      <div><button class="telop-del" onclick="delTelop(${i})">×</button></div>`;
+    list.appendChild(div);
+  });
+}
+
+function addTelop(){
+  const tc = document.getElementById('telopTc').value.trim();
+  const text = document.getElementById('telopText').value.trim();
+  if(!text){ showToast('テロップ文字を入力してください'); return; }
+  proj().telop.push({tc, text});
+  document.getElementById('telopTc').value = '';
+  document.getElementById('telopText').value = '';
+  saveState();
+  renderTelop();
+}
+
+function updateTelop(i,k,v){ proj().telop[i][k]=v; saveState(); }
+function delTelop(i){ proj().telop.splice(i,1); saveState(); renderTelop(); }
+
+function exportTelop(){
+  const lines = ['テロップ一覧 — ' + proj().name, ''];
+  (proj().telop||[]).forEach((t,i)=>{ lines.push(`${t.tc}\t${t.text}`); });
+  copyText(lines.join('\n'));
+}
+
+// ─── EDIT NOTES ──────────────────────────────────────────────────────────────
+function renderEditNotes(){ document.getElementById('editNotes').value = proj().editNotes || ''; }
+function saveEditNotes(){
+  proj().editNotes = document.getElementById('editNotes').value;
+  saveState();
+  showToast('編集メモを保存しました');
+}
+
+// ─── UTILS ───────────────────────────────────────────────────────────────────
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+function copyText(text){
+  navigator.clipboard.writeText(text).then(()=>showToast('クリップボードにコピーしました')).catch(()=>{
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    showToast('クリップボードにコピーしました');
+  });
+}
+
+function showToast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 2500);
+}
+
+// ─── RENDER ALL ──────────────────────────────────────────────────────────────
+function renderAll(){
+  renderChecks();
+  renderShots();
+  renderCamera();
+  renderCuts();
+  renderTelop();
+  renderEditNotes();
+  renderSB();
+  renderSchedule();
+  renderDashboard();
+  updateCurrentProjBar();
+}
+
+function updateCurrentProjBar(){
+  const el = document.getElementById('currentProjName');
+  if(!el || !proj()) return;
+  const closed = isProjectClosed(proj().schedule);
+  el.innerHTML = esc(proj().name) +
+    (closed ? ` <span style="background:#2a4a2a;color:#a8d8a8;font-family:'Noto Sans JP',sans-serif;font-size:10px;letter-spacing:.14em;padding:3px 10px;border-radius:2px;margin-left:8px;vertical-align:middle;">✓ 終了</span>` : '');
+}
+
+// ─── ND FILTER ───────────────────────────────────────────────────────────────
+const ND_FILTERS = [
+  {name:'ND2',  stops:1,  factor:2},
+  {name:'ND4',  stops:2,  factor:4},
+  {name:'ND8',  stops:3,  factor:8},
+  {name:'ND16', stops:4,  factor:16},
+  {name:'ND64', stops:6,  factor:64},
+  {name:'ND128',stops:7,  factor:128},
+  {name:'ND400',stops:8.6,factor:400},
+  {name:'ND1000',stops:10,factor:1000},
+  {name:'ND4000',stops:12,factor:4000},
+];
+
+const SS_VALS = [1/4,1/8,1/15,1/20,1/25,1/30,1/40,1/50,1/60,1/80,1/100,1/125,1/160,1/200,1/250,1/320,1/400,1/500,1/640,1/800,1/1000,1/1250,1/1600,1/2000,1/2500,1/3200,1/4000,1/6400,1/8000];
+const SS_LABELS=['1/4','1/8','1/15','1/20','1/25','1/30','1/40','1/50','1/60','1/80','1/100','1/125','1/160','1/200','1/250','1/320','1/400','1/500','1/640','1/800','1/1000','1/1250','1/1600','1/2000','1/2500','1/3200','1/4000','1/6400','1/8000'];
+
+function parseSS(str){ const p=str.split('/'); return p.length===2?1/parseInt(p[1]):parseFloat(p[0]); }
+
+function closestSS(val){
+  let best=0, bestDiff=Infinity;
+  SS_VALS.forEach((v,i)=>{ const d=Math.abs(v-val); if(d<bestDiff){bestDiff=d;best=i;} });
+  return SS_LABELS[best];
+}
+
+function calcND(){
+  const fps = parseInt(document.getElementById('nd-fps').value);
+  const recSS = 1/(fps*2);
+  document.getElementById('rule180ss').textContent = '1/' + (fps*2);
+
+  const curSS = parseSS(document.getElementById('nd-cur-ss').value);
+  const tgtSS = parseSS(document.getElementById('nd-target-ss').value);
+  if(curSS <= tgtSS){
+    document.getElementById('nd-forward-main').textContent = 'NDは不要';
+    document.getElementById('nd-forward-sub').textContent = '現在のSSはすでに目標以下です';
+    return;
+  }
+  const ratio = curSS / tgtSS;
+  const stops = Math.log2(ratio);
+  const best = ND_FILTERS.reduce((a,b)=> Math.abs(b.stops-stops)<Math.abs(a.stops-stops)?b:a);
+  document.getElementById('nd-forward-main').textContent = best.name + ' （' + best.stops.toFixed(0) + '段）';
+  document.getElementById('nd-forward-sub').textContent = `必要な減光: ${stops.toFixed(1)}段 → ${best.name}（${best.stops}段）が最適`;
+
+  renderNDTable(curSS);
+}
+
+function calcNDReverse(){
+  const baseSS = parseSS(document.getElementById('nd-base-ss').value);
+  const factor = parseInt(document.getElementById('nd-filter-select').value);
+  const resultSS = baseSS * factor;
+  const label = closestSS(resultSS);
+  document.getElementById('nd-reverse-main').textContent = label;
+  const nd = ND_FILTERS.find(f=>f.factor===factor);
+  document.getElementById('nd-reverse-sub').textContent = nd ? `${nd.name}（${nd.stops}段）を装着した場合` : '';
+}
+
+function renderNDTable(highlightBase){
+  const examples = [1/2000, 1/1000, 1/500];
+  const tbody = document.getElementById('ndTableBody');
+  tbody.innerHTML = '';
+  ND_FILTERS.forEach(f=>{
+    const tr = document.createElement('tr');
+    if(highlightBase && Math.abs(highlightBase/(1/f.factor) - (highlightBase*f.factor)) < 0.0001) tr.className='nd-highlight';
+    tr.innerHTML = `<td><strong>${f.name}</strong></td><td>${f.stops % 1 === 0 ? f.stops : f.stops.toFixed(1)}段</td><td>1/${f.factor}に減光</td>`
+      + examples.map(ss=>`<td>${closestSS(ss*f.factor)}</td>`).join('');
+    tbody.appendChild(tr);
+  });
+}
+
+function initND(){
+  calcND();
+  calcNDReverse();
+  renderNDTable();
+}
+
+// ─── TIMELINE ────────────────────────────────────────────────────────────────
+const TL_COLORS = {
+  '#4a7c3f':'撮影','#7a3c10':'移動','#1a4a7a':'準備','#6a3a7a':'インタビュー','#7a6a1a':'休憩','#3a6a7a':'その他'
+};
+
+function tlKey(){ return 'tl_' + currentProject; }
+function tlData(){
+  const d = JSON.parse(localStorage.getItem(tlKey()) || 'null');
+  return d || {date:'',start:'08:00',end:'18:00',venue:'',events:[]};
+}
+function saveTL(){
+  const d = tlData();
+  d.date = document.getElementById('tl-date').value;
+  d.start = document.getElementById('tl-start').value;
+  d.end = document.getElementById('tl-end').value;
+  d.venue = document.getElementById('tl-venue').value;
+  localStorage.setItem(tlKey(), JSON.stringify(d));
+}
+function loadTL(){
+  const d = tlData();
+  document.getElementById('tl-date').value = d.date || new Date().toISOString().split('T')[0];
+  document.getElementById('tl-start').value = d.start || '08:00';
+  document.getElementById('tl-end').value = d.end || '18:00';
+  document.getElementById('tl-venue').value = d.venue || '';
+  renderTimeline();
+}
+
+function timeToMin(t){ const [h,m]=t.split(':').map(Number); return h*60+m; }
+function minToTime(m){ return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0'); }
+
+function addTLEvent(){
+  const name = document.getElementById('tl-ev-name').value.trim();
+  if(!name){ showToast('シーン名を入力してください'); return; }
+  const d = tlData();
+  const start = document.getElementById('tl-ev-start').value;
+  const dur = parseInt(document.getElementById('tl-ev-dur').value) || 30;
+  const color = document.getElementById('tl-ev-type').value;
+  const endMin = timeToMin(start) + dur;
+  d.events.push({start, end: minToTime(endMin), dur, name, color});
+  d.events.sort((a,b)=>timeToMin(a.start)-timeToMin(b.start));
+  localStorage.setItem(tlKey(), JSON.stringify(d));
+  document.getElementById('tl-ev-name').value = '';
+  document.getElementById('tl-ev-start').value = minToTime(endMin);
+  renderTimeline();
+}
+
+function delTLEvent(i){
+  const d = tlData(); d.events.splice(i,1);
+  localStorage.setItem(tlKey(), JSON.stringify(d));
+  renderTimeline();
+}
+
+function renderTimeline(){
+  const d = tlData();
+  const startMin = timeToMin(d.start||'08:00');
+  const endMin = timeToMin(d.end||'18:00');
+  const totalMin = Math.max(endMin - startMin, 60);
+  const W = 900;
+
+  // Visual
+  const vis = document.getElementById('tlVisual');
+  const now = new Date();
+  const nowMin = now.getHours()*60 + now.getMinutes();
+  const pct = p => ((p - startMin) / totalMin * W).toFixed(1);
+
+  let html = `<div style="position:relative;width:${W}px;min-width:${W}px;">`;
+  // hour labels
+  html += '<div class="tl-axis">';
+  for(let m=startMin; m<=endMin; m+=60){
+    const w = Math.min(60/totalMin*100, (endMin-m)/totalMin*100);
+    html += `<div style="width:${60/totalMin*W}px;font-family:monospace;font-size:10px;color:#8b6820;padding-bottom:4px;flex-shrink:0;">${minToTime(m)}</div>`;
+  }
+  html += '</div>';
+
+  // grid + events
+  const rowH = (d.events.length+1)*48 + 16;
+  html += `<div style="position:relative;height:${rowH}px;background:#f0e4cc;border:1px solid rgba(184,152,72,.3);">`;
+  for(let m=startMin; m<=endMin; m+=60){
+    const x = pct(m);
+    html += `<div style="position:absolute;left:${x}px;top:0;bottom:0;width:1px;background:rgba(184,152,72,.25);"></div>`;
+  }
+
+  d.events.forEach((ev,i)=>{
+    const x = Math.max(0, pct(timeToMin(ev.start)));
+    const w = Math.max(2, (ev.dur / totalMin * W).toFixed(1));
+    const label = ev.name + ' ' + ev.start + '〜' + ev.end;
+    html += `<div class="tl-item" style="left:${x}px;width:${w}px;top:${8+i*48}px;background:${ev.color};color:#fff;font-size:11px;" title="${label}">${ev.name}</div>`;
+  });
+
+  // now line
+  if(nowMin >= startMin && nowMin <= endMin){
+    const x = pct(nowMin);
+    html += `<div class="tl-now-line" style="left:${x}px;"><div class="tl-now-label">${minToTime(nowMin)}</div></div>`;
+  }
+  html += '</div></div>';
+  vis.innerHTML = html;
+
+  // List
+  const list = document.getElementById('tlList');
+  if(!d.events.length){ list.innerHTML=''; return; }
+  let lhtml = '<div class="tl-list-row tl-list-head"><div>開始</div><div>終了</div><div>シーン・内容</div><div>所要時間</div><div>種別</div><div></div></div>';
+  d.events.forEach((ev,i)=>{
+    const typeName = TL_COLORS[ev.color] || '';
+    lhtml += `<div class="tl-list-row">
+      <div>${ev.start}</div><div>${ev.end}</div>
+      <div><input type="text" value="${esc(ev.name)}" onchange="updateTLEvent(${i},'name',this.value)" style="padding:4px 8px;font-size:12px;"></div>
+      <div>${ev.dur}分</div>
+      <div><span style="display:inline-block;width:10px;height:10px;background:${ev.color};border-radius:50%;margin-right:6px;"></span>${typeName}</div>
+      <div><button class="btn-danger" style="padding:4px 10px;" onclick="delTLEvent(${i})">×</button></div>
+    </div>`;
+  });
+  list.innerHTML = lhtml;
+}
+
+function updateTLEvent(i,k,v){
+  const d = tlData(); d.events[i][k]=v;
+  localStorage.setItem(tlKey(), JSON.stringify(d));
+}
+
+function clearTimeline(){
+  if(!confirm('タイムラインをクリアしますか？')) return;
+  const d = tlData(); d.events=[];
+  localStorage.setItem(tlKey(), JSON.stringify(d));
+  renderTimeline();
+}
+
+function exportTimeline(){
+  const d = tlData();
+  const lines = [`撮影タイムライン — ${proj().name}`, d.date||'', d.venue||'', ''];
+  d.events.forEach(ev=>{ lines.push(`${ev.start}〜${ev.end}（${ev.dur}分）　${ev.name}`); });
+  copyText(lines.join('\n'));
+}
+
+// ─── SCHEDULE ────────────────────────────────────────────────────────────────
+const PHASES = [
+  '事前打ち合わせ','撮影準備','撮影','素材整理・バックアップ','粗編集','本編集','クライアント確認','修正対応','最終書き出し','納品'
+];
+const STATUS_OPTS = ['未着手','進行中','完了','スキップ'];
+
+function defaultSchedule(){
+  return {
+    client:'', shootDates:[''], deadline:'', memo:'',
+    phases: PHASES.map(name=>({name, status:'未着手', due:'', note:''}))
+  };
+}
+
+function schData(){
+  const s = proj().schedule || (proj().schedule = defaultSchedule());
+  // 旧データ（単一shootDate）を複数形式に移行
+  if(!s.shootDates){ s.shootDates = s.shootDate ? [s.shootDate] : ['']; }
+  return s;
+}
+
+// 撮影日入力欄の描画
+function renderShootDates(dates){
+  const wrap = document.getElementById('sch-shoot-dates');
+  if(!dates || dates.length===0) dates = [''];
+  wrap.innerHTML = dates.map((d,i)=>`
+    <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px;">
+      <input type="date" class="sch-shoot-date-input" value="${d||''}" style="flex:1;">
+      ${dates.length>1?`<button type="button" onclick="removeShootDate(${i})" style="background:none;border:none;color:#a05030;font-size:16px;cursor:pointer;line-height:1;">×</button>`:''}
+    </div>`).join('');
+}
+function getShootDatesFromDOM(){
+  return Array.from(document.querySelectorAll('.sch-shoot-date-input')).map(el=>el.value).filter(v=>v);
+}
+function addShootDate(){
+  const dates = getShootDatesFromDOM();
+  dates.push('');
+  renderShootDates(dates.length?dates:['']);
+}
+function removeShootDate(i){
+  const dates = getShootDatesFromDOM();
+  // 描画上のindexで消す（空欄含む）
+  const all = Array.from(document.querySelectorAll('.sch-shoot-date-input')).map(el=>el.value);
+  all.splice(i,1);
+  renderShootDates(all.length?all:['']);
+}
+
+function saveSchedule(){
+  const s = schData();
+  s.client   = document.getElementById('sch-client').value;
+  s.shootDates = getShootDatesFromDOM();
+  if(s.shootDates.length===0) s.shootDates = [''];
+  s.shootDate = s.shootDates[0] || '';  // 互換用（先頭の撮影日）
+  s.deadline = document.getElementById('sch-deadline').value;
+  s.content  = document.getElementById('sch-content').value;
+  s.goal     = document.getElementById('sch-goal').value;
+  s.target   = document.getElementById('sch-target').value;
+  s.memo     = document.getElementById('sch-memo').value;
+  s.phases.forEach((p,i)=>{
+    p.status = document.getElementById(`ph-status-${i}`).value;
+    p.due    = document.getElementById(`ph-due-${i}`).value;
+    p.note   = document.getElementById(`ph-note-${i}`).value;
+  });
+  saveState();
+  renderSchedule();
+  renderDashboard();
+  showToast('保存しました');
+}
+
+function saveAndNextProject(){
+  saveSchedule();
+  newProject();
+}
+
+// ─── 案件TODO ─────────────────────────────────────────────────────────────────
+function localToday(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function setProjTodoToday(){ document.getElementById('todoDate').value = localToday(); }
+
+function addProjTodo(){
+  const p = proj();
+  if(!p.todos) p.todos = [];
+  const text = document.getElementById('todoInput').value.trim();
+  if(!text) return;
+  p.todos.push({id:'t_'+Date.now(), text, done:false, dueDate:document.getElementById('todoDate').value||''});
+  saveState();
+  document.getElementById('todoInput').value='';
+  document.getElementById('todoDate').value='';
+  renderProjTodos();
+}
+function toggleProjTodo(i){ proj().todos[i].done = !proj().todos[i].done; saveState(); renderProjTodos(); }
+function deleteProjTodo(i){ proj().todos.splice(i,1); saveState(); renderProjTodos(); }
+
+function renderProjTodos(){
+  const el = document.getElementById('schTodoList');
+  if(!el) return;
+  const todos = proj().todos || [];
+  if(todos.length===0){ el.innerHTML='<div style="font-family:\'Noto Sans JP\',sans-serif;font-size:12px;color:#8b6820;">TODOがありません。</div>'; return; }
+  const undone = todos.filter(t=>!t.done).sort((a,b)=>(a.dueDate||'9999').localeCompare(b.dueDate||'9999'));
+  const done = todos.filter(t=>t.done);
+  const todayStr = localToday();
+  const row = (t)=>{
+    const i = todos.indexOf(t);
+    let due = '';
+    if(t.dueDate){
+      const overdue = !t.done && t.dueDate < todayStr;
+      const isToday = t.dueDate === todayStr;
+      const col = overdue ? '#c05010' : isToday ? '#c05010' : '#8b6820';
+      due = `<span style="font-size:11px;color:${col};margin-left:8px;">📅 ${t.dueDate}${overdue?'（超過）':isToday?'（今日）':''}</span>`;
+    }
+    return `<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:${t.done?'#efe8d8':'#fffdf5'};border:1px solid #d4c4a4;border-radius:4px;margin-bottom:6px;font-family:'Noto Sans JP',sans-serif;">
+      <input type="checkbox" ${t.done?'checked':''} onchange="toggleProjTodo(${i})" style="width:16px;height:16px;accent-color:#c8880a;cursor:pointer;">
+      <span style="flex:1;font-size:13px;${t.done?'text-decoration:line-through;color:#a09080;':'color:#1a0e04;'}">${esc(t.text)}${due}</span>
+      <button onclick="deleteProjTodo(${i})" style="background:none;border:none;color:#b0a48c;font-size:15px;cursor:pointer;">×</button>
+    </div>`;
+  };
+  el.innerHTML = undone.map(row).join('') + (done.length?`<div style="font-size:10px;letter-spacing:.2em;color:#a09080;padding:8px 2px 4px;font-family:'Noto Sans JP',sans-serif;">完了済み</div>`+done.map(row).join(''):'');
+}
+
+function daysFrom(dateStr){
+  if(!dateStr) return null;
+  const diff = new Date(dateStr) - new Date(new Date().toDateString());
+  return Math.round(diff / 86400000);
+}
+
+// 撮影日のうち、これから来る最も近い日（なければ最も新しい過去日）を返す
+function nearestShootDate(s){
+  const dates = (s.shootDates && s.shootDates.length ? s.shootDates : [s.shootDate]).filter(d=>d);
+  if(dates.length===0) return '';
+  const sorted = [...dates].sort();
+  const _t = new Date();
+  const todayStr = `${_t.getFullYear()}-${String(_t.getMonth()+1).padStart(2,'0')}-${String(_t.getDate()).padStart(2,'0')}`;
+  const upcoming = sorted.find(d=>d>=todayStr);
+  return upcoming || sorted[sorted.length-1];
+}
+
+function renderSchedule(){
+  const s = schData();
+  document.getElementById('schProjTitle').textContent = proj().name;
+  document.getElementById('sch-client').value    = s.client    || '';
+  renderShootDates(s.shootDates && s.shootDates.length ? s.shootDates : ['']);
+  document.getElementById('sch-deadline').value  = s.deadline  || '';
+  document.getElementById('sch-content').value   = s.content   || '';
+  document.getElementById('sch-goal').value      = s.goal      || '';
+  document.getElementById('sch-target').value    = s.target    || '';
+  document.getElementById('sch-memo').value      = s.memo      || '';
+  renderProjTodos();
+
+  // カウントダウン（撮影日は直近の予定日を使用）
+  const sd = daysFrom(nearestShootDate(s)), dd = daysFrom(s.deadline);
+  const cd = document.getElementById('schCountdown');
+  if(sd !== null || dd !== null){
+    cd.style.display = 'block';
+    if(sd !== null){
+      const el = document.getElementById('schShootDays');
+      el.innerHTML = sd < 0 ? `終了<span style="font-size:13px;">（${-sd}日前）</span>`
+        : sd === 0 ? '<span style="color:#c8880a;">本日</span>'
+        : `${sd}<span style="font-size:13px;">日後</span>`;
+    }
+    if(dd !== null){
+      const el = document.getElementById('schDeadlineDays');
+      const bar = document.getElementById('schDeadlineBar');
+      el.innerHTML = dd < 0 ? `<span style="color:#b43c14;">超過 ${-dd}日</span>`
+        : dd === 0 ? '<span style="color:#c8880a;">本日</span>'
+        : `${dd}<span style="font-size:13px;">日後</span>`;
+      bar.style.borderColor = dd <= 3 ? '#b43c14' : dd <= 7 ? '#c8880a' : '#5a3c18';
+    }
+  } else { cd.style.display = 'none'; }
+
+  // 工程
+  const container = document.getElementById('schPhases');
+  let html = `<div class="phase-list">
+    <div class="phase-row phase-head">
+      <div>工程</div><div>ステータス</div><div>期日</div><div>メモ</div>
+    </div>`;
+  s.phases.forEach((p,i)=>{
+    const cls = p.status==='完了'?'status-done':p.status==='進行中'?'status-wip':'status-todo';
+    html += `<div class="phase-row">
+      <div class="phase-name"><span class="${cls}">●</span> ${p.name}</div>
+      <div class="phase-status"><select id="ph-status-${i}">
+        ${STATUS_OPTS.map(o=>`<option ${o===p.status?'selected':''}>${o}</option>`).join('')}
+      </select></div>
+      <div class="phase-due"><input type="date" id="ph-due-${i}" value="${p.due||''}"></div>
+      <div class="phase-note"><input type="text" id="ph-note-${i}" value="${esc(p.note||'')}" placeholder="メモ"></div>
+    </div>`;
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+let hideClosed = !!localStorage.getItem('videoToolsHideClosed');
+
+const fmtMD = d => { if(!d) return ''; const a=String(d).split('-'); return a.length<3?d:`${Number(a[1])}月${Number(a[2])}日`; };
+
+// ── 案件が終了しているかどうか ──
+// closed が true / false なら手動指定を優先。未設定なら工程の状況から自動判定する
+// （全工程が「完了」か「スキップ」で、少なくとも1つは「完了」なら終了とみなす）
+function isProjectClosed(s){
+  if(!s) return false;
+  if(s.closed === true) return true;
+  if(s.closed === false) return false;
+  const ph = s.phases || [];
+  if(!ph.length) return false;
+  return ph.every(p=>p.status==='完了'||p.status==='スキップ') && ph.some(p=>p.status==='完了');
+}
+
+function toggleProjectClosed(id){
+  const p = state[id];
+  if(!p) return;
+  if(!p.schedule) p.schedule = defaultSchedule();
+  const nowClosed = isProjectClosed(p.schedule);
+  p.schedule.closed = !nowClosed;
+  p.schedule.closedAt = !nowClosed ? localToday() : '';
+  saveState();
+  renderSchedule();
+  renderDashboard();
+  showToast(!nowClosed ? 'この案件を終了にしました' : '進行中に戻しました');
+}
+
+function toggleHideClosed(){
+  hideClosed = !hideClosed;
+  localStorage.setItem('videoToolsHideClosed', hideClosed ? '1' : '');
+  renderDashboard();
+}
+
+function renderDashboard(){
+  const container = document.getElementById('schDashboard');
+  const entries = Object.entries(state).map(([id,p])=>({id, name:p.name, s: p.schedule||null}));
+  if(!entries.length){ container.innerHTML=''; return; }
+
+  entries.forEach(e=>{ e.closed = isProjectClosed(e.s); });
+
+  // 終了した案件は下にまとめる。それ以外は納期の近い順
+  entries.sort((a,b)=>{
+    if(a.closed !== b.closed) return a.closed ? 1 : -1;
+    const da = a.s?.deadline||'9999', db = b.s?.deadline||'9999';
+    return da.localeCompare(db);
+  });
+
+  const closedCount = entries.filter(e=>e.closed).length;
+  let separatorDone = false;
+
+  let html = '<div class="dash-grid">';
+  entries.forEach(({id,name,s,closed})=>{
+    if(closed && !separatorDone){
+      separatorDone = true;
+      html += `<div class="dash-closed-head">
+        <span>終了した案件　${closedCount}件</span>
+        <button onclick="event.stopPropagation();toggleHideClosed()">${hideClosed?'表示する':'隠す'}</button>
+      </div>`;
+    }
+    if(closed && hideClosed) return;
+
+    const isActive = id === currentProject;
+    const dd = s?.deadline ? daysFrom(s.deadline) : null;
+    const sd = s ? daysFrom(nearestShootDate(s)) : null;
+    const done = s?.phases?.filter(p=>p.status==='完了').length || 0;
+    const total = s?.phases?.length || PHASES.length;
+    const pct = Math.round(done/total*100);
+
+    // 終了した案件に納期カウントダウンや撮影予定を出しても意味がないので出さない
+    let badges = '';
+    if(closed){
+      badges += `<span class="dash-badge badge-closed">✓ 終了</span>`;
+      if(s?.closedAt) badges += `<span class="dash-badge badge-done">${fmtMD(s.closedAt)}に終了</span>`;
+      else if(s?.deadline) badges += `<span class="dash-badge badge-done">納期 ${fmtMD(s.deadline)}</span>`;
+    }else{
+      if(dd !== null){
+        if(dd < 0) badges += `<span class="dash-badge badge-over">納期${-dd}日超過</span>`;
+        else if(dd <= 3) badges += `<span class="dash-badge badge-urgent">納期まで${dd}日</span>`;
+        else if(dd <= 7) badges += `<span class="dash-badge badge-soon">納期まで${dd}日</span>`;
+        else badges += `<span class="dash-badge badge-ok">納期まで${dd}日</span>`;
+      }
+      if(sd !== null && sd >= 0) badges += `<span class="dash-badge badge-shoot">撮影${sd===0?'本日':`${sd}日後`}</span>`;
+    }
+
+    html += `<div class="dash-card${isActive?' active-proj':''}${closed?' closed-proj':''}" onclick="switchToProject('${id}')">
+      ${closed?`<div class="dash-ribbon">終了</div>`:''}
+      <div class="dash-name">${name}</div>
+      <div class="dash-client">${s?.client||'クライアント未設定'}</div>
+      ${s?.content?`<div class="dash-desc" style="font-family:'Noto Sans JP',sans-serif;font-size:11px;color:#5a3c18;margin-bottom:6px;line-height:1.6;">${esc(s.content)}</div>`:''}
+
+      <div class="dash-badges">${badges}</div>
+      <div style="margin-top:10px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+          <span style="font-family:'Noto Sans JP',sans-serif;font-size:10px;color:#8b6820;">進捗</span>
+          <span style="font-family:'Noto Sans JP',sans-serif;font-size:10px;color:#8b6820;">${closed?'完了':`${done}/${total}`}</span>
+        </div>
+        <div style="height:3px;background:#d4c4a4;">
+          <div style="height:100%;background:${closed?'#2a7a2a':'#c8880a'};width:${closed?100:pct}%;"></div>
+        </div>
+      </div>
+      <div class="dash-actions">
+        <button class="act-open" onclick="event.stopPropagation();switchToProject('${id}')">開く</button>
+        <button class="${closed?'':'act-close'}" onclick="event.stopPropagation();toggleProjectClosed('${id}')">${closed?'進行中に戻す':'終了にする'}</button>
+        <button onclick="event.stopPropagation();openStoryboard('${id}')">絵コンテ</button>
+        <button onclick="event.stopPropagation();openRefs('${id}')">参考・素材</button>
+        <button class="act-report" onclick="event.stopPropagation();clientReport('${id}')">レポート</button>
+        <button onclick="event.stopPropagation();renameProjectById('${id}')">名前変更</button>
+        <button class="act-del" onclick="event.stopPropagation();deleteProjectById('${id}')">削除</button>
+      </div>
+    </div>`;
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function switchToProject(id){
+  currentProject = id;
+  document.getElementById('projectSelect').value = id;
+  renderAll();
+  renderSchedule();
+  renderDashboard();
+}
+
+function openStoryboard(id){
+  switchToProject(id);
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  const tab = Array.from(document.querySelectorAll('.tab')).find(t=>(t.getAttribute('onclick')||'').includes("'storyboard'"));
+  if(tab) tab.classList.add('active');
+  document.getElementById('tab-storyboard').classList.add('active');
+  renderSB();
+  window.scrollTo(0,0);
+}
+
+async function clientReport(id){
+  const p = state[id];
+  if(!p) return;
+  const s = p.schedule || {};
+  const me = myInfo();
+  const shootDates = (s.shootDates && s.shootDates.length ? s.shootDates : (s.shootDate?[s.shootDate]:[])).filter(d=>d);
+  const fmtJ = d => { if(!d) return ''; const a=d.split('-'); return `${a[0]}年${a[1]}月${a[2]}日`; };
+
+  // 絵コンテ画像を読み込み
+  const sb = p.storyboard || [];
+  const sbHtml = [];
+  for(const c of sb){
+    let img = '';
+    try{ img = await getImgFromDB(c.id); }catch(e){}
+    sbHtml.push(`
+      <div class="sb-item">
+        ${img?`<img src="${img}">`:`<div class="sb-ph">🖼</div>`}
+        <div class="sb-cap"><b>${esc(c.scene||'')} ${esc(c.cut||'')}</b>${c.dur?` / ${esc(c.dur)}秒`:''}${c.type?`<br>${esc(c.type)}${c.motion?' · '+esc(c.motion):''}`:''}${c.note?`<br>${esc(c.note)}`:''}</div>
+      </div>`);
+  }
+
+  // スケジュール表
+  const phases = s.phases || PHASES.map(name=>({name,status:'未着手',due:'',note:''}));
+  const phaseRows = phases.map(ph=>`
+    <tr>
+      <td>${esc(ph.name)}</td>
+      <td style="text-align:center;">${ph.due?fmtJ(ph.due):'—'}</td>
+      <td style="text-align:center;">${esc(ph.status||'未着手')}</td>
+    </tr>`).join('');
+
+  const w = window.open('', '_blank');
+  w.document.write(`<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>${esc(p.name)} レポート</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Hiragino Mincho ProN','Yu Mincho',serif;color:#1c0f02;padding:40px;line-height:1.8;max-width:800px;margin:0 auto;}
+    .rep-head{text-align:center;border-bottom:3px solid #1c0f02;padding-bottom:16px;margin-bottom:8px;}
+    .rep-eyebrow{font-size:10px;letter-spacing:.4em;color:#8b6820;margin-bottom:8px;}
+    .rep-title{font-size:24px;letter-spacing:.08em;}
+    .rep-client{font-size:14px;color:#5a3c18;margin-top:8px;}
+    h2{font-size:15px;letter-spacing:.1em;border-left:4px solid #c8880a;padding-left:10px;margin:28px 0 12px;}
+    .info-row{display:flex;border-bottom:1px solid #ddd;padding:7px 0;font-size:13px;}
+    .info-label{width:130px;color:#8b6820;flex-shrink:0;}
+    table{width:100%;border-collapse:collapse;font-size:13px;}
+    th{background:#1c0f02;color:#f0ddb0;font-weight:400;padding:8px 10px;letter-spacing:.05em;}
+    td{border-bottom:1px solid #ddd;padding:7px 10px;}
+    .sb-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    .sb-item{border:1px solid #ccc;border-radius:4px;overflow:hidden;}
+    .sb-item img{width:100%;display:block;aspect-ratio:16/9;object-fit:cover;}
+    .sb-ph{aspect-ratio:16/9;background:#eee;display:flex;align-items:center;justify-content:center;font-size:28px;}
+    .sb-cap{padding:8px 10px;font-size:11px;line-height:1.6;}
+    .rep-foot{margin-top:40px;padding-top:16px;border-top:1px solid #ddd;font-size:12px;color:#5a3c18;text-align:right;line-height:1.9;}
+    .print-btn{position:fixed;top:16px;right:16px;background:#c8880a;color:#fff;border:none;padding:10px 20px;border-radius:4px;font-size:13px;cursor:pointer;}
+    @media print{.print-btn{display:none;}body{padding:0;}}
+  </style></head><body>
+    <button class="print-btn" onclick="window.print()">🖨 印刷 / PDF保存</button>
+    <div class="rep-head">
+      <div class="rep-eyebrow">PROJECT REPORT</div>
+      <div class="rep-title">${esc(p.name)}</div>
+      ${s.client?`<div class="rep-client">${esc(s.client)} 様</div>`:''}
+    </div>
+
+    <h2>案件概要</h2>
+    ${s.content?`<div class="info-row"><div class="info-label">案件内容</div><div>${esc(s.content)}</div></div>`:''}
+    ${s.goal?`<div class="info-row"><div class="info-label">目的・ゴール</div><div>${esc(s.goal).replace(/\n/g,'<br>')}</div></div>`:''}
+    ${s.target?`<div class="info-row"><div class="info-label">ターゲット</div><div>${esc(s.target).replace(/\n/g,'<br>')}</div></div>`:''}
+    ${shootDates.length?`<div class="info-row"><div class="info-label">撮影日</div><div>${shootDates.map(fmtJ).join('　/　')}</div></div>`:''}
+    ${s.deadline?`<div class="info-row"><div class="info-label">納品予定日</div><div>${fmtJ(s.deadline)}</div></div>`:''}
+
+    <h2>進行スケジュール</h2>
+    <table>
+      <thead><tr><th>工程</th><th style="width:140px;text-align:center;">予定日</th><th style="width:90px;text-align:center;">状況</th></tr></thead>
+      <tbody>${phaseRows}</tbody>
+    </table>
+
+    ${sb.length?`<h2>絵コンテ（${sb.length}カット）</h2><div class="sb-grid">${sbHtml.join('')}</div>`:''}
+
+    <div class="rep-foot">
+      ${me.name?esc(me.name)+'<br>':'下町きろくの動画屋<br>'}
+      ${me.tel?'TEL：'+esc(me.tel)+'　':''}${me.email?esc(me.email):''}
+    </div>
+  </body></html>`);
+  w.document.close();
+}
+
+function openRefs(id){
+  switchToProject(id);
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  const tab = Array.from(document.querySelectorAll('.tab')).find(t=>(t.getAttribute('onclick')||'').includes("'refs'"));
+  if(tab) tab.classList.add('active');
+  document.getElementById('tab-refs').classList.add('active');
+  renderRefs();
+  window.scrollTo(0,0);
+}
+
+function renameProjectById(id){
+  const p = state[id];
+  if(!p) return;
+  const name = prompt('案件名を入力してください', p.name);
+  if(name===null) return;
+  const trimmed = name.trim();
+  if(!trimmed){ showToast('案件名を入力してください'); return; }
+  p.name = trimmed;
+  saveState();
+  renderProjectSelect(currentProject);
+  renderSchedule();
+  renderDashboard();
+  showToast('案件名を変更しました');
+}
+
+function deleteProjectById(id){
+  if(Object.keys(state).length <= 1){ showToast('最後の案件は削除できません'); return; }
+  if(!confirm('案件「'+state[id].name+'」を削除しますか？')) return;
+  delete state[id];
+  saveState();
+  if(currentProject===id) currentProject = Object.keys(state)[0];
+  renderProjectSelect(currentProject);
+  renderAll();
+  renderSchedule();
+  renderDashboard();
+  showToast('案件を削除しました');
+}
+
+// ─── DOCUMENTS ───────────────────────────────────────────────────────────────
+function switchDocTab(name){
+  document.querySelectorAll('.doc-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.doc-section').forEach(s=>s.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('docsec-'+name).classList.add('active');
+}
+
+// 自社情報（ローカルストレージに保存）
+function myInfo(){
+  return JSON.parse(localStorage.getItem('myInfo') || '{"name":"","address":"","tel":"","email":"","bank":""}');
+}
+
+function fmtYen(n){ return '¥' + Number(n||0).toLocaleString(); }
+function fmtDateJP(str){ if(!str) return ''; const d=new Date(str); return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`; }
+
+// ── 明細管理 ──
+const docItems = {es:[], iv:[]};
+
+function addDocItem(prefix){
+  const name  = document.getElementById(`${prefix}-new-name`).value.trim();
+  const qty   = parseInt(document.getElementById(`${prefix}-new-qty`).value) || 1;
+  const price = parseInt(document.getElementById(`${prefix}-new-price`).value) || 0;
+  const tax   = parseInt(document.getElementById(`${prefix}-new-tax`).value);
+  if(!name){ showToast('品目名を入力してください'); return; }
+  docItems[prefix].push({name, qty, price, tax});
+  document.getElementById(`${prefix}-new-name`).value = '';
+  document.getElementById(`${prefix}-new-price`).value = '';
+  renderDocItems(prefix);
+}
+
+function delDocItem(prefix, i){ docItems[prefix].splice(i,1); renderDocItems(prefix); }
+
+function renderDocItems(prefix){
+  const container = document.getElementById(`${prefix}-items`);
+  let html = '';
+  docItems[prefix].forEach((item,i)=>{
+    const subtotal = item.qty * item.price;
+    html += `<div class="doc-item-row">
+      <input type="text" value="${esc(item.name)}" onchange="docItems['${prefix}'][${i}].name=this.value;renderDocItems('${prefix}')">
+      <input type="number" value="${item.qty}" min="1" onchange="docItems['${prefix}'][${i}].qty=parseInt(this.value)||1;renderDocItems('${prefix}')">
+      <input type="number" value="${item.price}" min="0" onchange="docItems['${prefix}'][${i}].price=parseInt(this.value)||0;renderDocItems('${prefix}')">
+      <div style="font-size:12px;color:#5a3c18;padding:0 4px;">${fmtYen(subtotal)}</div>
+      <button class="btn-danger" style="padding:4px 10px;" onclick="delDocItem('${prefix}',${i})">×</button>
+    </div>`;
+  });
+  container.innerHTML = html;
+  renderDocTotal(prefix);
+}
+
+function renderDocTotal(prefix){
+  const items = docItems[prefix];
+  const subtotal = items.reduce((s,i)=>s+i.qty*i.price, 0);
+  const tax10 = items.filter(i=>i.tax===10).reduce((s,i)=>s+Math.floor(i.qty*i.price*0.1),0);
+  const tax8  = items.filter(i=>i.tax===8).reduce((s,i)=>s+Math.floor(i.qty*i.price*0.08),0);
+  const total = subtotal + tax10 + tax8;
+  const el = document.getElementById(`${prefix}-total`);
+  el.innerHTML = `
+    <div class="doc-total-item"><div class="doc-total-label">小計</div><div class="doc-total-value">${fmtYen(subtotal)}</div></div>
+    ${tax10?`<div class="doc-total-item"><div class="doc-total-label">消費税（10%）</div><div class="doc-total-value">${fmtYen(tax10)}</div></div>`:''}
+    ${tax8?`<div class="doc-total-item"><div class="doc-total-label">消費税（8%）</div><div class="doc-total-value">${fmtYen(tax8)}</div></div>`:''}
+    <div class="doc-total-item"><div class="doc-total-label">合計（税込）</div><div class="doc-total-value" style="font-size:22px;color:#1a0e04;">${fmtYen(total)}</div></div>`;
+}
+
+// ── 進行表アイテム ──
+let rdItems = [];
+function addRdItem(){
+  const time = document.getElementById('rd-new-time').value;
+  const name = document.getElementById('rd-new-name').value.trim();
+  const who  = document.getElementById('rd-new-who').value.trim();
+  if(!name){ showToast('内容を入力してください'); return; }
+  rdItems.push({time, name, who});
+  rdItems.sort((a,b)=>a.time.localeCompare(b.time));
+  document.getElementById('rd-new-name').value = '';
+  renderRdItems();
+}
+function delRdItem(i){ rdItems.splice(i,1); renderRdItems(); }
+function renderRdItems(){
+  const c = document.getElementById('rd-items');
+  if(!rdItems.length){ c.innerHTML=''; return; }
+  let html = '<div style="display:grid;grid-template-columns:90px 1fr 80px 40px;gap:2px;background:#b89848;margin-bottom:2px;">'
+    + ['時刻','内容','担当',''].map(h=>`<div style="background:#150c02;color:#8b6820;font-family:\'Noto Sans JP\',sans-serif;font-size:10px;letter-spacing:.3em;padding:8px 12px;">${h}</div>`).join('')+'</div>';
+  rdItems.forEach((item,i)=>{
+    html += `<div style="display:grid;grid-template-columns:90px 1fr 80px 40px;gap:2px;background:#b89848;margin-bottom:1px;">
+      <div style="background:#f0e4cc;padding:8px 12px;font-family:monospace;font-size:13px;">${item.time}</div>
+      <div style="background:#f0e4cc;padding:8px 12px;font-family:\'Noto Sans JP\',sans-serif;font-size:12px;">${esc(item.name)}</div>
+      <div style="background:#f0e4cc;padding:8px 12px;font-family:\'Noto Sans JP\',sans-serif;font-size:12px;color:#8b6820;">${esc(item.who)}</div>
+      <div style="background:#f0e4cc;padding:4px;display:flex;align-items:center;justify-content:center;"><button class="btn-danger" style="padding:4px 8px;" onclick="delRdItem(${i})">×</button></div>
+    </div>`;
+  });
+  c.innerHTML = html;
+}
+
+// ── 印刷 ──
+function printDoc(type){
+  const me = myInfo();
+  let html = '';
+
+  if(type === 'brief'){
+    const client = document.getElementById('br-client').value;
+    const title  = document.getElementById('br-title').value;
+    html = `<div class="print-preview">
+      <h1>案件概要書</h1>
+      <div class="print-meta">
+        <div class="print-meta-left">${esc(client)}</div>
+        <div class="print-meta-right">${me.name}<br>${fmtDateJP(document.getElementById('br-shoot').value)}</div>
+      </div>
+      <h2>基本情報</h2>
+      <table class="print-table">
+        <tr><th style="width:140px;">案件名</th><td>${esc(title)}</td></tr>
+        <tr><th>クライアント</th><td>${esc(client)}</td></tr>
+        <tr><th>撮影日</th><td>${fmtDateJP(document.getElementById('br-shoot').value)}</td></tr>
+        <tr><th>撮影場所</th><td>${esc(document.getElementById('br-location').value)}</td></tr>
+        <tr><th>納品日</th><td>${fmtDateJP(document.getElementById('br-delivery').value)}</td></tr>
+        <tr><th>担当者</th><td>${esc(document.getElementById('br-staff').value)}</td></tr>
+      </table>
+      <h2>撮影内容・概要</h2>
+      <div class="print-notes">${esc(document.getElementById('br-overview').value).replace(/\n/g,'<br>')}</div>
+      <h2>納品物</h2>
+      <div class="print-notes">${esc(document.getElementById('br-deliverables').value).replace(/\n/g,'<br>')}</div>
+      ${document.getElementById('br-notes').value?`<h2>特記事項</h2><div class="print-notes">${esc(document.getElementById('br-notes').value).replace(/\n/g,'<br>')}</div>`:''}
+    </div>`;
+
+  } else if(type === 'rundown'){
+    const rows = rdItems.map(item=>`<tr><td style="font-family:monospace;">${item.time}</td><td>${esc(item.name)}</td><td>${esc(item.who)}</td></tr>`).join('');
+    html = `<div class="print-preview">
+      <h1>撮影進行表</h1>
+      <div class="print-meta">
+        <div class="print-meta-left">${esc(document.getElementById('rd-title').value)}</div>
+        <div class="print-meta-right">${fmtDateJP(document.getElementById('rd-date').value)}</div>
+      </div>
+      <table class="print-table" style="margin-bottom:8px;">
+        <tr><th style="width:120px;">集合場所</th><td>${esc(document.getElementById('rd-venue').value)}</td></tr>
+        <tr><th>スタッフ</th><td>${esc(document.getElementById('rd-staff').value)}</td></tr>
+      </table>
+      <h2>タイムスケジュール</h2>
+      <table class="print-table"><thead><tr><th style="width:80px;">時刻</th><th>内容</th><th style="width:100px;">担当</th></tr></thead><tbody>${rows}</tbody></table>
+      ${document.getElementById('rd-notes').value?`<h2>備考・注意事項</h2><div class="print-notes">${esc(document.getElementById('rd-notes').value).replace(/\n/g,'<br>')}</div>`:''}
+    </div>`;
+
+  } else if(type === 'estimate'){
+    const items = docItems['es'];
+    const subtotal = items.reduce((s,i)=>s+i.qty*i.price,0);
+    const tax10 = items.filter(i=>i.tax===10).reduce((s,i)=>s+Math.floor(i.qty*i.price*0.1),0);
+    const tax8  = items.filter(i=>i.tax===8).reduce((s,i)=>s+Math.floor(i.qty*i.price*0.08),0);
+    const total = subtotal+tax10+tax8;
+    const rows = items.map(i=>`<tr><td>${esc(i.name)}</td><td class="num">${i.qty}</td><td class="num">${fmtYen(i.price)}</td><td class="num">${fmtYen(i.qty*i.price)}</td><td>${i.tax?i.tax+'%':'非課税'}</td></tr>`).join('');
+    html = `<div class="print-preview">
+      <h1>御見積書</h1>
+      <div class="print-meta">
+        <div class="print-meta-left">${esc(document.getElementById('es-to').value)}</div>
+        <div class="print-meta-right">${me.name||'氏名未設定'}<br>発行日：${fmtDateJP(document.getElementById('es-date').value)}<br>見積番号：${esc(document.getElementById('es-no').value)}<br>有効期限：${fmtDateJP(document.getElementById('es-expire').value)}</div>
+      </div>
+      <div style="margin-bottom:16px;font-size:14px;">件名：<strong>${esc(document.getElementById('es-title').value)}</strong></div>
+      <table class="print-table"><thead><tr><th>品目</th><th class="num">数量</th><th class="num">単価</th><th class="num">金額</th><th>税率</th></tr></thead><tbody>${rows}</tbody></table>
+      <div class="print-total"><table>
+        <tr><td>小計</td><td class="num">${fmtYen(subtotal)}</td></tr>
+        ${tax10?`<tr><td>消費税（10%）</td><td class="num">${fmtYen(tax10)}</td></tr>`:''}
+        ${tax8?`<tr><td>消費税（8%）</td><td class="num">${fmtYen(tax8)}</td></tr>`:''}
+        <tr class="grand"><td>合計（税込）</td><td class="num">${fmtYen(total)}</td></tr>
+      </table></div>
+      ${document.getElementById('es-payment').value?`<div class="print-notes">支払条件：${esc(document.getElementById('es-payment').value)}</div>`:''}
+      ${document.getElementById('es-notes').value?`<div class="print-notes">備考：${esc(document.getElementById('es-notes').value)}</div>`:''}
+    </div>`;
+
+  } else if(type === 'invoice'){
+    const items = docItems['iv'];
+    const subtotal = items.reduce((s,i)=>s+i.qty*i.price,0);
+    const tax10 = items.filter(i=>i.tax===10).reduce((s,i)=>s+Math.floor(i.qty*i.price*0.1),0);
+    const tax8  = items.filter(i=>i.tax===8).reduce((s,i)=>s+Math.floor(i.qty*i.price*0.08),0);
+    const total = subtotal+tax10+tax8;
+    const rows = items.map(i=>`<tr><td>${esc(i.name)}</td><td class="num">${i.qty}</td><td class="num">${fmtYen(i.price)}</td><td class="num">${fmtYen(i.qty*i.price)}</td><td>${i.tax?i.tax+'%':'非課税'}</td></tr>`).join('');
+    html = `<div class="print-preview">
+      <h1>請求書</h1>
+      <div class="print-meta">
+        <div class="print-meta-left">${esc(document.getElementById('iv-to').value)}</div>
+        <div class="print-meta-right">${me.name||'氏名未設定'}<br>発行日：${fmtDateJP(document.getElementById('iv-date').value)}<br>請求番号：${esc(document.getElementById('iv-no').value)}<br>お支払期限：${fmtDateJP(document.getElementById('iv-due').value)}</div>
+      </div>
+      <div style="margin-bottom:16px;font-size:14px;">件名：<strong>${esc(document.getElementById('iv-title').value)}</strong></div>
+      <table class="print-table"><thead><tr><th>品目</th><th class="num">数量</th><th class="num">単価</th><th class="num">金額</th><th>税率</th></tr></thead><tbody>${rows}</tbody></table>
+      <div class="print-total"><table>
+        <tr><td>小計</td><td class="num">${fmtYen(subtotal)}</td></tr>
+        ${tax10?`<tr><td>消費税（10%）</td><td class="num">${fmtYen(tax10)}</td></tr>`:''}
+        ${tax8?`<tr><td>消費税（8%）</td><td class="num">${fmtYen(tax8)}</td></tr>`:''}
+        <tr class="grand"><td>ご請求金額（税込）</td><td class="num">${fmtYen(total)}</td></tr>
+      </table></div>
+      ${document.getElementById('iv-bank').value?`<div class="print-notes">振込先：${esc(document.getElementById('iv-bank').value)}</div>`:''}
+      ${document.getElementById('iv-notes').value?`<div class="print-notes">備考：${esc(document.getElementById('iv-notes').value)}</div>`:''}
+    </div>`;
+
+  } else if(type === 'receipt'){
+    const amount = parseInt(document.getElementById('rc-amount').value)||0;
+    const tax    = parseInt(document.getElementById('rc-tax').value)||0;
+    html = `<div class="print-preview" style="max-width:480px;">
+      <h1>領収書</h1>
+      <div style="margin:24px 0;font-size:18px;">${esc(document.getElementById('rc-to').value)}</div>
+      <div style="font-size:32px;font-weight:700;margin:24px 0;border-bottom:2px solid #111;padding-bottom:16px;">${fmtYen(amount)}</div>
+      <table class="print-table" style="margin-bottom:24px;">
+        <tr><th style="width:120px;">但し書き</th><td>${esc(document.getElementById('rc-note').value)}</td></tr>
+        <tr><th>うち消費税</th><td>${fmtYen(tax)}</td></tr>
+        <tr><th>支払方法</th><td>${document.getElementById('rc-method').value}</td></tr>
+        <tr><th>発行日</th><td>${fmtDateJP(document.getElementById('rc-date').value)}</td></tr>
+      </table>
+      <div style="text-align:right;">
+        ${me.name||'氏名未設定'}<br>
+        ${me.address||''}<br>
+        ${me.tel||''}
+        <div class="print-seal">印</div>
+      </div>
+    </div>`;
+  }
+
+  document.getElementById('printContent').innerHTML = html;
+  document.getElementById('printModal').style.display = 'block';
+  window.scrollTo(0,0);
+}
+
+// ─── STORYBOARD ──────────────────────────────────────────────────────────────
+// 画像はIndexedDBに保存、メタデータはLocalStorageのstateに保存
+let sbDB = null;
+
+function openSbDB(){
+  return new Promise((resolve, reject)=>{
+    const req = indexedDB.open('sbImages', 1);
+    req.onupgradeneeded = e => e.target.result.createObjectStore('images', {keyPath:'id'});
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror = () => reject();
+  });
+}
+
+async function getSbDB(){
+  if(!sbDB) sbDB = await openSbDB();
+  return sbDB;
+}
+
+async function saveImgToDB(id, dataUrl){
+  const db = await getSbDB();
+  return new Promise((resolve)=>{
+    const tx = db.transaction('images','readwrite');
+    tx.objectStore('images').put({id, dataUrl});
+    tx.oncomplete = resolve;
+  });
+}
+
+async function getImgFromDB(id){
+  const db = await getSbDB();
+  return new Promise((resolve)=>{
+    const req = db.transaction('images').objectStore('images').get(id);
+    req.onsuccess = e => resolve(e.result?.dataUrl || null);
+  });
+}
+
+async function delImgFromDB(id){
+  const db = await getSbDB();
+  return new Promise((resolve)=>{
+    const tx = db.transaction('images','readwrite');
+    tx.objectStore('images').delete(id);
+    tx.oncomplete = resolve;
+  });
+}
+
+function sbDragOver(e){ e.preventDefault(); document.getElementById('sbDrop').classList.add('drag-over'); }
+function sbDragLeave(){ document.getElementById('sbDrop').classList.remove('drag-over'); }
+function sbDropFiles(e){ e.preventDefault(); sbDragLeave(); sbAddFiles(e.dataTransfer.files); }
+
+async function sbAddFiles(files){
+  if(!files || !files.length) return;
+  if(!proj().storyboard) proj().storyboard = [];
+  for(const file of files){
+    if(!file.type.startsWith('image/')) continue;
+    const dataUrl = await new Promise(r=>{ const fr=new FileReader(); fr.onload=e=>r(e.target.result); fr.readAsDataURL(file); });
+    const id = 'sb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+    await saveImgToDB(id, dataUrl);
+    const num = proj().storyboard.length + 1;
+    proj().storyboard.push({id, scene:'シーン'+num, cut:'C'+String(num).padStart(2,'0'), type:'', dur:'', motion:'', note:''});
+  }
+  saveState();
+  renderSB();
+  showToast('追加しました');
+}
+
+// ─── 参考・素材 ───────────────────────────────────────────────────────────────
+function refData(){
+  const p = proj();
+  if(!p.refs) p.refs = {links:[], images:[], note:''};
+  if(!p.refs.links) p.refs.links = [];
+  if(!p.refs.images) p.refs.images = [];
+  return p.refs;
+}
+
+async function renderRefs(){
+  const r = refData();
+  // リンク
+  const ll = document.getElementById('refLinkList');
+  ll.innerHTML = r.links.length===0
+    ? '<div style="font-family:\'Noto Sans JP\',sans-serif;font-size:12px;color:#8b6820;">参考リンクがありません。</div>'
+    : r.links.map((l,i)=>`
+        <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:#fffdf5;border:1px solid #d4c4a4;border-radius:4px;margin-bottom:6px;font-family:'Noto Sans JP',sans-serif;">
+          <a href="${esc(l.url)}" target="_blank" rel="noopener" style="flex:1;font-size:13px;color:#c8880a;text-decoration:none;">🔗 ${esc(l.title||l.url)}</a>
+          <button onclick="deleteRefLink(${i})" style="background:none;border:none;color:#b0a48c;font-size:15px;cursor:pointer;">×</button>
+        </div>`).join('');
+  // 画像
+  const g = document.getElementById('refImgGrid');
+  g.innerHTML = '';
+  for(let i=0;i<r.images.length;i++){
+    const img = r.images[i];
+    const dataUrl = await getImgFromDB(img.id);
+    const card = document.createElement('div');
+    card.className = 'sb-card';
+    card.innerHTML = `
+      ${dataUrl?`<img class="sb-card-img" src="${dataUrl}" alt="" onclick="sbFullscreen('${img.id}')">`:`<div class="sb-card-img-placeholder">🖼</div>`}
+      <div class="sb-card-body">
+        <input type="text" value="${esc(img.caption||'')}" placeholder="キャプション（任意）" onchange="setRefCaption(${i},this.value)" style="width:100%;font-family:'Noto Sans JP',sans-serif;font-size:12px;padding:5px 6px;border:1px solid #c8a860;border-radius:3px;">
+      </div>
+      <div class="sb-card-actions">
+        <button class="sb-card-del" onclick="deleteRefImg(${i})">削除</button>
+      </div>`;
+    g.appendChild(card);
+  }
+  // メモ
+  document.getElementById('refNote').value = r.note || '';
+}
+
+function addRefLink(){
+  const r = refData();
+  const url = document.getElementById('refLinkUrl').value.trim();
+  if(!url){ showToast('URLを入力してください'); return; }
+  r.links.push({title:document.getElementById('refLinkTitle').value.trim(), url});
+  saveState();
+  document.getElementById('refLinkTitle').value='';
+  document.getElementById('refLinkUrl').value='';
+  renderRefs();
+}
+function deleteRefLink(i){ refData().links.splice(i,1); saveState(); renderRefs(); }
+
+function refDragOver(e){ e.preventDefault(); document.getElementById('refDrop').classList.add('drag-over'); }
+function refDragLeave(){ document.getElementById('refDrop').classList.remove('drag-over'); }
+function refDropFiles(e){ e.preventDefault(); refDragLeave(); refAddFiles(e.dataTransfer.files); }
+
+async function refAddFiles(files){
+  if(!files || !files.length) return;
+  const r = refData();
+  for(const file of files){
+    if(!file.type.startsWith('image/')) continue;
+    const dataUrl = await new Promise(res=>{ const fr=new FileReader(); fr.onload=e=>res(e.target.result); fr.readAsDataURL(file); });
+    const id = 'ref_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+    await saveImgToDB(id, dataUrl);
+    r.images.push({id, caption:''});
+  }
+  saveState();
+  renderRefs();
+  showToast('追加しました');
+}
+function setRefCaption(i, val){ refData().images[i].caption = val; saveState(); }
+async function deleteRefImg(i){
+  const r = refData();
+  if(!confirm('この画像を削除しますか？')) return;
+  await delImgFromDB(r.images[i].id);
+  r.images.splice(i,1);
+  saveState();
+  renderRefs();
+}
+function saveRefNote(){ refData().note = document.getElementById('refNote').value; saveState(); }
+
+let sbEditIdx = null;
+
+async function renderSB(){
+  const cards = proj().storyboard || [];
+  document.getElementById('sbCount').textContent = cards.length ? cards.length + ' カット' : '';
+  const grid = document.getElementById('sbGrid');
+  grid.innerHTML = '';
+  for(let i=0; i<cards.length; i++){
+    const c = cards[i];
+    const dataUrl = await getImgFromDB(c.id);
+    const card = document.createElement('div');
+    card.className = 'sb-card';
+    card.innerHTML = `
+      ${dataUrl
+        ? `<img class="sb-card-img" src="${dataUrl}" alt="" onclick="sbFullscreen('${c.id}')">`
+        : `<div class="sb-card-img-placeholder">🖼</div>`}
+      <div class="sb-card-body">
+        <div class="sb-card-num">${c.scene}　${c.cut}${c.dur?' · '+c.dur+'秒':''}</div>
+        ${c.type?`<div class="sb-card-meta">${c.type}${c.motion?' · '+c.motion:''}</div>`:''}
+        ${c.note?`<div class="sb-card-note">${esc(c.note)}</div>`:''}
+      </div>
+      <div class="sb-card-actions">
+        <button class="sb-card-edit" onclick="openSbEdit(${i})">編集</button>
+        <button class="sb-card-del" onclick="deleteSbCard(${i})">削除</button>
+        ${i>0?`<button class="sb-card-edit" onclick="moveSb(${i},-1)">◀</button>`:''}
+        ${i<cards.length-1?`<button class="sb-card-edit" onclick="moveSb(${i},1)">▶</button>`:''}
+      </div>`;
+    grid.appendChild(card);
+  }
+}
+
+async function openSbEdit(i){
+  sbEditIdx = i;
+  const c = proj().storyboard[i];
+  const dataUrl = await getImgFromDB(c.id);
+  document.getElementById('sbModalImg').src = dataUrl || '';
+  document.getElementById('sbEditScene').value = c.scene || '';
+  document.getElementById('sbEditCut').value = c.cut || '';
+  document.getElementById('sbEditType').value = c.type || '';
+  document.getElementById('sbEditDur').value = c.dur || '';
+  document.getElementById('sbEditMotion').value = c.motion || '';
+  document.getElementById('sbEditNote').value = c.note || '';
+  document.getElementById('sbModal').style.display = 'flex';
+}
+
+function saveSbEdit(){
+  if(sbEditIdx === null) return;
+  const c = proj().storyboard[sbEditIdx];
+  c.scene = document.getElementById('sbEditScene').value;
+  c.cut = document.getElementById('sbEditCut').value;
+  c.type = document.getElementById('sbEditType').value;
+  c.dur = document.getElementById('sbEditDur').value;
+  c.motion = document.getElementById('sbEditMotion').value;
+  c.note = document.getElementById('sbEditNote').value;
+  saveState();
+  closeSbModal();
+  renderSB();
+  showToast('保存しました');
+}
+
+function closeSbModal(){ document.getElementById('sbModal').style.display='none'; sbEditIdx=null; }
+
+async function sbFullscreen(id){
+  const dataUrl = await getImgFromDB(id);
+  if(!dataUrl) return;
+  document.getElementById('sbFullImg').src = dataUrl;
+  document.getElementById('sbFullscreen').style.display = 'flex';
+}
+
+async function deleteSbCard(i){
+  if(!confirm('このカットを削除しますか？')) return;
+  const c = proj().storyboard[i];
+  await delImgFromDB(c.id);
+  proj().storyboard.splice(i,1);
+  saveState();
+  renderSB();
+}
+
+function moveSb(i, dir){
+  const sb = proj().storyboard;
+  const j = i + dir;
+  if(j<0||j>=sb.length) return;
+  [sb[i],sb[j]] = [sb[j],sb[i]];
+  saveState();
+  renderSB();
+}
+
+// ─── FILE ORGANIZER ──────────────────────────────────────────────────────────
+const VIDEO_EXTS = new Set(['mp4','mov','avi','mkv','mxf','m2ts','mts','webm','m4v','3gp']);
+let orgFiles = [];   // {file, date, dateStr, ext, newName}
+let orgHandle = null;
+
+async function selectFolder(){
+  if(!window.showDirectoryPicker){ showToast('このブラウザは非対応です（Chrome推奨）'); return; }
+  try {
+    orgHandle = await window.showDirectoryPicker({mode:'read'});
+    await scanFolder();
+  } catch(e){ if(e.name !== 'AbortError') showToast('フォルダの選択に失敗しました'); }
+}
+
+async function rescanFolder(){
+  if(orgHandle) await scanFolder();
+}
+
+async function scanFolder(){
+  orgFiles = [];
+  await walkDir(orgHandle, '');
+  orgFiles.sort((a,b)=> a.date - b.date);
+  document.getElementById('orgBody').style.display = 'block';
+  document.getElementById('btnRescan').style.display = 'inline-block';
+  document.getElementById('folderBtn').querySelector('.folder-btn-text').textContent = '📂 ' + orgHandle.name;
+  applyRename();
+}
+
+async function walkDir(dirHandle, relPath){
+  for await (const [name, handle] of dirHandle.entries()){
+    if(handle.kind === 'directory'){
+      await walkDir(handle, relPath ? relPath + '/' + name : name);
+    } else {
+      const ext = name.split('.').pop().toLowerCase();
+      if(!VIDEO_EXTS.has(ext)) continue;
+      const file = await handle.getFile();
+      const date = new Date(file.lastModified);
+      orgFiles.push({file, date, ext, relPath, origName: name, newName:''});
+    }
+  }
+}
+
+function fmtDate(d){
+  return d.getFullYear()
+    + String(d.getMonth()+1).padStart(2,'0')
+    + String(d.getDate()).padStart(2,'0');
+}
+
+function fmtDateLabel(d){
+  return d.getFullYear() + '年' + (d.getMonth()+1) + '月' + d.getDate() + '日';
+}
+
+function applyRename(){
+  const prefix = (document.getElementById('orgPrefix').value.trim() || '動画').replace(/[\/\\:*?"<>|]/g,'_');
+  const digits = parseInt(document.getElementById('orgDigits').value);
+  const byDate = {};
+  orgFiles.forEach(f=>{
+    const ds = fmtDate(f.date);
+    if(!byDate[ds]) byDate[ds] = [];
+    byDate[ds].push(f);
+  });
+  Object.keys(byDate).sort().forEach(ds=>{
+    byDate[ds].forEach((f,i)=>{
+      const num = String(i+1).padStart(digits,'0');
+      f.newName = `${prefix}_${ds}_${num}.${f.ext}`;
+    });
+  });
+  updateRenamePreview();
+  renderOrgList(byDate);
+  generateScript();
+}
+
+function updateRenamePreview(){
+  const prefix = (document.getElementById('orgPrefix').value.trim() || '案件名').replace(/[\/\\:*?"<>|]/g,'_');
+  const digits = parseInt(document.getElementById('orgDigits').value);
+  const today = fmtDate(new Date());
+  document.getElementById('renamePreviewText').textContent =
+    `${prefix}_${today}_${'1'.padStart(digits,'0')}.mp4`;
+}
+
+function renderOrgList(byDate){
+  const container = document.getElementById('orgFileList');
+  container.innerHTML = '';
+  let totalSize = 0;
+  orgFiles.forEach(f=> totalSize += f.file.size);
+  document.getElementById('orgTotal').textContent = orgFiles.length + ' 本';
+  document.getElementById('orgDays').textContent = Object.keys(byDate).length + ' 日';
+  document.getElementById('orgSize').textContent = fmtSize(totalSize);
+
+  Object.keys(byDate).sort().forEach(ds=>{
+    const files = byDate[ds];
+    const grp = document.createElement('div');
+    grp.className = 'date-group';
+
+    const hdr = document.createElement('div');
+    hdr.className = 'date-group-header';
+    const d = files[0].date;
+    hdr.innerHTML = `<span>${fmtDateLabel(d)}</span><span class="date-group-count">${files.length} ファイル</span>`;
+    grp.appendChild(hdr);
+
+    const headRow = document.createElement('div');
+    headRow.className = 'file-row file-row-head';
+    headRow.innerHTML = `<div></div><div>元のファイル名</div><div>変更後のファイル名</div><div style="justify-content:flex-end;">サイズ</div><div>形式</div>`;
+    grp.appendChild(headRow);
+
+    files.forEach((f,i)=>{
+      const row = document.createElement('div');
+      row.className = 'file-row';
+      row.innerHTML = `
+        <div class="file-check"><span style="font-family:monospace;font-size:11px;color:#8b6820;">${String(i+1).padStart(3,'0')}</span></div>
+        <div class="file-orig">${f.origName}${f.relPath ? '<br><span style="font-size:10px;color:#8b6820;">'+f.relPath+'</span>' : ''}</div>
+        <div class="file-new">${f.newName}</div>
+        <div class="file-size">${fmtSize(f.file.size)}</div>
+        <div class="file-type">${f.ext.toUpperCase()}</div>`;
+      grp.appendChild(row);
+    });
+    container.appendChild(grp);
+  });
+
+  document.getElementById('orgScriptSection').style.display = orgFiles.length ? 'block' : 'none';
+}
+
+function generateScript(){
+  const shLines = ['#!/bin/bash','# リネームスクリプト（Mac / Linux用）','# このファイルと同じ場所で実行してください',''];
+  const batLines = ['@echo off','chcp 65001 > nul','rem リネームスクリプト（Windows用）','rem このファイルと同じ場所で実行してください',''];
+
+  orgFiles.forEach(f=>{
+    const orig = f.origName.replace(/'/g,"'\\''");
+    const newN = f.newName;
+    const sub = f.relPath ? f.relPath + '/' : '';
+    shLines.push(`mv -n "${sub}${f.origName}" "${sub}${newN}"`);
+    batLines.push(`ren "${sub.replace(/\//g,'\\')}${f.origName}" "${newN}"`);
+  });
+
+  shLines.push('','echo "リネーム完了！"');
+  batLines.push('','echo リネーム完了！','pause');
+
+  document.getElementById('orgScript').textContent = shLines.join('\n');
+  document._orgShScript = shLines.join('\n');
+  document._orgBatScript = batLines.join('\n');
+}
+
+function downloadScript(type){
+  const content = type === 'sh' ? document._orgShScript : document._orgBatScript;
+  const mime = type === 'sh' ? 'text/x-shellscript' : 'text/plain';
+  const blob = new Blob([content], {type: mime});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'rename_videos.' + type;
+  a.click();
+  showToast('スクリプトをダウンロードしました');
+}
+
+function copyScript(){
+  copyText(document._orgShScript || '');
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+loadState();
+renderProjectSelect(Object.keys(state)[0]);
+renderAll();
+initND();
+loadTL();
+// 書類の日付デフォルト
+const today = new Date().toISOString().split('T')[0];
+['es-date','iv-date','rc-date','rd-date','br-shoot'].forEach(id=>{
+  const el = document.getElementById(id);
+  if(el && !el.value) el.value = today;
+});
+
+// ─── VIDEO COMPRESSOR ────────────────────────────────────────────────────────
+let ffmpegLoaded = false;
+let ffmpegInstance = null;
+let currentFile = null;
+let outputBlob = null;
+
+function onDragOver(e){ e.preventDefault(); document.getElementById('dropZone').classList.add('drag-over'); }
+function onDragLeave(e){ document.getElementById('dropZone').classList.remove('drag-over'); }
+function onDrop(e){
+  e.preventDefault();
+  document.getElementById('dropZone').classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if(f && f.type.startsWith('video/')) onFileSelect(f);
+  else showToast('動画ファイルを選択してください');
+}
+
+function fmtSize(bytes){
+  if(bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+  return (bytes/(1024*1024)).toFixed(1) + ' MB';
+}
+
+function onFileSelect(file){
+  if(!file) return;
+  currentFile = file;
+  outputBlob = null;
+  document.getElementById('fileInfo').style.display = 'flex';
+  document.getElementById('compressSettings').style.display = 'block';
+  document.getElementById('compressProgress').style.display = 'none';
+  document.getElementById('compressResult').style.display = 'none';
+  document.getElementById('fiName').textContent = file.name;
+  document.getElementById('fiSize').textContent = fmtSize(file.size);
+
+  const url = URL.createObjectURL(file);
+  const vid = document.createElement('video');
+  vid.src = url;
+  document.getElementById('previewOrig').src = url;
+  vid.onloadedmetadata = ()=>{
+    document.getElementById('fiRes').textContent = vid.videoWidth + '×' + vid.videoHeight;
+    const s = Math.round(vid.duration);
+    document.getElementById('fiDur').textContent = Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
+  };
+}
+
+function log(msg, cls=''){
+  const box = document.getElementById('compressLog');
+  const p = document.createElement('p');
+  p.className = cls;
+  p.textContent = msg;
+  box.appendChild(p);
+  box.scrollTop = box.scrollHeight;
+}
+
+function setProgress(pct){ document.getElementById('compressFill').style.width = pct + '%'; }
+
+async function startCompress(){
+  if(!currentFile){ showToast('動画ファイルを選択してください'); return; }
+  document.getElementById('btnCompress').disabled = true;
+  document.getElementById('compressProgress').style.display = 'block';
+  document.getElementById('compressResult').style.display = 'none';
+  document.getElementById('compressLog').innerHTML = '';
+  setProgress(0);
+
+  try {
+    if(!ffmpegLoaded){
+      log('FFmpegエンジンをダウンロード中... (初回のみ・約30MB)');
+      const { createFFmpeg } = FFmpeg;
+      ffmpegInstance = createFFmpeg({
+        log: false,
+        progress: ({ratio}) => setProgress(Math.round(ratio * 90))
+      });
+      await ffmpegInstance.load();
+      ffmpegLoaded = true;
+      log('FFmpegの準備完了', 'log-ok');
+    }
+
+    const ff = ffmpegInstance;
+    const { fetchFile } = FFmpeg;
+
+    log('ファイルを読み込み中...');
+    const inName = 'input_' + Date.now() + '.' + currentFile.name.split('.').pop();
+    const fmt = document.getElementById('outFmt').value;
+    const outName = 'output.' + fmt;
+    ff.FS('writeFile', inName, await fetchFile(currentFile));
+    log('エンコード開始...', 'log-ok');
+
+    const crf = document.getElementById('outCrf').value;
+    const res = document.getElementById('outRes').value;
+    const args = ['-i', inName];
+
+    if(res !== 'original'){
+      args.push('-vf', 'scale=' + res.replace('x',':'));
+    }
+
+    if(fmt === 'mp4'){
+      args.push('-c:v','libx264','-crf',crf,'-preset','fast','-c:a','aac','-b:a','128k');
+    } else {
+      args.push('-c:v','libvpx-vp9','-crf',crf,'-b:v','0','-c:a','libopus');
+    }
+    args.push(outName);
+
+    await ff.run(...args);
+    setProgress(95);
+    log('出力ファイルを生成中...');
+
+    const data = ff.FS('readFile', outName);
+    outputBlob = new Blob([data.buffer], {type: fmt === 'mp4' ? 'video/mp4' : 'video/webm'});
+
+    ff.FS('unlink', inName);
+    ff.FS('unlink', outName);
+
+    setProgress(100);
+    log('完了！', 'log-ok');
+
+    const outUrl = URL.createObjectURL(outputBlob);
+    const saving = currentFile.size - outputBlob.size;
+    const ratio = (saving / currentFile.size * 100).toFixed(1);
+
+    document.getElementById('resSize').textContent = fmtSize(outputBlob.size);
+    document.getElementById('resSaving').textContent = (saving > 0 ? '−' : '+') + fmtSize(Math.abs(saving));
+    document.getElementById('resRatio').textContent = ratio + '%削減';
+    const dl = document.getElementById('downloadLink');
+    const baseName = currentFile.name.replace(/\.[^.]+$/, '');
+    dl.href = outUrl;
+    dl.download = baseName + '_compressed.' + fmt;
+    document.getElementById('previewOut').src = outUrl;
+    document.getElementById('compressResult').style.display = 'block';
+
+  } catch(e) {
+    log('エラー: ' + e.message, 'log-err');
+    showToast('圧縮に失敗しました');
+  }
+  document.getElementById('btnCompress').disabled = false;
+}
+
+function resetCompress(){
+  currentFile = null;
+  outputBlob = null;
+  document.getElementById('fileInfo').style.display = 'none';
+  document.getElementById('compressSettings').style.display = 'none';
+  document.getElementById('compressProgress').style.display = 'none';
+  document.getElementById('compressResult').style.display = 'none';
+  document.getElementById('videoInput').value = '';
+}
+</script>
+</body>
+</html>

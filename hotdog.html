@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>飲食部門｜下町炭焼きホットドッグ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;700&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans JP',sans-serif;background:#f7f0e2;color:#1e1006;min-height:100vh;}
+nav{background:#150c02;padding:18px 48px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #7a5218;position:sticky;top:0;z-index:100;}
+.nav-logo{font-family:'Shippori Mincho',serif;font-size:16px;letter-spacing:.22em;color:#f0ddb0;text-decoration:none;}
+.nav-logo span{color:#d4920a;}
+.nav-links{display:flex;gap:22px;align-items:center;flex-wrap:wrap;}
+.nav-links a{font-size:11px;letter-spacing:.2em;color:rgba(240,221,176,.5);text-decoration:none;}
+.nav-links a:hover{color:#d4920a;}
+.nav-links a.active{color:#d4920a;}
+.tabs{background:#1e1204;border-bottom:1px solid #3a2208;padding:0 48px;display:flex;overflow-x:auto;}
+.tab{padding:14px 20px;font-size:11px;letter-spacing:.18em;color:rgba(240,221,176,.4);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;}
+.tab:hover{color:rgba(240,221,176,.7);}
+.tab.active{color:#d4920a;border-bottom-color:#d4920a;}
+.tab-content{display:block;padding:24px 48px 8px;max-width:1000px;}
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:24px;padding-bottom:12px;border-bottom:1px solid #b89848;}
+.sec-head h2{font-family:'Shippori Mincho',serif;font-size:18px;font-weight:400;letter-spacing:.1em;}
+.sec-sub{font-size:11px;color:#8b6820;letter-spacing:.08em;}
+.card{background:#fff9ee;border:1px solid #d4b870;border-radius:6px;padding:20px;margin-bottom:16px;}
+.card-label{font-size:10px;letter-spacing:.3em;color:#8b6820;margin-bottom:6px;}
+.card-value{font-family:'Shippori Mincho',serif;font-size:24px;color:#1c0f02;}
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-bottom:28px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;margin-bottom:16px;}
+.form-grid.one{grid-template-columns:1fr;}
+label.fl{font-size:11px;letter-spacing:.15em;color:#5a3a10;display:block;margin-bottom:4px;}
+input[type=text],input[type=date],input[type=number],textarea,select{font-family:'Noto Sans JP',sans-serif;font-size:13px;padding:8px 10px;border:1px solid #c8a860;border-radius:4px;background:#fffdf5;color:#1e1006;width:100%;}
+textarea{resize:vertical;min-height:64px;}
+input:focus,textarea:focus,select:focus{outline:2px solid #c8880a;border-color:#c8880a;}
+.span2{grid-column:span 2;}
+.btn{font-family:'Noto Sans JP',sans-serif;font-size:12px;letter-spacing:.1em;padding:9px 20px;border:none;border-radius:4px;cursor:pointer;}
+.btn:hover{opacity:.85;}
+.btn-gold{background:#c8880a;color:#fff8e8;}
+.btn-outline{background:transparent;border:1px solid #c8880a;color:#c8880a;}
+.btn-sm{padding:5px 12px;font-size:11px;}
+.btn-danger{background:transparent;border:1px solid #c05010;color:#c05010;font-size:11px;padding:4px 10px;border-radius:4px;cursor:pointer;}
+.btn-danger:hover{background:#c05010;color:#fff;}
+.btn-row{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+.list-item{background:#fffdf5;border:1px solid #ddc890;border-radius:5px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px;}
+.list-item:hover{border-color:#c8880a;}
+.list-item-body{flex:1;}
+.list-item-title{font-size:15px;font-weight:700;color:#1c0f02;margin-bottom:3px;}
+.list-item-meta{font-size:11px;color:#8b6820;line-height:1.8;}
+.badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;letter-spacing:.05em;}
+.badge-yellow{background:#fdf3e0;color:#8b5e0a;}
+.badge-green{background:#e4f0e8;color:#2f6040;}
+.badge-gray{background:#ede8dd;color:#6b5840;}
+.chk-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fffdf5;border:1px solid #ddc890;border-radius:5px;margin-bottom:5px;}
+.chk-item input[type=checkbox]{width:16px;height:16px;accent-color:#c8880a;cursor:pointer;}
+.chk-item span{flex:1;font-size:13px;}
+.chk-item.done span{text-decoration:line-through;color:#a09080;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{background:#1c0f02;color:#e8d090;font-family:'Shippori Mincho',serif;font-weight:400;letter-spacing:.08em;padding:9px 10px;text-align:left;}
+td{padding:8px 10px;border-bottom:1px solid #ddc890;}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;align-items:center;justify-content:center;padding:20px;}
+.modal-bg.open{display:flex;}
+.modal{background:#f7f0e2;border:1px solid #b89848;border-radius:8px;width:100%;max-width:680px;max-height:92vh;overflow-y:auto;}
+.modal-head{background:#150c02;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;border-radius:8px 8px 0 0;}
+.modal-head h3{font-family:'Shippori Mincho',serif;font-size:16px;color:#f0ddb0;font-weight:400;}
+.modal-close{background:none;border:none;color:#a09080;font-size:20px;cursor:pointer;}
+.modal-body{padding:24px;}
+.sub-eyebrow{font-size:10px;letter-spacing:.3em;color:#8b6820;margin:22px 0 10px;}
+#toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:#1c0f02;color:#f0ddb0;font-size:12px;letter-spacing:.1em;padding:10px 24px;border-radius:20px;border:1px solid #c8880a;opacity:0;transition:opacity .3s;z-index:9999;pointer-events:none;}
+#toast.show{opacity:1;}
+@media(max-width:700px){nav,.tabs,.tab-content{padding-left:16px;padding-right:16px;}.form-grid{grid-template-columns:1fr;}.span2{grid-column:span 1;}.dash-grid{grid-template-columns:1fr 1fr;}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">下町炭焼き<span>ホットドッグ</span></a>
+  <div class="nav-links">
+    <a href="tools.html">制作ツール</a>
+    <a href="gyomu.html">業務管理</a>
+    <a href="shuzai.html">取材ノート</a>
+    <a href="hotdog.html" class="active">飲食部門</a>
+  </div>
+</nav>
+
+
+<!-- EVENTS -->
+<div class="tab-content active" id="tab-events">
+  <div class="sec-head"><h2>出店イベント</h2>
+    <button class="btn btn-gold btn-sm" onclick="openEventModal(null)">＋ 出店を追加</button>
+  </div>
+  <div class="dash-grid" id="eventCards"></div>
+  <div id="eventList"></div>
+</div>
+
+<!-- MENU -->
+<div class="tab-content" id="tab-menu">
+  <div class="sec-head"><h2>メニュー・原価</h2>
+    <button class="btn btn-gold btn-sm" onclick="openMenuModal(null)">＋ 商品を追加</button>
+  </div>
+  <table>
+    <thead><tr><th>商品名</th><th style="width:90px;">売価</th><th style="width:90px;">原価</th><th style="width:80px;">原価率</th><th style="width:90px;">利益</th><th style="width:60px;"></th></tr></thead>
+    <tbody id="menuBody"></tbody>
+  </table>
+  <input type="file" id="menuImgInput" accept="image/*" style="display:none;" onchange="menuSetImage(this.files)">
+</div>
+
+<!-- 共通 持ち物マスター -->
+<div class="tab-content" id="tab-belongings">
+  <div class="sec-head"><h2>持ち物マスター</h2>
+    <span class="sec-sub">ここで登録 → 各出店で選んで反映</span>
+  </div>
+  <p style="font-size:12px;color:#5a3a10;margin-bottom:12px;line-height:1.8;">よく持っていくものを登録しておきます。各出店イベントの「持ち物リスト」で、ここから選んで反映できます。</p>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+    <input type="text" id="belInput" placeholder="持ち物を追加（例：延長コード）" style="flex:1;min-width:160px;">
+    <button class="btn btn-gold btn-sm" type="button" onclick="addBel()">追加</button>
+    <button class="btn btn-outline btn-sm" type="button" onclick="addBelTemplate()">定番をまとめて追加</button>
+  </div>
+  <div id="belList"></div>
+</div>
+
+<!-- TODO -->
+<div class="tab-content" id="tab-todo">
+  <div class="sec-head"><h2>TODO</h2>
+    <span class="sec-sub">業務管理アプリと連携</span>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+    <input type="text" id="todoInput" placeholder="やること（例：容器を発注する）" style="flex:1;min-width:160px;">
+    <input type="date" id="todoDate" style="width:150px;">
+    <button class="btn btn-outline btn-sm" type="button" onclick="setTodoToday()">今日</button>
+    <button class="btn btn-gold btn-sm" type="button" onclick="addTodo()">追加</button>
+  </div>
+  <div id="todoList"></div>
+</div>
+
+<!-- REFS -->
+<div class="tab-content" id="tab-refs">
+  <div class="sec-head"><h2>資料</h2>
+    <span class="sec-sub">参考リンク・画像・メモ</span>
+  </div>
+  <div style="margin-bottom:32px;">
+    <div class="card-label" style="margin-bottom:10px;">参考リンク</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+      <input type="text" id="refLinkTitle" placeholder="タイトル" style="flex:1;min-width:120px;">
+      <input type="text" id="refLinkUrl" placeholder="URL（https://...）" style="flex:2;min-width:160px;">
+      <button class="btn btn-outline btn-sm" type="button" onclick="addRefLink()">追加</button>
+    </div>
+    <div id="refLinkList"></div>
+  </div>
+  <div style="margin-bottom:32px;">
+    <div class="card-label" style="margin-bottom:10px;">参考画像</div>
+    <label class="btn btn-gold btn-sm" style="cursor:pointer;display:inline-block;margin-bottom:12px;">📂 画像を追加<input type="file" accept="image/*" multiple style="display:none;" onchange="refAddFiles(this.files)"></label>
+    <div id="refImgGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;"></div>
+  </div>
+  <div>
+    <div class="card-label" style="margin-bottom:10px;">メモ</div>
+    <textarea id="refNote" placeholder="仕入れ先・レシピ・アイデアなど" style="min-height:100px;" onchange="saveRefNote()"></textarea>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="tab-content" id="tab-settings">
+  <div class="sec-head"><h2>設定</h2></div>
+  <div class="card">
+    <div class="card-label">データのバックアップ・復元</div>
+    <p style="font-size:12px;color:#5a3a10;margin:10px 0 16px;line-height:1.8;">ブラウザのデータを消すと消えます。時々バックアップを保存してください。</p>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      <button class="btn btn-gold" onclick="exportData()">💾 バックアップを保存</button>
+      <label class="btn btn-outline" style="cursor:pointer;">📂 復元<input type="file" accept=".json" onchange="importData(event)" style="display:none;"></label>
+    </div>
+    <div id="backupStatus" style="font-size:12px;color:#2f6040;margin-top:10px;"></div>
+  </div>
+</div>
+
+<!-- EVENT MODAL -->
+<div class="modal-bg" id="eventModal">
+  <div class="modal">
+    <div class="modal-head"><h3 id="eventModalTitle">出店を追加</h3><button class="modal-close" onclick="closeModal('eventModal')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="evEditId">
+      <div class="form-grid">
+        <div class="span2"><label class="fl">イベント名</label><input type="text" id="ev-name" placeholder="例：〇〇夏祭り"></div>
+        <div><label class="fl">日付</label><input type="date" id="ev-date"></div>
+        <div><label class="fl">場所</label><input type="text" id="ev-place" placeholder="例：〇〇公園"></div>
+      </div>
+
+      <div class="sub-eyebrow">準備チェックリスト</div>
+      <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+        <input type="text" id="ev-prep-input" placeholder="準備項目を追加" style="flex:1;min-width:140px;">
+        <button class="btn btn-outline btn-sm" type="button" onclick="addPrep()">追加</button>
+        <button class="btn btn-outline btn-sm" type="button" onclick="addPrepTemplate()">定番をまとめて追加</button>
+      </div>
+      <div id="ev-prep-list"></div>
+
+      <div class="sub-eyebrow">持ち物リスト</div>
+      <div style="font-size:11px;color:#8b6820;margin-bottom:6px;">持ち物マスターから選ぶ（タップで反映）</div>
+      <div id="ev-bring-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;"></div>
+      <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+        <input type="text" id="ev-bring-input" placeholder="この出店だけの持ち物を追加" style="flex:1;min-width:140px;">
+        <button class="btn btn-outline btn-sm" type="button" onclick="addBring()">追加</button>
+      </div>
+      <div id="ev-bring-list"></div>
+
+      <div class="sub-eyebrow">買い出しリスト</div>
+      <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+        <input type="text" id="ev-shop-input" placeholder="買うものを追加" style="flex:1;min-width:140px;">
+        <button class="btn btn-outline btn-sm" type="button" onclick="addShop()">追加</button>
+        <button class="btn btn-outline btn-sm" type="button" onclick="printShoppingList()">🖨 PDFで書き出し</button>
+      </div>
+      <div id="ev-shop-list"></div>
+
+      <div class="sub-eyebrow">商品別の販売（売れたら ＋ を押すだけ）</div>
+      <div id="ev-sales-tbody"></div>
+      <datalist id="menuNames"></datalist>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+        <button class="btn btn-outline btn-sm" type="button" onclick="addSalesFromMenu()">メニューから一括で並べる</button>
+        <button class="btn btn-outline btn-sm" type="button" onclick="addSalesItem()">＋ 商品を追加</button>
+      </div>
+
+      <div class="sub-eyebrow">当日の実績</div>
+      <div class="form-grid">
+        <div><label class="fl">売上（円）※商品別があれば自動</label><input type="number" id="ev-sales" min="0" placeholder="0" oninput="calcProfit()"></div>
+        <div><label class="fl">販売数（個）</label><input type="number" id="ev-customers" min="0" placeholder="0"></div>
+        <div><label class="fl">経費（材料費・出店料など・円）</label><input type="number" id="ev-cost" min="0" placeholder="0" oninput="calcProfit()"></div>
+        <div><label class="fl">利益（自動計算）</label><input type="text" id="ev-profit" disabled></div>
+        <div><label class="fl">天気</label>
+          <select id="ev-weather"><option value="">—</option><option>☀ 晴れ</option><option>⛅ くもり</option><option>☂ 雨</option><option>🌫 その他</option></select>
+        </div>
+        <div><label class="fl">客層・反応</label><input type="text" id="ev-reaction" placeholder="例：家族連れが多かった"></div>
+        <div class="span2"><label class="fl">振り返りメモ（良かった点・次回への改善）</label><textarea id="ev-memo"></textarea></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-gold" onclick="saveEvent()">保存</button>
+        <button class="btn btn-outline" onclick="shareEventFromModal()">📢 告知をシェア</button>
+        <button class="btn btn-outline" onclick="closeModal('eventModal')">キャンセル</button>
+        <button class="btn btn-danger" id="evDeleteBtn" onclick="deleteEvent()" style="display:none;">削除</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MENU MODAL -->
+<div class="modal-bg" id="menuModal">
+  <div class="modal">
+    <div class="modal-head"><h3 id="menuModalTitle">商品を追加</h3><button class="modal-close" onclick="closeModal('menuModal')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="mEditId">
+      <div class="form-grid">
+        <div class="span2"><label class="fl">商品名</label><input type="text" id="m-name" placeholder="例：炭焼きホットドッグ"></div>
+        <div><label class="fl">売価（円）</label><input type="number" id="m-price" min="0"></div>
+        <div><label class="fl">原価（円）</label><input type="number" id="m-cost" min="0"></div>
+      </div>
+      <div>
+        <label class="fl">看板・写真</label>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+          <img id="m-img-preview" style="width:120px;height:120px;object-fit:cover;border:1px solid #d4b870;border-radius:6px;display:none;background:#fff;">
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <label class="btn btn-outline btn-sm" style="cursor:pointer;">📂 画像を選ぶ<input type="file" accept="image/*" style="display:none;" onchange="chooseMenuImg(this.files)"></label>
+            <button type="button" class="btn-danger" id="m-img-remove" onclick="removeMenuImg()" style="display:none;">画像を削除</button>
+          </div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-gold" onclick="saveMenu()">保存</button>
+        <button class="btn btn-outline" onclick="closeModal('menuModal')">キャンセル</button>
+        <button class="btn btn-danger" id="mDeleteBtn" onclick="deleteMenu()" style="display:none;">削除</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 販売モード（全画面） -->
+<div id="saleMode" style="display:none;position:fixed;inset:0;background:#150c02;z-index:2000;flex-direction:column;">
+  <div style="padding:12px 16px;background:#1c0f02;border-bottom:1px solid #3a2208;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+    <button onclick="closeSaleMode()" style="background:transparent;border:1px solid #7a5218;color:#e8d090;font-size:13px;padding:10px 16px;border-radius:6px;cursor:pointer;">終了</button>
+    <button onclick="smAddProduct()" style="background:#c8880a;border:none;color:#fff;font-size:14px;padding:10px 16px;border-radius:6px;cursor:pointer;font-weight:700;">＋ 商品を追加</button>
+    <div id="smTitle" style="font-family:'Shippori Mincho',serif;color:#a09070;font-size:12px;"></div>
+    <div style="margin-left:auto;text-align:right;">
+      <div style="font-family:'Shippori Mincho',serif;color:#d4920a;font-size:28px;line-height:1;" id="smTotal">¥0</div>
+      <div style="color:#a09070;font-size:12px;margin-top:2px;" id="smCount">0 個</div>
+    </div>
+  </div>
+  <div id="smGrid" style="flex:1;overflow-y:auto;padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;align-content:start;"></div>
+  <input type="file" id="smImgInput" accept="image/*" style="display:none;" onchange="smSetImage(this.files)">
+</div>
+
+<div id="toast"></div>
+
+<script>
+let D = {};
+const KEY = 'hotdogData';
+function loadD(){ D = JSON.parse(localStorage.getItem(KEY)||'{}'); if(!D.events) D.events=[]; if(!D.menu) D.menu=[]; if(!D.todos) D.todos=[]; if(!D.refs) D.refs={links:[],images:[],note:''}; if(!D.belongings) D.belongings=[]; }
+function saveD(){ localStorage.setItem(KEY, JSON.stringify(D)); }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function fmt(n){ return Number(n||0).toLocaleString(); }
+function fmtDate(d){ if(!d) return '日付未定'; const p=d.split('-'); return `${p[0]}年${p[1]}月${p[2]}日`; }
+function today(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function showToast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+function uid(){ return 'id_'+Date.now()+'_'+Math.random().toString(36).slice(2,6); }
+
+const PREP_TEMPLATE = ['パン・ソーセージの仕込み','トッピング・ソースの準備','炭・ガスの確認','備品（トング・手袋・容器・紙ナプキン）','つり銭の準備','テント・テーブル・のぼり','保健所の営業許可確認','ゴミ袋・クーラーボックス'];
+
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+  if(name==='events') renderEvents();
+  if(name==='menu') renderMenu();
+  if(name==='todo') renderTodo();
+  if(name==='refs') renderRefs();
+}
+
+// ─── IndexedDB (画像) ─────────────────────────────────────────────────────────
+let idb=null;
+function openIDB(){ return new Promise(res=>{ const q=indexedDB.open('hotdogImages',1); q.onupgradeneeded=e=>e.target.result.createObjectStore('images',{keyPath:'id'}); q.onsuccess=e=>{idb=e.target.result;res(idb);}; q.onerror=()=>res(null); }); }
+function putImg(id,dataUrl){ return new Promise(res=>{ if(!idb){res(false);return;} const tx=idb.transaction('images','readwrite'); tx.objectStore('images').put({id,dataUrl}); tx.oncomplete=()=>res(true); }); }
+function getImg(id){ return new Promise(res=>{ if(!idb){res(null);return;} const req=idb.transaction('images').objectStore('images').get(id); req.onsuccess=e=>res(e.target.result?e.target.result.dataUrl:null); req.onerror=()=>res(null); }); }
+function delImg(id){ if(!idb) return; idb.transaction('images','readwrite').objectStore('images').delete(id); }
+
+const BEL_TEMPLATE = ['テント・タープ','折りたたみテーブル・イス','のぼり・看板・メニュー表','炭・炭焼きコンロ・着火剤','トング・ヘラ・調理器具','クーラーボックス・保冷剤','手袋・エプロン・帽子','容器・紙ナプキン・持ち帰り袋','つり銭・レジ（金庫）','ゴミ袋・雑巾・アルコール','消火用の水・消火器','手指消毒・ペーパータオル'];
+
+// ─── 持ち物マスター（共通） ───────────────────────────────────────────────────
+function renderBel(){
+  const el=document.getElementById('belList');
+  if(!el) return;
+  if((D.belongings||[]).length===0){ el.innerHTML='<div style="color:#8b6820;font-size:13px;">持ち物がありません。「定番をまとめて追加」から始められます。</div>'; return; }
+  el.innerHTML = D.belongings.map((b,i)=>`<div class="chk-item">
+    <span style="flex:1;">${esc(b.text)}</span>
+    <button onclick="deleteBel(${i})" style="background:none;border:none;color:#b0a48c;font-size:15px;cursor:pointer;">×</button>
+  </div>`).join('');
+}
+function addBel(){ const v=document.getElementById('belInput').value.trim(); if(!v)return; if(!D.belongings.some(b=>b.text===v)) D.belongings.push({text:v}); saveD(); document.getElementById('belInput').value=''; renderBel(); }
+function addBelTemplate(){ BEL_TEMPLATE.forEach(t=>{ if(!D.belongings.some(b=>b.text===t)) D.belongings.push({text:t}); }); saveD(); renderBel(); showToast('定番を追加しました'); }
+function deleteBel(i){ D.belongings.splice(i,1); saveD(); renderBel(); }
+
+// ─── TODO ─────────────────────────────────────────────────────────────────────
+function setTodoToday(){ document.getElementById('todoDate').value = today(); }
+function addTodo(){
+  const v=document.getElementById('todoInput').value.trim(); if(!v)return;
+  D.todos.push({id:uid(),text:v,done:false,dueDate:document.getElementById('todoDate').value||''});
+  saveD(); document.getElementById('todoInput').value=''; document.getElementById('todoDate').value=''; renderTodo();
+}
+function toggleTodo(i){ D.todos[i].done=!D.todos[i].done; saveD(); renderTodo(); }
+function deleteTodo(i){ D.todos.splice(i,1); saveD(); renderTodo(); }
+function renderTodo(){
+  const el=document.getElementById('todoList');
+  if(D.todos.length===0){ el.innerHTML='<div style="color:#8b6820;font-size:13px;">TODOがありません。</div>'; return; }
+  const undone=D.todos.filter(t=>!t.done).sort((a,b)=>(a.dueDate||'9999').localeCompare(b.dueDate||'9999'));
+  const done=D.todos.filter(t=>t.done);
+  const row=(t)=>{ const i=D.todos.indexOf(t); const due=t.dueDate?`<span style="font-size:11px;color:${!t.done&&t.dueDate<today()?'#c05010':'#8b6820'};margin-left:8px;">📅 ${fmtDate(t.dueDate)}${!t.done&&t.dueDate<today()?'（超過）':''}</span>`:'';
+    return `<div class="chk-item ${t.done?'done':''}"><input type="checkbox" ${t.done?'checked':''} onchange="toggleTodo(${i})"><span>${esc(t.text)}${due}</span><button onclick="deleteTodo(${i})" style="background:none;border:none;color:#b0a48c;font-size:15px;cursor:pointer;">×</button></div>`; };
+  el.innerHTML = undone.map(row).join('') + (done.length?`<div style="font-size:10px;letter-spacing:.2em;color:#a09080;padding:8px 2px 4px;">完了済み</div>`+done.map(row).join(''):'');
+}
+
+// ─── REFS ─────────────────────────────────────────────────────────────────────
+async function renderRefs(){
+  const r=D.refs;
+  document.getElementById('refLinkList').innerHTML = r.links.length===0
+    ? '<div style="color:#8b6820;font-size:12px;">リンクがありません。</div>'
+    : r.links.map((l,i)=>`<div class="chk-item"><a href="${esc(l.url)}" target="_blank" rel="noopener" style="flex:1;font-size:13px;color:#c8880a;text-decoration:none;">🔗 ${esc(l.title||l.url)}</a><button onclick="deleteRefLink(${i})" style="background:none;border:none;color:#b0a48c;font-size:15px;cursor:pointer;">×</button></div>`).join('');
+  const g=document.getElementById('refImgGrid'); g.innerHTML='';
+  for(let i=0;i<r.images.length;i++){
+    const url=await getImg(r.images[i].id);
+    const d=document.createElement('div'); d.style.cssText='border:1px solid #d4b870;border-radius:5px;overflow:hidden;background:#fff;';
+    d.innerHTML=`${url?`<img src="${url}" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;">`:'<div style="aspect-ratio:1;display:flex;align-items:center;justify-content:center;">🖼</div>'}<button class="btn-danger" style="width:100%;border:none;border-top:1px solid #d4b870;border-radius:0;" onclick="deleteRefImg(${i})">削除</button>`;
+    g.appendChild(d);
+  }
+  document.getElementById('refNote').value=r.note||'';
+}
+function addRefLink(){ const url=document.getElementById('refLinkUrl').value.trim(); if(!url){showToast('URLを入力してください');return;} D.refs.links.push({title:document.getElementById('refLinkTitle').value.trim(),url}); saveD(); document.getElementById('refLinkTitle').value='';document.getElementById('refLinkUrl').value=''; renderRefs(); }
+function deleteRefLink(i){ D.refs.links.splice(i,1); saveD(); renderRefs(); }
+async function refAddFiles(files){ if(!files||!files.length)return; for(const f of files){ if(!f.type.startsWith('image/'))continue; const url=await new Promise(r=>{const fr=new FileReader();fr.onload=e=>r(e.target.result);fr.readAsDataURL(f);}); const id='hi_'+Date.now()+'_'+Math.random().toString(36).slice(2); await putImg(id,url); D.refs.images.push({id}); } saveD(); renderRefs(); showToast('追加しました'); }
+async function deleteRefImg(i){ if(!confirm('この画像を削除しますか？'))return; delImg(D.refs.images[i].id); D.refs.images.splice(i,1); saveD(); renderRefs(); }
+function saveRefNote(){ D.refs.note=document.getElementById('refNote').value; saveD(); }
+
+// ─── EVENTS ───────────────────────────────────────────────────────────────────
+function renderEvents(){
+  const evs = [...D.events].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  // 年間まとめ
+  const yr = new Date().getFullYear();
+  const thisYear = D.events.filter(e=>e.date && e.date.startsWith(yr));
+  const yearSales = thisYear.reduce((a,e)=>a+Number(e.sales||0),0);
+  const yearProfit = thisYear.reduce((a,e)=>a+(Number(e.sales||0)-Number(e.cost||0)),0);
+  const upcoming = D.events.filter(e=>e.date && e.date>=today()).length;
+  document.getElementById('eventCards').innerHTML = `
+    <div class="card"><div class="card-label">出店回数（累計）</div><div class="card-value">${D.events.length}<span style="font-size:13px;"> 回</span></div></div>
+    <div class="card"><div class="card-label">今後の予定</div><div class="card-value">${upcoming}<span style="font-size:13px;"> 件</span></div></div>
+    <div class="card"><div class="card-label">${yr}年の売上</div><div class="card-value">¥${fmt(yearSales)}</div></div>
+    <div class="card"><div class="card-label">${yr}年の利益</div><div class="card-value">¥${fmt(yearProfit)}</div></div>
+  `;
+  document.getElementById('eventList').innerHTML = evs.length===0
+    ? '<div style="color:#8b6820;font-size:13px;">出店イベントがありません。「＋ 出店を追加」から登録してください。</div>'
+    : evs.map(e=>{
+        const idx = D.events.indexOf(e);
+        const past = e.date && e.date < today();
+        const prepDone = (e.prep||[]).filter(p=>p.done).length, prepAll=(e.prep||[]).length;
+        const brDone = (e.bring||[]).filter(p=>p.done).length, brAll=(e.bring||[]).length;
+        return `<div class="list-item">
+          <div class="list-item-body">
+            <div class="list-item-title">${esc(e.name||'無題の出店')}
+              <span class="badge ${e.sales?'badge-green':past?'badge-gray':'badge-yellow'}">${e.sales?'売上あり':past?'終了':'予定'}</span>
+            </div>
+            <div class="list-item-meta">
+              ${fmtDate(e.date)}${e.place?`　／　${esc(e.place)}`:''}
+              ${prepAll?`　／　準備 ${prepDone}/${prepAll}`:''}
+              ${brAll?`　／　持ち物 ${brDone}/${brAll}`:''}
+              ${e.weather?`　／　${esc(e.weather)}`:''}
+              ${e.sales?`　／　売上 ¥${fmt(e.sales)}${e.customers?`（${e.customers}個）`:''}${e.cost?`・利益 ¥${fmt(Number(e.sales)-Number(e.cost))}`:''}`:''}
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;flex-direction:column;">
+            <button class="btn btn-gold btn-sm" onclick="openSaleMode(${idx})">🛒 販売モード</button>
+            <button class="btn btn-outline btn-sm" onclick="openEventModal(${idx})">開く</button>
+          </div>
+        </div>`;
+      }).join('');
+}
+
+let tmpPrep = [], tmpShop = [], tmpSales = [], tmpBring = [];
+
+function renderSalesItems(){
+  document.getElementById('menuNames').innerHTML = D.menu.map(m=>`<option value="${esc(m.name)}">`).join('');
+  const tb = document.getElementById('ev-sales-tbody');
+  if(tmpSales.length===0){ tb.innerHTML='<div style="color:#8b6820;font-size:12px;margin-bottom:8px;">商品がありません。「メニューから一括で並べる」か「＋ 商品を追加」から。</div>'; return; }
+  tb.innerHTML = tmpSales.map((it,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:#fffdf5;border:1px solid #ddc890;border-radius:6px;margin-bottom:8px;flex-wrap:wrap;">
+      <input type="text" list="menuNames" value="${esc(it.name)}" placeholder="商品名" oninput="tmpSales[${i}].name=this.value" onchange="autofillPrice(${i})" style="flex:1;min-width:110px;">
+      <input type="number" min="0" value="${it.price}" oninput="tmpSales[${i}].price=Number(this.value);renderSalesTotalsOnly();onSalesChange()" style="width:70px;" title="単価">
+      <button type="button" onclick="bumpSales(${i},-1)" style="width:38px;height:38px;border-radius:50%;border:1px solid #c8880a;background:#fff;color:#c8880a;font-size:20px;cursor:pointer;">−</button>
+      <span style="font-family:'Shippori Mincho',serif;font-size:24px;min-width:44px;text-align:center;" id="qtyDisp${i}">${it.qty}</span>
+      <button type="button" onclick="bumpSales(${i},1)" style="width:44px;height:44px;border-radius:50%;border:none;background:#c8880a;color:#fff;font-size:24px;cursor:pointer;">＋</button>
+      <span style="font-size:12px;color:#8b6820;min-width:70px;text-align:right;" id="subDisp${i}">¥${fmt(it.qty*it.price)}</span>
+      <button class="btn-danger" onclick="tmpSales.splice(${i},1);renderSalesItems();onSalesChange()" style="padding:2px 8px;">×</button>
+    </div>`).join('');
+}
+function bumpSales(i, d){
+  tmpSales[i].qty = Math.max(0, Number(tmpSales[i].qty||0) + d);
+  renderSalesTotalsOnly(); onSalesChange();
+}
+function renderSalesTotalsOnly(){
+  tmpSales.forEach((it,i)=>{
+    const q=document.getElementById('qtyDisp'+i); if(q) q.textContent=it.qty;
+    const s=document.getElementById('subDisp'+i); if(s) s.textContent='¥'+fmt(it.qty*it.price);
+  });
+}
+function addSalesItem(){
+  tmpSales.push({name:'', qty:0, price:0});
+  renderSalesItems(); onSalesChange();
+}
+function addSalesFromMenu(){
+  if(D.menu.length===0){ showToast('先にメニュー・原価で商品を登録してください'); return; }
+  D.menu.forEach(m=>{ if(!tmpSales.some(s=>s.name===m.name)) tmpSales.push({name:m.name, qty:0, price:Number(m.price||0)}); });
+  renderSalesItems(); onSalesChange();
+}
+function autofillPrice(i){
+  const m = D.menu.find(x=>x.name===tmpSales[i].name);
+  if(m && (!tmpSales[i].price)){ tmpSales[i].price = Number(m.price||0); }
+  renderSalesItems(); onSalesChange();
+}
+function onSalesChange(){
+  if(tmpSales.length>0){
+    const total = tmpSales.reduce((a,it)=>a+it.qty*it.price,0);
+    const qty = tmpSales.reduce((a,it)=>a+Number(it.qty||0),0);
+    document.getElementById('ev-sales').value = total;
+    document.getElementById('ev-customers').value = qty;
+    calcProfit();
+  }
+}
+
+function calcProfit(){
+  const s=Number(document.getElementById('ev-sales').value||0);
+  const c=Number(document.getElementById('ev-cost').value||0);
+  document.getElementById('ev-profit').value = '¥'+fmt(s-c);
+}
+
+function openEventModal(idx){
+  const e = idx!==null ? D.events[idx] : null;
+  document.getElementById('eventModalTitle').textContent = e?'出店の編集':'出店を追加';
+  document.getElementById('evEditId').value = idx!==null ? idx : '';
+  document.getElementById('ev-name').value = e?.name||'';
+  document.getElementById('ev-date').value = e?.date||'';
+  document.getElementById('ev-place').value = e?.place||'';
+  document.getElementById('ev-sales').value = e?.sales||'';
+  document.getElementById('ev-customers').value = e?.customers||'';
+  document.getElementById('ev-cost').value = e?.cost||'';
+  document.getElementById('ev-weather').value = e?.weather||'';
+  document.getElementById('ev-reaction').value = e?.reaction||'';
+  document.getElementById('ev-memo').value = e?.memo||'';
+  calcProfit();
+  tmpPrep = e? JSON.parse(JSON.stringify(e.prep||[])) : [];
+  tmpShop = e? JSON.parse(JSON.stringify(e.shop||[])) : [];
+  tmpSales = e? JSON.parse(JSON.stringify(e.salesItems||[])) : [];
+  tmpBring = e? JSON.parse(JSON.stringify(e.bring||[])) : [];
+  renderPrep(); renderShop(); renderSalesItems(); renderBring();
+  document.getElementById('evDeleteBtn').style.display = e?'block':'none';
+  document.getElementById('eventModal').classList.add('open');
+}
+
+function renderPrep(){
+  document.getElementById('ev-prep-list').innerHTML = tmpPrep.length===0
+    ? '<div style="color:#8b6820;font-size:12px;margin-bottom:8px;">項目がありません。</div>'
+    : tmpPrep.map((p,i)=>`<div class="chk-item ${p.done?'done':''}">
+        <input type="checkbox" ${p.done?'checked':''} onchange="tmpPrep[${i}].done=!tmpPrep[${i}].done;renderPrep()">
+        <span>${esc(p.text)}</span>
+        <button onclick="tmpPrep.splice(${i},1);renderPrep()" style="background:none;border:none;color:#b0a48c;font-size:15px;cursor:pointer;">×</button>
+      </div>`).join('');
+}
+function addPrep(){ const v=document.getElementById('ev-prep-input').value.trim(); if(!v)return; tmpPrep.push({text:v,done:false}); document.getElementById('ev-prep-input').value=''; renderPrep(); }
+function addPrepTemplate(){ PREP_TEMPLATE.forEach(t=>{ if(!tmpPrep.some(p=>p.text===t)) tmpPrep.push({text:t,done:false}); }); renderPrep(); }
+
+function renderShop(){
+  document.getElementById('ev-shop-list').innerHTML = tmpShop.length===0
+    ? '<div style="color:#8b6820;font-size:12px;margin-bottom:8px;">項目がありません。</div>'
+    : tmpShop.map((p,i)=>`<div class="chk-item ${p.done?'done':''}">
+        <input type="checkbox" ${p.done?'checked':''} onchange="tmpShop[${i}].done=!tmpShop[${i}].done;renderShop()">
+        <span>${esc(p.text)}</span>
+        <button onclick="tmpShop.splice(${i},1);renderShop()" style="background:none;border:none;color:#b0a48c;font-size:15px;cursor:pointer;">×</button>
+      </div>`).join('');
+}
+function addShop(){ const v=document.getElementById('ev-shop-input').value.trim(); if(!v)return; tmpShop.push({text:v,done:false}); document.getElementById('ev-shop-input').value=''; renderShop(); }
+
+function printShoppingList(){
+  if(tmpShop.length===0){ showToast('買い出しリストが空です'); return; }
+  const name = document.getElementById('ev-name').value || '出店';
+  const date = document.getElementById('ev-date').value;
+  const rows = tmpShop.map(s=>`<tr><td class="ck">${s.done?'☑':'☐'}</td><td>${esc(s.text)}</td></tr>`).join('');
+  const w = window.open('','_blank','width=600,height=800');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>買い出しリスト</title>
+  <style>
+    body{font-family:'Hiragino Sans','Yu Gothic',sans-serif;padding:32px;color:#1a1a1a;}
+    h1{font-size:22px;margin:0 0 4px;}
+    .meta{font-size:13px;color:#555;margin-bottom:20px;}
+    table{width:100%;border-collapse:collapse;}
+    td{border-bottom:1px solid #ccc;padding:12px 8px;font-size:16px;}
+    td.ck{width:36px;text-align:center;font-size:22px;}
+    @media print{ .noprint{display:none;} }
+    .noprint{margin-bottom:16px;}
+    button{padding:8px 16px;font-size:14px;cursor:pointer;}
+  </style></head><body>
+    <div class="noprint"><button onclick="window.print()">印刷 / PDF保存</button></div>
+    <h1>買い出しリスト</h1>
+    <div class="meta">${esc(name)}${date?'　／　'+date.replace(/-/g,'.'):''}</div>
+    <table>${rows}</table>
+  </body></html>`);
+  w.document.close();
+}
+
+function renderBring(){
+  // マスターのチップ（選択で反映）
+  const chips = document.getElementById('ev-bring-chips');
+  if((D.belongings||[]).length===0){
+    chips.innerHTML = '<span style="font-size:11px;color:#a09080;">持ち物マスターが空です。上部の「持ち物マスター」で登録してください。</span>';
+  } else {
+    chips.innerHTML = D.belongings.map(b=>{
+      const on = tmpBring.some(t=>t.text===b.text);
+      return `<button type="button" onclick="toggleBringFromMaster('${esc(b.text).replace(/'/g,"\\'")}')" style="font-size:12px;padding:5px 12px;border-radius:16px;cursor:pointer;border:1px solid ${on?'#c8880a':'#d4c4a4'};background:${on?'#c8880a':'#fffdf5'};color:${on?'#fff':'#5a3a10'};">${on?'✓ ':''}${esc(b.text)}</button>`;
+    }).join('');
+  }
+  // この出店の持ち物リスト（準備チェック＋購入チェック）
+  document.getElementById('ev-bring-list').innerHTML = tmpBring.length===0
+    ? '<div style="color:#8b6820;font-size:12px;margin-bottom:8px;">上のマスターから選ぶか、下で追加してください。</div>'
+    : `<div style="display:flex;font-size:10px;color:#8b6820;padding:0 12px 4px;gap:8px;"><span style="width:16px;">準備</span><span style="flex:1;"></span><span>買い出し</span></div>`
+      + tmpBring.map((p,i)=>`<div class="chk-item ${p.done?'done':''}">
+        <input type="checkbox" ${p.done?'checked':''} onchange="tmpBring[${i}].done=!tmpBring[${i}].done;renderBring()" title="準備できた">
+        <span>${esc(p.text)}</span>
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:${p.bought?'#c05010':'#8b6820'};cursor:pointer;white-space:nowrap;" title="チェックすると買い出しリストに入ります">
+          <input type="checkbox" ${p.bought?'checked':''} onchange="toggleBringBuy(${i})" style="accent-color:#c05010;">🛒買い出し
+        </label>
+        <button onclick="tmpBring.splice(${i},1);renderBring()" style="background:none;border:none;color:#b0a48c;font-size:15px;cursor:pointer;">×</button>
+      </div>`).join('');
+}
+function toggleBringBuy(i){
+  tmpBring[i].bought = !tmpBring[i].bought;
+  const text = tmpBring[i].text;
+  if(tmpBring[i].bought){
+    if(!tmpShop.some(s=>s.text===text)){ tmpShop.push({text, done:false, fromBring:true}); showToast('買い出しリストに追加：'+text); }
+  } else {
+    const idx = tmpShop.findIndex(s=>s.text===text && s.fromBring && !s.done);
+    if(idx>=0){ tmpShop.splice(idx,1); showToast('買い出しリストから外しました'); }
+  }
+  renderBring(); renderShop();
+}
+function toggleBringFromMaster(text){
+  const idx = tmpBring.findIndex(t=>t.text===text);
+  if(idx>=0) tmpBring.splice(idx,1); else tmpBring.push({text,done:false});
+  renderBring();
+}
+function addBring(){ const v=document.getElementById('ev-bring-input').value.trim(); if(!v)return; if(!tmpBring.some(t=>t.text===v)) tmpBring.push({text:v,done:false}); document.getElementById('ev-bring-input').value=''; renderBring(); }
+
+function saveEvent(){
+  const idx = document.getElementById('evEditId').value;
+  const obj = {
+    id: idx!=='' ? D.events[Number(idx)].id : uid(),
+    name:document.getElementById('ev-name').value,
+    date:document.getElementById('ev-date').value,
+    place:document.getElementById('ev-place').value,
+    sales:document.getElementById('ev-sales').value,
+    customers:document.getElementById('ev-customers').value,
+    cost:document.getElementById('ev-cost').value,
+    weather:document.getElementById('ev-weather').value,
+    reaction:document.getElementById('ev-reaction').value,
+    memo:document.getElementById('ev-memo').value,
+    prep:tmpPrep, shop:tmpShop, bring:tmpBring, salesItems:tmpSales
+  };
+  if(idx!=='') D.events[Number(idx)]=obj; else D.events.push(obj);
+  saveD(); closeModal('eventModal'); renderEvents();
+  showToast('保存しました');
+}
+function deleteEvent(){
+  const idx=Number(document.getElementById('evEditId').value);
+  if(!confirm('この出店を削除しますか？')) return;
+  D.events.splice(idx,1); saveD(); closeModal('eventModal'); renderEvents();
+}
+
+// ─── 販売モード（全画面レジ） ─────────────────────────────────────────────────
+let smEventIdx = null;
+function openSaleMode(idx){
+  smEventIdx = idx;
+  const e = D.events[idx];
+  if(!e.salesItems) e.salesItems = [];
+  // 商品が無ければメニューから自動で並べる
+  if(e.salesItems.length===0){
+    if(D.menu.length===0){ if(!confirm('商品が登録されていません。先に「メニュー・原価」で登録すると便利です。空のまま開きますか？')) return; }
+    D.menu.forEach(m=>e.salesItems.push({name:m.name, qty:0, price:Number(m.price||0)}));
+    saveD();
+  }
+  const t = document.getElementById('smTitle'); if(t) t.textContent = (e.name||'出店') + ' 販売モード';
+  renderSaleMode();
+  document.getElementById('saleMode').style.display = 'flex';
+}
+function closeSaleMode(){
+  document.getElementById('saleMode').style.display = 'none';
+  smEventIdx = null;
+  renderEvents();
+}
+function renderSaleMode(){
+  const e = D.events[smEventIdx];
+  const items = e.salesItems || [];
+  const total = items.reduce((a,it)=>a+it.qty*it.price,0);
+  const count = items.reduce((a,it)=>a+Number(it.qty||0),0);
+  document.getElementById('smTotal').textContent = '¥'+fmt(total);
+  document.getElementById('smCount').textContent = count+' 個';
+  document.getElementById('smGrid').innerHTML = items.length===0
+    ? '<div style="color:#a09070;grid-column:1/-1;">商品がありません。「開く」から商品を追加してください。</div>'
+    : items.map((it,i)=>`
+      <div style="background:#241605;border:1px solid #3a2208;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;">
+        <div onclick="smBump(${i},1)" style="position:relative;cursor:pointer;aspect-ratio:1/1;background:#1a1105;display:flex;align-items:center;justify-content:center;">
+          <div id="smImg${i}" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+            <span style="color:#5a4a2a;font-size:48px;">🌭</span>
+          </div>
+          ${it.qty>0?`<div style="position:absolute;top:8px;right:8px;background:#c8880a;color:#fff;min-width:44px;height:44px;border-radius:22px;display:flex;align-items:center;justify-content:center;font-family:'Shippori Mincho',serif;font-size:26px;padding:0 8px;box-shadow:0 2px 8px rgba(0,0,0,.4);">${it.qty}</div>`:''}
+          <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.75));padding:16px 12px 10px;">
+            <div style="color:#fff;font-size:16px;font-weight:700;line-height:1.3;">${esc(it.name||'（無名）')}</div>
+            <div style="color:#e8d090;font-size:13px;">¥${fmt(it.price)}</div>
+          </div>
+          <div style="position:absolute;bottom:10px;right:10px;color:rgba(255,255,255,.7);font-size:11px;">タップで＋1</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:8px;">
+          <button onclick="smBump(${i},-1)" style="width:40px;height:40px;border-radius:8px;border:1px solid #7a5218;background:transparent;color:#d4920a;font-size:22px;cursor:pointer;">−</button>
+          <button onclick="smBump(${i},1)" style="flex:1;height:40px;border-radius:8px;border:none;background:#c8880a;color:#fff;font-size:22px;font-weight:700;cursor:pointer;">＋</button>
+          <button onclick="smPickImage(${i})" title="写真" style="width:40px;height:40px;border-radius:8px;border:1px solid #7a5218;background:transparent;color:#d4920a;font-size:16px;cursor:pointer;">📷</button>
+        </div>
+      </div>`).join('');
+  // 商品写真をメニューから読み込み
+  items.forEach(async (it,i)=>{
+    const m = D.menu.find(x=>x.name===it.name);
+    if(m && m.imgId){ const url=await getImg(m.imgId); const el=document.getElementById('smImg'+i); if(el&&url) el.innerHTML=`<img src="${url}" style="width:100%;height:100%;object-fit:cover;">`; }
+  });
+}
+let smImgTargetIdx = null;
+function smPickImage(i){
+  smImgTargetIdx = i;
+  document.getElementById('smImgInput').click();
+}
+async function smSetImage(files){
+  if(!files||!files.length||smImgTargetIdx===null) return;
+  const f=files[0]; if(!f.type.startsWith('image/')) return;
+  const e = D.events[smEventIdx];
+  const it = e.salesItems[smImgTargetIdx];
+  const url=await new Promise(r=>{const fr=new FileReader();fr.onload=ev=>r(ev.target.result);fr.readAsDataURL(f);});
+  const id='mi_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+  await putImg(id,url);
+  // メニューに反映（無ければ登録）
+  let m = D.menu.find(x=>x.name===it.name);
+  if(!m){ m={name:it.name, price:it.price, cost:'', imgId:''}; D.menu.push(m); }
+  if(m.imgId) delImg(m.imgId);
+  m.imgId = id;
+  saveD();
+  document.getElementById('smImgInput').value='';
+  smImgTargetIdx=null;
+  renderSaleMode(); renderMenu();
+  showToast('写真を登録しました');
+}
+function smAddProduct(){
+  const name = prompt('商品名を入力してください');
+  if(!name || !name.trim()) return;
+  const nm = name.trim();
+  const price = Number(prompt('売価（円）を入力してください', '0')) || 0;
+  // メニューに未登録なら登録
+  if(!D.menu.some(m=>m.name===nm)) D.menu.push({name:nm, price:price, cost:'', imgId:''});
+  const e = D.events[smEventIdx];
+  if(!e.salesItems) e.salesItems=[];
+  if(!e.salesItems.some(s=>s.name===nm)) e.salesItems.push({name:nm, qty:0, price:price});
+  saveD();
+  renderSaleMode();
+  renderMenu();
+  showToast('「'+nm+'」を登録しました');
+  // 続けて写真を登録するか
+  if(confirm('「'+nm+'」の写真を登録しますか？')){
+    const idx = e.salesItems.findIndex(s=>s.name===nm);
+    if(idx>=0) smPickImage(idx);
+  }
+}
+function smBump(i, d){
+  const e = D.events[smEventIdx];
+  e.salesItems[i].qty = Math.max(0, Number(e.salesItems[i].qty||0)+d);
+  // 集計を売上・販売数に反映
+  e.sales = e.salesItems.reduce((a,it)=>a+it.qty*it.price,0);
+  e.customers = e.salesItems.reduce((a,it)=>a+Number(it.qty||0),0);
+  saveD();
+  renderSaleMode();
+}
+
+// ─── シェア（Instagram等） ────────────────────────────────────────────────────
+async function shareContent(text, imgId){
+  let files = [];
+  if(imgId){
+    const url = await getImg(imgId);
+    if(url){
+      try{
+        const blob = await (await fetch(url)).blob();
+        const file = new File([blob], 'photo.jpg', {type:blob.type||'image/jpeg'});
+        if(navigator.canShare && navigator.canShare({files:[file]})) files=[file];
+      }catch(e){}
+    }
+  }
+  if(navigator.share){
+    try{
+      await navigator.share(files.length ? {text, files} : {text});
+      return;
+    }catch(e){ if(e.name==='AbortError') return; }
+  }
+  // フォールバック：文章をコピー
+  try{ await navigator.clipboard.writeText(text); showToast('文章をコピーしました。Instagramに貼り付けてください'); }
+  catch(e){ alert(text); }
+}
+
+function shareMenu(i){
+  const m = D.menu[i];
+  const text = `${m.name}　¥${fmt(m.price)}\n\n炭火でじっくり焼き上げた一品です🔥\n\n#下町炭焼きホットドッグ #ホットドッグ #炭焼き #キッチンカー #出店`;
+  shareContent(text, m.imgId);
+}
+
+function shareEventFromModal(){
+  const name = document.getElementById('ev-name').value;
+  const date = document.getElementById('ev-date').value;
+  const place = document.getElementById('ev-place').value;
+  const text = `【出店のお知らせ】\n${name||''}\n📅 ${date?fmtDate(date):'日程調整中'}\n📍 ${place||''}\n\n炭焼きホットドッグを焼いてお待ちしています！ぜひお越しください🌭🔥\n\n#下町炭焼きホットドッグ #出店 #イベント`;
+  shareContent(text, null);
+}
+
+// ─── MENU ─────────────────────────────────────────────────────────────────────
+async function renderMenu(){
+  const tb = document.getElementById('menuBody');
+  if(D.menu.length===0){ tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:#8b6820;">商品がありません</td></tr>'; return; }
+  tb.innerHTML = D.menu.map((m,i)=>{
+    const price=Number(m.price||0), cost=Number(m.cost||0);
+    const rate = price? Math.round(cost/price*100):0;
+    return `<tr>
+      <td><span id="menuThumb${i}" style="display:inline-block;vertical-align:middle;margin-right:8px;"></span>${esc(m.name)}</td>
+      <td style="text-align:right;">¥${fmt(price)}</td>
+      <td style="text-align:right;">¥${fmt(cost)}</td>
+      <td style="text-align:right;color:${rate>50?'#c05010':'#2f6040'};">${rate}%</td>
+      <td style="text-align:right;">¥${fmt(price-cost)}</td>
+      <td style="white-space:nowrap;">
+        <button onclick="menuPickImage(${i})" title="画像をつける" style="border:1px solid #c8880a;color:#c8880a;background:transparent;border-radius:4px;padding:4px 8px;cursor:pointer;font-size:11px;">🖼</button>
+        <button onclick="shareMenu(${i})" title="シェア" style="border:1px solid #c8880a;color:#c8880a;background:transparent;border-radius:4px;padding:4px 8px;cursor:pointer;font-size:11px;">📷</button>
+        <button class="btn-danger" onclick="openMenuModal(${i})">編集</button>
+      </td>
+    </tr>`;
+  }).join('');
+  // サムネイル読み込み
+  for(let i=0;i<D.menu.length;i++){
+    if(D.menu[i].imgId){ const url=await getImg(D.menu[i].imgId); const el=document.getElementById('menuThumb'+i); if(el&&url) el.innerHTML=`<img src="${url}" style="width:36px;height:36px;object-fit:cover;border-radius:4px;border:1px solid #d4b870;">`; }
+  }
+}
+let menuImgTargetIdx = null;
+function menuPickImage(i){ menuImgTargetIdx = i; document.getElementById('menuImgInput').click(); }
+async function menuSetImage(files){
+  if(!files||!files.length||menuImgTargetIdx===null) return;
+  const f=files[0]; if(!f.type.startsWith('image/')) return;
+  const m = D.menu[menuImgTargetIdx];
+  const url=await new Promise(r=>{const fr=new FileReader();fr.onload=e=>r(e.target.result);fr.readAsDataURL(f);});
+  const id='mi_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+  await putImg(id,url);
+  if(m.imgId) delImg(m.imgId);
+  m.imgId = id;
+  saveD();
+  document.getElementById('menuImgInput').value='';
+  menuImgTargetIdx=null;
+  renderMenu();
+  showToast('画像を登録しました');
+}
+let mTmpImgId = '';
+function openMenuModal(i){
+  const m = i!==null ? D.menu[i] : null;
+  document.getElementById('menuModalTitle').textContent = m?'商品を編集':'商品を追加';
+  document.getElementById('mEditId').value = i!==null ? i : '';
+  document.getElementById('m-name').value=m?.name||'';
+  document.getElementById('m-price').value=m?.price||'';
+  document.getElementById('m-cost').value=m?.cost||'';
+  mTmpImgId = m?.imgId||'';
+  showMenuImgPreview();
+  document.getElementById('mDeleteBtn').style.display=m?'block':'none';
+  document.getElementById('menuModal').classList.add('open');
+}
+async function showMenuImgPreview(){
+  const prev=document.getElementById('m-img-preview'), rm=document.getElementById('m-img-remove');
+  if(mTmpImgId){ const url=await getImg(mTmpImgId); if(url){ prev.src=url; prev.style.display='block'; rm.style.display='block'; return; } }
+  prev.style.display='none'; rm.style.display='none';
+}
+async function chooseMenuImg(files){
+  if(!files||!files.length) return;
+  const f=files[0]; if(!f.type.startsWith('image/')) return;
+  const url=await new Promise(r=>{const fr=new FileReader();fr.onload=e=>r(e.target.result);fr.readAsDataURL(f);});
+  const id='mi_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+  await putImg(id,url);
+  mTmpImgId=id; showMenuImgPreview();
+}
+function removeMenuImg(){ if(mTmpImgId){ delImg(mTmpImgId); mTmpImgId=''; } showMenuImgPreview(); }
+function saveMenu(){
+  const i=document.getElementById('mEditId').value;
+  const obj={name:document.getElementById('m-name').value,price:document.getElementById('m-price').value,cost:document.getElementById('m-cost').value,imgId:mTmpImgId};
+  if(!obj.name){ showToast('商品名を入力してください'); return; }
+  if(i!=='') D.menu[Number(i)]=obj; else D.menu.push(obj);
+  saveD(); closeModal('menuModal'); renderMenu();
+}
+function deleteMenu(){
+  const i=Number(document.getElementById('mEditId').value);
+  if(!confirm('この商品を削除しますか？')) return;
+  D.menu.splice(i,1); saveD(); closeModal('menuModal'); renderMenu();
+}
+
+// ─── BACKUP ───────────────────────────────────────────────────────────────────
+function exportData(){
+  const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),hotdogData:D},null,2)],{type:'application/json'});
+  const a=document.createElement('a'); const d=new Date();
+  a.href=URL.createObjectURL(blob);
+  a.download=`hotdog_backup_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.json`;
+  a.click(); showToast('保存しました');
+}
+function importData(e){
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=ev=>{ try{ const data=JSON.parse(ev.target.result); if(!data.hotdogData) throw 0;
+    if(!confirm('現在のデータを上書きします。よろしいですか？')) return;
+    localStorage.setItem(KEY, JSON.stringify(data.hotdogData)); loadD(); renderEvents();
+    document.getElementById('backupStatus').textContent='✓ 復元しました'; showToast('復元しました');
+  }catch(err){ alert('読み込みに失敗しました'); } };
+  r.readAsText(f); e.target.value='';
+}
+
+loadD();
+openIDB().then(()=>renderRefs());
+renderEvents();
+renderMenu();
+renderBel();
+renderTodo();
+renderRefs();
+document.querySelectorAll('.modal-bg').forEach(bg=>bg.addEventListener('click',e=>{ if(e.target===bg) bg.classList.remove('open'); }));
+</script>
+</body>
+</html>
