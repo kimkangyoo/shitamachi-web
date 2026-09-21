@@ -882,6 +882,12 @@ function getShuzaiTodos(){
       out.push({ivId:iv.id, leadName:iv.title, ti, text:t.text, done:t.done, dueDate:t.dueDate||''});
     });
   });
+  // 記事ごとのやること
+  (shuzaiData.articles||[]).forEach(a=>{
+    (a.todos||[]).forEach((t,ti)=>{
+      out.push({artId:a.id, leadName:a.title||'無題の記事', ti, text:t.text, done:t.done, dueDate:t.dueDate||''});
+    });
+  });
   return out;
 }
 function toggleShuzaiTodo(leadId, ti){
@@ -889,6 +895,15 @@ function toggleShuzaiTodo(leadId, ti){
   const l = (shuzaiData.leads||[]).find(x=>x.id===leadId);
   if(l && l.todos && l.todos[ti]){
     l.todos[ti].done = !l.todos[ti].done;
+    localStorage.setItem('shuzaiData', JSON.stringify(shuzaiData));
+  }
+  renderDashTodo(); renderDashSchedule();
+}
+function toggleShuzaiArticleTodo(artId, ti){
+  loadShuzai();
+  const a = (shuzaiData.articles||[]).find(x=>x.id===artId);
+  if(a && a.todos && a.todos[ti]){
+    a.todos[ti].done = !a.todos[ti].done;
     localStorage.setItem('shuzaiData', JSON.stringify(shuzaiData));
   }
   renderDashTodo(); renderDashSchedule();
@@ -991,8 +1006,8 @@ function renderDashboard(){
   const sorted = projects.filter(p=>p.s&&p.s.deadline).sort((a,b)=>a.s.deadline.localeCompare(b.s.deadline));
   const near = sorted.filter(p=>{ const d=daysUntil(p.s.deadline); return d!==null&&d<=watchDays*2; });
   const dp = document.getElementById('dashProjects');
-  if(near.length===0){ dp.innerHTML='<div style="color:#8b6820;font-size:13px;">締切が近い案件はありません。</div>'; return; }
-  dp.innerHTML = near.map(p=>{
+  if(near.length===0){ dp.innerHTML='<div style="color:#8b6820;font-size:13px;">締切が近い案件はありません。</div>'; }
+  else dp.innerHTML = near.map(p=>{
     const d=daysUntil(p.s.deadline);
     const meta=G.projectMeta[p.id]||{};
     const gcalUrl = makeGcalAddUrl(p.name, p.s.deadline, p.s.client);
@@ -1132,11 +1147,11 @@ function renderDashTodo(){
   // 取材ごとのTODO（取材ノートと連携・未完了のみ）
   if(shuzaiTodos.length>0){
     shuzaiTodos.sort((a,b)=>(a.dueDate||'9999').localeCompare(b.dueDate||'9999'));
-    html += `<li style="font-size:10px;letter-spacing:.2em;color:#5a2f7a;padding:10px 4px 4px;">🎤 取材TODO（取材ノート）</li>`;
+    html += `<li style="font-size:10px;letter-spacing:.2em;color:#5a2f7a;padding:10px 4px 4px;">🎤 取材・記事TODO（取材ノート）</li>`;
     html += shuzaiTodos.map(t=>{
       const days = t.dueDate ? daysUntil(t.dueDate) : null;
       const duLabel = days===null ? '' : days<0 ? `<span style="color:#c05010;font-size:10px;font-weight:700;">${Math.abs(days)}日超過</span>` : days===0 ? `<span style="color:#c05010;font-size:10px;font-weight:700;">今日</span>` : `<span style="color:#8b6820;font-size:10px;">あと${days}日</span>`;
-      const tog = t.ivId ? `toggleShuzaiIvTodo('${t.ivId}',${t.ti})` : `toggleShuzaiTodo('${t.leadId}',${t.ti})`;
+      const tog = t.ivId ? `toggleShuzaiIvTodo('${t.ivId}',${t.ti})` : t.artId ? `toggleShuzaiArticleTodo('${t.artId}',${t.ti})` : `toggleShuzaiTodo('${t.leadId}',${t.ti})`;
       return `<li style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:#fbf7fd;border:1px solid #d8c4e0;border-radius:5px;margin-bottom:6px;">
         <input type="checkbox" style="width:17px;height:17px;accent-color:#5a2f7a;cursor:pointer;flex-shrink:0;" onchange="${tog}">
         <div style="flex:1;cursor:pointer;" onclick="${tog}">
@@ -1258,7 +1273,7 @@ function renderDashSchedule(){
     }),
     ...szTodos.map(t=>{
       const overdue = t.dueDate < todayStr;
-      const tog = t.ivId ? `toggleShuzaiIvTodo('${t.ivId}',${t.ti})` : `toggleShuzaiTodo('${t.leadId}',${t.ti})`;
+      const tog = t.ivId ? `toggleShuzaiIvTodo('${t.ivId}',${t.ti})` : t.artId ? `toggleShuzaiArticleTodo('${t.artId}',${t.ti})` : `toggleShuzaiTodo('${t.leadId}',${t.ti})`;
       return `<div class="task-item" style="padding:8px 12px;margin-bottom:5px;">
         <input type="checkbox" onchange="${tog}">
         <label onclick="${tog}" style="font-size:12px;flex:1;cursor:pointer;">
@@ -1849,7 +1864,10 @@ function runVoiceCheck(){
     .filter(t=>!t.done && t.dueDate)
     .forEach(t=>{
       const days = daysUntil(t.dueDate);
-      if(days!==null && days<=watchDays) todoAlerts.push({name:t.leadName+'の取材「'+t.text+'」', days});
+      if(days!==null && days<=watchDays){
+        const label = t.artId ? (t.leadName+'の記事「'+t.text+'」') : (t.leadName+'の取材「'+t.text+'」');
+        todoAlerts.push({name:label, days});
+      }
     });
   // 案件TODO（制作ツールと連携）
   getVideoTodos()

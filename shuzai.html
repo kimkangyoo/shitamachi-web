@@ -380,6 +380,18 @@ input:focus,textarea:focus,select:focus{outline:2px solid #c8880a;border-color:#
         <div class="span2"><label class="fl">リード文（導入）</label><textarea id="a-lead-text" style="min-height:60px;"></textarea></div>
         <div class="span2"><label class="fl">本文</label><textarea id="a-body" style="min-height:240px;"></textarea></div>
       </div>
+
+      <!-- 記事TODO -->
+      <div style="border-top:1px solid #d4c4a4;margin-top:20px;padding-top:16px;">
+        <label class="fl" style="font-size:13px;margin-bottom:10px;">✅ やることリスト（期限つき・業務管理と連携）</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+          <input type="text" id="artTodoText" placeholder="例：写真を選ぶ・本人確認をもらう" style="flex:1;min-width:140px;">
+          <input type="date" id="artTodoDate" style="width:150px;">
+          <button class="btn btn-outline btn-sm" type="button" onclick="addArtTodo()">追加</button>
+        </div>
+        <div id="artTodoList"></div>
+      </div>
+
       <div class="btn-row">
         <button class="btn btn-gold" onclick="saveArticle()">保存</button>
         <button class="btn btn-outline" onclick="copyArticle()">📋 全文コピー</button>
@@ -985,7 +997,7 @@ function renderArticles(){
         const lead = S.leads.find(l=>l.id===a.leadId);
         return `<div class="list-item">
           <div class="list-item-body">
-            <div class="list-item-title">${esc(a.title||'無題')} <span class="badge ${ART_BADGE[a.status]||'badge-gray'}">${a.status}</span></div>
+            <div class="list-item-title">${esc(a.title||'無題')} <span class="badge ${ART_BADGE[a.status]||'badge-gray'}">${a.status}</span>${(a.todos&&a.todos.some(t=>!t.done))?'<span class="badge badge-blue">✅ やること</span>':''}</div>
             <div class="list-item-meta">
               ${lead?`取材先：${esc(lead.name)}　`:''}${a.updatedAt?`更新：${fmtDate(a.updatedAt.slice(0,10))}`:''}
               ${a.leadText?`<br>${esc(a.leadText.slice(0,80))}`:''}
@@ -996,6 +1008,28 @@ function renderArticles(){
           </div>
         </div>`;
       }).join('');
+}
+
+let artTodos = [];
+function renderArtTodos(){
+  const el = document.getElementById('artTodoList');
+  if(artTodos.length===0){ el.innerHTML='<div style="font-size:12px;color:#8b6820;">やることがありません。</div>'; return; }
+  const undone = artTodos.filter(t=>!t.done).sort((a,b)=>(a.dueDate||'9999').localeCompare(b.dueDate||'9999'));
+  const done = artTodos.filter(t=>t.done);
+  const row = (t)=>{ const i=artTodos.indexOf(t);
+    const due = t.dueDate?`<span style="font-size:11px;color:${!t.done&&t.dueDate<today()?'#c05010':'#8b6820'};margin-left:8px;">📅 ${fmtDate(t.dueDate)}${!t.done&&t.dueDate<today()?'（超過）':''}</span>`:'';
+    return `<div style="display:flex;align-items:center;gap:9px;padding:8px 11px;background:${t.done?'#efe8d8':'#fffdf5'};border:1px solid #d4c4a4;border-radius:4px;margin-bottom:5px;">
+      <input type="checkbox" ${t.done?'checked':''} onchange="artTodos[${i}].done=!artTodos[${i}].done;renderArtTodos()" style="width:16px;height:16px;accent-color:#8b5e0a;">
+      <span style="flex:1;font-size:13px;${t.done?'text-decoration:line-through;color:#a09080;':''}">${esc(t.text)}${due}</span>
+      <button onclick="artTodos.splice(${i},1);renderArtTodos()" style="background:none;border:none;color:#b0a48c;font-size:15px;cursor:pointer;">×</button>
+    </div>`; };
+  el.innerHTML = undone.map(row).join('') + (done.length?`<div style="font-size:10px;letter-spacing:.2em;color:#a09080;padding:6px 2px 3px;">完了済み</div>`+done.map(row).join(''):'');
+}
+function addArtTodo(){
+  const v = document.getElementById('artTodoText').value.trim(); if(!v) return;
+  artTodos.push({id:uid(), text:v, done:false, dueDate:document.getElementById('artTodoDate').value||''});
+  document.getElementById('artTodoText').value=''; document.getElementById('artTodoDate').value='';
+  renderArtTodos();
 }
 
 function openArticleModal(i){
@@ -1010,6 +1044,8 @@ function openArticleModal(i){
   document.getElementById('a-lead').value = a?.leadId||'';
   document.getElementById('a-lead-text').value = a?.leadText||'';
   document.getElementById('a-body').value = a?.body||'';
+  artTodos = a?.todos ? JSON.parse(JSON.stringify(a.todos)) : [];
+  renderArtTodos();
   document.getElementById('articleDeleteBtn').style.display = a?'block':'none';
   document.getElementById('articleModal').classList.add('open');
 }
@@ -1022,6 +1058,7 @@ function saveArticle(){
     leadId:document.getElementById('a-lead').value,
     leadText:document.getElementById('a-lead-text').value,
     body:document.getElementById('a-body').value,
+    todos: artTodos,
     updatedAt:new Date().toISOString()
   };
   if(i!=='') S.articles[Number(i)]=obj; else S.articles.unshift(obj);
