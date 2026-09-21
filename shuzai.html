@@ -597,10 +597,11 @@ function renderTodoList(){
   const done = todos.filter(t=>t.done);
   const row = (t)=>{
     const idx = todos.indexOf(t);
-    const due = t.dueDate ? `<span style="font-size:10px;color:#8b6820;"> 📅 ${fmtDate(t.dueDate)}</span>` : '';
+    const overdue = !t.done && t.dueDate && t.dueDate<today();
     return `<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:${t.done?'#f5f0e8':'#fffdf5'};border:1px solid #ddc890;border-radius:5px;margin-bottom:6px;${t.done?'opacity:.7;':''}">
       <input type="checkbox" ${t.done?'checked':''} style="width:16px;height:16px;accent-color:#c8880a;cursor:pointer;" onchange="toggleTodo(${idx})">
-      <span style="flex:1;font-size:13px;${t.done?'text-decoration:line-through;color:#a09080;':''}">${esc(t.text)}${due}</span>
+      <span style="flex:1;font-size:13px;${t.done?'text-decoration:line-through;color:#a09080;':''}">${esc(t.text)}</span>
+      <input type="date" value="${t.dueDate||''}" onchange="setTodoDate(${idx},this.value)" style="width:150px;font-size:12px;padding:5px 8px;${overdue?'border-color:#c05010;color:#c05010;':''}">
       <button onclick="deleteTodo(${idx})" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:15px;">✕</button>
     </div>`;
   };
@@ -634,6 +635,13 @@ function toggleTodo(idx){
   const leadId = document.getElementById('todoLeadId').value;
   const l = S.leads.find(x=>x.id===leadId);
   l.todos[idx].done = !l.todos[idx].done;
+  saveS(); renderTodoList(); renderLeads();
+}
+function setTodoDate(idx, value){
+  const leadId = document.getElementById('todoLeadId').value;
+  const l = S.leads.find(x=>x.id===leadId);
+  if(!l || !l.todos[idx]) return;
+  l.todos[idx].dueDate = value;
   saveS(); renderTodoList(); renderLeads();
 }
 function deleteTodo(idx){
