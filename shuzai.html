@@ -277,15 +277,7 @@ input:focus,textarea:focus,select:focus{outline:2px solid #c8880a;border-color:#
     <div class="modal-body">
       <input type="hidden" id="todoLeadId">
       <form onsubmit="addTodo(event)" style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
-        <select id="todoType" onchange="onTodoTypeChange()" style="width:160px;">
-          <option value="アポとり">アポとり</option>
-          <option value="取材">取材</option>
-          <option value="記事作成">記事作成</option>
-          <option value="役所チェック">役所チェック</option>
-          <option value="記事アップ">記事アップ</option>
-          <option value="その他">その他</option>
-        </select>
-        <input type="text" id="todoText" placeholder="内容を入力" style="flex:1;min-width:140px;display:none;">
+        <input type="text" id="todoText" placeholder="例：アポを取る" style="flex:1;min-width:140px;" required>
         <input type="date" id="todoDate" style="width:140px;">
         <button class="btn btn-gold btn-sm" type="submit">追加</button>
       </form>
@@ -581,7 +573,7 @@ function deleteLead(){
 }
 
 // ─── LEAD TODO ────────────────────────────────────────────────────────────────
-const TODO_TEMPLATE = ['アポを取る','質問を準備する','当日の録音・撮影','文字起こしを整える','記事を書く','本人に確認をもらう'];
+const TODO_TEMPLATE = ['アポとり','取材','記事作成','役所チェック','記事アップ'];
 
 function openTodoModal(leadId){
   const l = S.leads.find(x=>x.id===leadId);
@@ -589,17 +581,8 @@ function openTodoModal(leadId){
   if(!l.todos) l.todos = [];
   document.getElementById('todoLeadId').value = leadId;
   document.getElementById('todoModalTitle').textContent = l.name + ' のTODO';
-  document.getElementById('todoType').value = 'アポとり';
-  document.getElementById('todoText').style.display = 'none';
-  document.getElementById('todoText').value = '';
   renderTodoList();
   document.getElementById('todoModal').classList.add('open');
-}
-function onTodoTypeChange(){
-  const isOther = document.getElementById('todoType').value==='その他';
-  const txt = document.getElementById('todoText');
-  txt.style.display = isOther ? 'block' : 'none';
-  if(isOther) txt.focus(); else txt.value='';
 }
 
 function renderTodoList(){
@@ -630,12 +613,8 @@ function addTodo(e){
   const l = S.leads.find(x=>x.id===leadId);
   if(!l) return;
   if(!l.todos) l.todos=[];
-  const type = document.getElementById('todoType').value;
-  let text = type;
-  if(type==='その他'){
-    text = document.getElementById('todoText').value.trim();
-    if(!text){ showToast('内容を入力してください'); return; }
-  }
+  const text = document.getElementById('todoText').value.trim();
+  if(!text) return;
   l.todos.push({id:uid(), text, done:false, dueDate:document.getElementById('todoDate').value||''});
   saveS(); renderTodoList(); renderLeads();
   document.getElementById('todoText').value=''; document.getElementById('todoDate').value='';
