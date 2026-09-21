@@ -385,7 +385,15 @@ input:focus,textarea:focus,select:focus{outline:2px solid #c8880a;border-color:#
       <div style="border-top:1px solid #d4c4a4;margin-top:20px;padding-top:16px;">
         <label class="fl" style="font-size:13px;margin-bottom:10px;">✅ やることリスト（期限つき・業務管理と連携）</label>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
-          <input type="text" id="artTodoText" placeholder="例：写真を選ぶ・本人確認をもらう" style="flex:1;min-width:140px;">
+          <select id="artTodoType" onchange="onArtTodoTypeChange()" style="width:160px;">
+            <option value="アポとり">アポとり</option>
+            <option value="取材">取材</option>
+            <option value="記事作成">記事作成</option>
+            <option value="役所チェック">役所チェック</option>
+            <option value="記事アップ">記事アップ</option>
+            <option value="その他">その他</option>
+          </select>
+          <input type="text" id="artTodoText" placeholder="内容を入力" style="flex:1;min-width:140px;display:none;">
           <input type="date" id="artTodoDate" style="width:150px;">
           <button class="btn btn-outline btn-sm" type="button" onclick="addArtTodo()">追加</button>
         </div>
@@ -1025,8 +1033,19 @@ function renderArtTodos(){
     </div>`; };
   el.innerHTML = undone.map(row).join('') + (done.length?`<div style="font-size:10px;letter-spacing:.2em;color:#a09080;padding:6px 2px 3px;">完了済み</div>`+done.map(row).join(''):'');
 }
+function onArtTodoTypeChange(){
+  const isOther = document.getElementById('artTodoType').value==='その他';
+  const txt = document.getElementById('artTodoText');
+  txt.style.display = isOther ? 'block' : 'none';
+  if(isOther) txt.focus(); else txt.value='';
+}
 function addArtTodo(){
-  const v = document.getElementById('artTodoText').value.trim(); if(!v) return;
+  const type = document.getElementById('artTodoType').value;
+  let v = type;
+  if(type==='その他'){
+    v = document.getElementById('artTodoText').value.trim();
+    if(!v){ showToast('内容を入力してください'); return; }
+  }
   artTodos.push({id:uid(), text:v, done:false, dueDate:document.getElementById('artTodoDate').value||''});
   document.getElementById('artTodoText').value=''; document.getElementById('artTodoDate').value='';
   renderArtTodos();
@@ -1046,6 +1065,9 @@ function openArticleModal(i){
   document.getElementById('a-body').value = a?.body||'';
   artTodos = a?.todos ? JSON.parse(JSON.stringify(a.todos)) : [];
   renderArtTodos();
+  document.getElementById('artTodoType').value = 'アポとり';
+  document.getElementById('artTodoText').style.display = 'none';
+  document.getElementById('artTodoText').value = '';
   document.getElementById('articleDeleteBtn').style.display = a?'block':'none';
   document.getElementById('articleModal').classList.add('open');
 }
