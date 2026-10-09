@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>中森明菜マニアックビューイング</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@400;700;900&display=swap">
@@ -212,7 +213,13 @@ footer{margin-top:40px;text-align:center;font-size:12px;color:var(--mute)}
 
 /* ---------- 横型（モニターに映す前提。どの画面幅でも横型で表示） ---------- */
 @media all{
-  body{font-size:16px}
+  body{font-size:18px}
+  .lead,.rtext p{font-size:17px}
+  .card .story,.qitem .body p{font-size:17px}
+  .setlist .st{font-size:22px}
+  .timeline .ev span{font-size:14px}
+  .timeline .ev b{font-size:17px}
+  .song .t b{font-size:18px}
   .marquee{padding:22px 110px 18px;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:24px}
   .marquee h1{display:flex;align-items:baseline;gap:20px;flex-wrap:wrap}
   .marquee .name{font-size:clamp(44px,5vw,64px)}
@@ -281,14 +288,14 @@ footer{margin-top:40px;text-align:center;font-size:12px;color:var(--mute)}
   <section class="panel" id="p-quiz" role="tabpanel" hidden>
     <div class="phead">
     <div class="ph"><div class="big">2</div><div><div class="eyebrow">PROGRAM 2</div><h2>中森明菜クイズ</h2></div></div>
-    <p class="lead">レベルを選んで挑戦する4択クイズです。答えると正解と解説が出ます。「オリジナル」では、司会やみなさんが作った問題で遊べます。</p>
+    <p class="lead">レベルを選んで挑戦する4択クイズです。答えると正解と解説が出ます。「オリジナル」では、自分たちで作った問題を出題できます。</p>
     </div>
     <div class="levels" role="group" aria-label="レベル">
       <button class="lv" type="button" data-lv="easy"><b>初級</b><span>まずは肩慣らし</span></button>
       <button class="lv" type="button" data-lv="mid"><b>中級</b><span>ファンなら答えたい</span></button>
       <button class="lv" type="button" data-lv="hard"><b>上級</b><span>知る人ぞ知る話</span></button>
       <button class="lv" type="button" data-lv="fun"><b>お笑い</b><span>エピソードと空耳</span></button>
-      <button class="lv" type="button" data-lv="orig"><b>オリジナル</b><span id="orig-count">みんなが作った問題</span></button>
+      <button class="lv" type="button" data-lv="orig"><b>オリジナル</b><span id="orig-count">自分たちで作った問題</span></button>
     </div>
     <div class="box stack" id="quiz"></div>
 
@@ -337,14 +344,14 @@ footer{margin-top:40px;text-align:center;font-size:12px;color:var(--mute)}
   <section class="panel" id="p-best" role="tabpanel" hidden>
     <div class="phead">
     <div class="ph"><div class="big">4</div><div><div class="eyebrow">PROGRAM 4</div><h2>あなたのベストソングは？</h2></div></div>
-    <p class="lead">一番好きな曲と、その曲にまつわる思い出を書いてください。集まった曲はランキングになり、最後の「みんなで歌おう」のセットリストになります。</p>
+    <p class="lead">会場で聞いた「一番好きな曲」と思い出を、司会が入力していきます。集まった曲はその場でランキングになり、最後の「みんなで歌おう」のセットリストになります。</p>
     </div>
     <div class="split">
     <form class="box stack side" id="best-form">
       <div><label for="bs-name">お名前（ニックネーム可）</label><input type="text" id="bs-name" maxlength="30" placeholder="例：北ウイングの佐藤"></div>
       <div><label for="bs-song">ベストソング</label><input type="text" id="bs-song" list="song-list" maxlength="60" placeholder="例：難破船" required></div>
       <div><label for="bs-story">思い出・エピソード</label><textarea id="bs-story" maxlength="400" placeholder="例：受験の夜、ラジオで初めて聴いて…"></textarea></div>
-      <div class="row"><button class="btn" type="submit" id="bs-submit">投稿する</button><span class="status" id="bs-status"></span></div>
+      <div class="row"><button class="btn" type="submit" id="bs-submit">追加する</button><span class="status" id="bs-status"></span></div>
     </form>
     <div class="stack">
       <div class="box stack"><div class="eyebrow">いまのランキング</div><ol class="rank" id="rank"></ol></div>
@@ -358,13 +365,13 @@ footer{margin-top:40px;text-align:center;font-size:12px;color:var(--mute)}
   <section class="panel" id="p-guest" role="tabpanel" hidden>
     <div class="phead">
     <div class="ph"><div class="big">5</div><div><div class="eyebrow">PROGRAM 5 ・ オンライン</div><h2>スペシャルゲスト 店主Aに質問</h2></div></div>
-    <p class="lead">デビュー当時からの筋金入りファン「店主A」が、時間内のどこかでオンライン登場します。聞いてみたいことを先に集めておきましょう。お店の状況次第で出られない場合もあります。</p>
+    <p class="lead">デビュー当時からの筋金入りファン「店主A」が、時間内のどこかでオンライン登場します。会場から出た質問をここに書いておき、登場したら順番に聞いていきましょう。お店の状況次第で出られない場合もあります。</p>
     </div>
     <div class="split">
     <form class="box stack side" id="q-form">
       <div><label for="gq-text">質問</label><textarea id="gq-text" maxlength="300" placeholder="例：一番思い出に残っているコンサートは？" required></textarea></div>
       <div><label for="gq-name">お名前（空欄なら匿名）</label><input type="text" id="gq-name" maxlength="30"></div>
-      <div class="row"><button class="btn" type="submit" id="gq-submit">質問を送る</button><span class="status" id="gq-status"></span></div>
+      <div class="row"><button class="btn" type="submit" id="gq-submit">質問を追加</button><span class="status" id="gq-status"></span></div>
     </form>
     <ul class="qlist" id="qlist"></ul>
     </div>
@@ -383,7 +390,7 @@ footer{margin-top:40px;text-align:center;font-size:12px;color:var(--mute)}
   <section class="panel" id="p-party" role="tabpanel" hidden>
     <div class="phead">
     <div class="ph"><div class="big">★</div><div><div class="eyebrow">AFTER PARTY ・ 実費</div><h2>店主Aのお店で交流会</h2></div></div>
-    <p class="lead">イベント終了後、希望者はスペシャルゲスト店主Aのお店で交流会を行います。お宝話やマニアックなコレクションが見られるかも。参加する方は名前を入れてください。</p>
+    <p class="lead">イベント終了後、希望者はスペシャルゲスト店主Aのお店で交流会を行います。お宝話やマニアックなコレクションが見られるかも。参加する方の名前を入力して、人数を確認しましょう。</p>
     </div>
     <div class="split">
     <div class="box stack side">
@@ -400,7 +407,7 @@ footer{margin-top:40px;text-align:center;font-size:12px;color:var(--mute)}
     </div>
   </section>
 
-  <footer>中森明菜マニアックビューイング ・ 投稿はこのページを開いている全員に共有されます</footer>
+  <footer>中森明菜マニアックビューイング</footer>
 </div>
 
 <datalist id="song-list"></datalist>
@@ -765,7 +772,7 @@ function canEditPhotos(){ return !db || canWrite; }
 function origChanged(list){
   const playing = quizLv==="orig" && qi>0 && qi<QUIZ.length;
   origQuiz = list;
-  $("orig-count").textContent = "みんなが作った問題（"+list.length+"問）";
+  $("orig-count").textContent = "自分たちで作った問題（"+list.length+"問）";
   renderMaker();
   if(quizLv==="orig" && !playing) startQuiz("orig");
 }
@@ -855,7 +862,7 @@ SONGS.forEach((s,i)=>{
 
 /* ---------- shared data (4, 5, 6, 交流会) ---------- */
 let best = [], questions = [], party = [];
-let db = null, canWrite = true, readOnlyNote = "";
+let db = null, canWrite = true, readOnlyNote = "", ready = false;
 const sung = new Set(store.get("sung", []));
 
 function setReadOnly(msg){
@@ -876,7 +883,14 @@ function confirmDelete(holder, onYes){
   });
   holder.append(b);
 }
+/* claude.ai の共有データが使えないときは、このパソコンのブラウザに保存する */
+const LOCAL = {best:v=>best=v, questions:v=>questions=v, rsvp:v=>party=v};
+function localSave(col, list){ store.set("col:"+col, list); LOCAL[col](list); renderAll(); }
 async function remove(col, id, statusId){
+  if(!db){
+    if(col==="quiz"){ const left = origQuiz.filter(x=>x.id!==id); store.set("origQuiz", left); origChanged(left); return; }
+    localSave(col, store.get("col:"+col, []).filter(x=>x.id!==id)); return;
+  }
   try{ await db.collection(col).doc(id).delete(); }
   catch(e){ if(statusId) $(statusId).textContent = "削除できませんでした。もう一度お試しください。"; }
 }
@@ -890,7 +904,7 @@ function yearOf(song){ const s = SONGS.find(x=>x.t===song); return s ? s.y+"年"
 
 function renderBest(){
   const rk = ranking(), rank = $("rank"); rank.replaceChildren();
-  if(!rk.length){ rank.append(el("li","empty", db ? "まだ投稿がありません。最初の1曲を投稿してください。" : "読み込み中…")); }
+  if(!rk.length){ rank.append(el("li","empty", ready ? "まだ入力がありません。最初の1曲を入力してください。" : "読み込み中…")); }
   const max = rk.length ? rk[0].n : 1;
   rk.slice(0,10).forEach((r,i)=>{
     const li = el("li"); li.append(el("div","pos",String(i+1)));
@@ -903,23 +917,26 @@ function renderBest(){
     const c = el("article","card");
     c.append(el("div","song-t","♪ "+canonical(b.song)), el("div","story",b.story));
     const who = el("div","who"); who.append(el("span",null,(b.name||"匿名")+" ・ "+ago(b.ts)));
-    if(canWrite && db) confirmDelete(who, ()=>remove("best", b.id, "bs-status"));
+    if(canWrite) confirmDelete(who, ()=>remove("best", b.id, "bs-status"));
     c.append(who); st.append(c);
   });
-  if(!st.children.length) st.append(el("div","empty","思い出つきの投稿がここに並びます。"));
+  if(!st.children.length) st.append(el("div","empty","思い出つきの入力がここに並びます。"));
 }
 
 function renderQuestions(){
   const ul = $("qlist"); ul.replaceChildren();
-  if(!questions.length){ ul.append(el("li","empty", db ? "まだ質問がありません。" : "読み込み中…")); return; }
+  if(!questions.length){ ul.append(el("li","empty", ready ? "まだ質問がありません。" : "読み込み中…")); return; }
   [...questions].sort((a,b)=>(a.done?1:0)-(b.done?1:0) || a.ts-b.ts).forEach(q=>{
     const li = el("li","qitem"+(q.done?" done":""));
     const body = el("div","body"); body.append(el("p",null,q.text), el("span",null,(q.name||"匿名")+" ・ "+ago(q.ts)));
     li.append(body);
-    if(canWrite && db){
+    if(canWrite){
       const r = el("div","row");
       const d = el("button","btn small "+(q.done?"ghost":"gold"), q.done?"戻す":"聞いた");
-      d.addEventListener("click", async ()=>{ d.disabled=true; try{ await db.collection("questions").doc(q.id).update({done:!q.done}); }catch(_){ d.disabled=false; $("gq-status").textContent="更新できませんでした。"; } });
+      d.addEventListener("click", async ()=>{ d.disabled=true; try{
+        if(db) await db.collection("questions").doc(q.id).update({done:!q.done});
+        else localSave("questions", store.get("col:questions", []).map(x=>x.id===q.id?Object.assign({}, x, {done:!x.done}):x));
+      }catch(_){ d.disabled=false; $("gq-status").textContent="更新できませんでした。"; } });
       r.append(d); confirmDelete(r, ()=>remove("questions", q.id, "gq-status")); li.append(r);
     }
     ul.append(li);
@@ -942,12 +959,12 @@ function renderSing(){
 function renderParty(){
   $("party-total").textContent = String(party.reduce((s,p)=>s+(Number(p.people)||1),0));
   const ul = $("party-list"); ul.replaceChildren();
-  if(!party.length){ ul.append(el("li","empty", db ? "参加者の名前がここに並びます。" : "読み込み中…")); return; }
+  if(!party.length){ ul.append(el("li","empty", ready ? "参加者の名前がここに並びます。" : "読み込み中…")); return; }
   [...party].sort((a,b)=>a.ts-b.ts).forEach(p=>{
     const li = el("li","qitem");
     const body = el("div","body"); body.append(el("p",null,p.name+"さん"), el("span",null,(Number(p.people)||1)+"人"));
     li.append(body);
-    if(canWrite && db){ const r = el("div","row"); confirmDelete(r, ()=>remove("rsvp", p.id, "pt-status")); li.append(r); }
+    if(canWrite){ const r = el("div","row"); confirmDelete(r, ()=>remove("rsvp", p.id, "pt-status")); li.append(r); }
     ul.append(li);
   });
 }
@@ -964,13 +981,18 @@ function subscribe(col, setter){
 }
 
 async function add(col, data, statusId, btnId){
-  if(!db || !canWrite) return false;
+  if(!canWrite) return false;
+  if(!db){
+    const item = Object.assign({id:"l"+Date.now(), ts:Date.now()}, data);
+    localSave(col, store.get("col:"+col, []).concat([item]));
+    $(statusId).textContent = "追加しました。"; return item;
+  }
   $(btnId).disabled = true; $(statusId).textContent = "送信中…";
   try{
     const ref = await db.collection(col).add(Object.assign({ts:Date.now()}, data));
     $(statusId).textContent = "送信しました。"; return ref;
   }catch(e){
-    if(e && e.code==="invalid_argument"){ setReadOnly("このページは閲覧のみです。投稿は司会者が代わりに入力します。"); return false; }
+    if(e && e.code==="invalid_argument"){ setReadOnly("このアカウントでは入力できません。アプリの持ち主のアカウントで開いてください。"); return false; }
     $(statusId).textContent = e && e.code==="quota_exceeded" ? "投稿の上限に達しました。古い投稿を削除してください。" : "送信できませんでした。もう一度お試しください。";
     return false;
   }finally{ if(canWrite) $(btnId).disabled = false; }
@@ -998,13 +1020,14 @@ $("party-form").addEventListener("submit", async e=>{
 
 (async ()=>{
   if(!window.claude || typeof window.claude.use!=="function"){
-    setReadOnly("共有機能はこのページを claude.ai で開いたときに使えます。"); renderNoDb(); origChanged(store.get("origQuiz",[])); return;
+    startLocal(); return;
   }
   db = await window.claude.use("db");
-  if(!db){ setReadOnly("この端末ではみんなの投稿を読み込めません。サインインして開き直してください。"); renderNoDb(); origChanged(store.get("origQuiz",[])); return; }
+  if(!db){ startLocal(); return; }
+  ready = true;
   const user = await window.claude.use("user");
   const can = user ? await user.can("data.write") : null;
-  if(can===false) setReadOnly("このページは閲覧のみです。投稿は司会者が代わりに入力します。");
+  if(can===false) setReadOnly("このアカウントでは入力できません。アプリの持ち主のアカウントで開いてください。");
   subscribe("best", v=>best=v);
   subscribe("questions", v=>questions=v);
   subscribe("rsvp", v=>party=v);
@@ -1013,8 +1036,10 @@ $("party-form").addEventListener("submit", async e=>{
   }, ()=>{});
 })();
 
-function renderNoDb(){
-  [["rank","li"],["qlist","li"],["party-list","li"]].forEach(([id])=>{ const x=$(id); x.replaceChildren(el("li","empty","みんなの投稿はここに表示されます。")); });
+function startLocal(){
+  ready = true;
+  Object.keys(LOCAL).forEach(col=>LOCAL[col](store.get("col:"+col, [])));
+  renderAll(); origChanged(store.get("origQuiz",[]));
 }
 })();
 </script>
