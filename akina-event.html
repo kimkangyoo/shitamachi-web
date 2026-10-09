@@ -107,8 +107,8 @@ textarea{min-height:84px;resize:vertical}
 .explain{border-left:3px solid var(--spot);padding:6px 12px;background:var(--panel-2);border-radius:0 10px 10px 0;font-size:14px}
 .score-big{font-family:var(--f-display);font-size:56px;color:var(--spot);line-height:1;font-variant-numeric:tabular-nums}
 
-.levels{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
-@media (max-width:560px){.levels{grid-template-columns:1fr 1fr}}
+.levels{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:12px}
+@media (max-width:640px){.levels{grid-template-columns:1fr 1fr}.levels .lv:last-child{grid-column:1/-1}}
 .lv{display:flex;flex-direction:column;gap:2px;text-align:left;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--panel);cursor:pointer;min-width:0}
 .lv b{font-family:var(--f-display);font-weight:400;font-size:18px}
 .lv span{font-size:11px;color:var(--mute)}
@@ -208,7 +208,8 @@ footer{margin-top:40px;text-align:center;font-size:12px;color:var(--mute)}
     <div class="levels" role="group" aria-label="レベル">
       <button class="lv" type="button" data-lv="easy"><b>初級</b><span>まずは肩慣らし</span></button>
       <button class="lv" type="button" data-lv="mid"><b>中級</b><span>ファンなら答えたい</span></button>
-      <button class="lv" type="button" data-lv="hard"><b>上級</b><span>作家陣とB面の世界</span></button>
+      <button class="lv" type="button" data-lv="hard"><b>上級</b><span>知る人ぞ知る話</span></button>
+      <button class="lv" type="button" data-lv="fun"><b>お笑い</b><span>エピソードと空耳</span></button>
       <button class="lv" type="button" data-lv="orig"><b>オリジナル</b><span id="orig-count">みんなが作った問題</span></button>
     </div>
     <div class="box stack" id="quiz"></div>
@@ -370,19 +371,29 @@ const QUIZ_SETS = {
     {q:"2014年の紅白歌合戦で、ニューヨークから中継で歌った曲は？", c:["少女A","Rojo -Tierra-","難破船","Dear Friend"], a:1, e:"新曲「Rojo -Tierra-」を披露しました。"}
   ],
   hard: [
-    {q:"「少女A」の作曲者は？", c:["筒美京平","芹澤廣明","林哲司","細野晴臣"], a:1, e:"作曲は芹澤廣明、作詞は売野雅勇です。"},
-    {q:"「禁区」の作曲者は？", c:["坂本龍一","細野晴臣","大沢誉志幸","玉置浩二"], a:1, e:"YMOの細野晴臣が作曲しました。"},
-    {q:"「1/2の神話」の作曲者は？", c:["大沢誉志幸","来生たかお","芹澤廣明","鈴木キサブロー"], a:0, e:"大沢誉志幸の作曲、売野雅勇の作詞です。"},
-    {q:"「北ウイング」の作曲者は？", c:["林哲司","玉置浩二","大沢誉志幸","高中正義"], a:0, e:"作曲は林哲司、作詞は康珍化です。"},
-    {q:"「サザン・ウインド」の作曲者は？", c:["井上陽水","玉置浩二","松岡直也","来生たかお"], a:1, e:"安全地帯の玉置浩二が作曲しました。"},
-    {q:"「十戒 (1984)」の作曲者は？", c:["高中正義","細野晴臣","林哲司","都志見隆"], a:0, e:"ギタリストの高中正義です。"},
-    {q:"「ミ・アモーレ」の作曲者は？", c:["松岡直也","林哲司","鈴木キサブロー","筒美京平"], a:0, e:"ラテン・フュージョンの松岡直也です。"},
+    {q:"デビュー当時のレコード会社は？", c:["CBS・ソニー","ワーナー・パイオニア","ビクター音楽産業","キャニオン・レコード"], a:1, e:"ワーナー・パイオニアからのデビューでした。"},
+    {q:"「セカンド・ラブ」は何枚目のシングル？", c:["2枚目","3枚目","4枚目","5枚目"], a:1, e:"「スローモーション」「少女A」に続く3枚目。“セカンド”なのに3枚目です。"},
+    {q:"1982年のレコード大賞・最優秀新人賞を受賞したのは？", c:["中森明菜","小泉今日子","シブがき隊","早見優"], a:2, e:"受賞はシブがき隊。明菜さんはこの賞を逃しましたが、3年後に大賞を獲ります。"},
+    {q:"「北ウイング」というタイトルを提案したのは？", c:["作詞の康珍化","作曲の林哲司","明菜さん本人","レコード会社の社長"], a:2, e:"明菜さん自身のアイデアと言われています。セルフプロデュースの始まりとも語られる1曲です。"},
+    {q:"「禁区」を作曲したのは？", c:["坂本龍一","細野晴臣","大沢誉志幸","玉置浩二"], a:1, e:"YMOの細野晴臣。アイドル歌謡にテクノポップの風が吹き込みました。"},
+    {q:"「ミ・アモーレ」の正式タイトルに続く言葉は？", c:["〔Meu amor é・・・〕","〔Te quiero〕","〔Bésame mucho〕","〔Je t'aime〕"], a:0, e:"「ミ・アモーレ〔Meu amor é・・・〕」。ポルトガル語で「私の愛は…」という意味です。"},
     {q:"「ミ・アモーレ」と同じメロディーに別の歌詞をつけた曲は？", c:["赤い鳥逃げた","SAND BEIGE -砂漠へ-","ジプシー・クイーン","BLONDE"], a:0, e:"「赤い鳥逃げた」。12インチシングルで発表されました。"},
+    {q:"1986年のアルバム『不思議』が驚かれた理由は？", c:["全曲が英語詞","ボーカルが深いエコーに沈んで聞き取りにくい","アカペラだけで録音","ライブ録音だけで構成"], a:1, e:"声を楽器のように扱った実験作。「不良品では？」という問い合わせもあったと言われます。"},
     {q:"「DESIRE -情熱-」の作詞者は？", c:["阿木燿子","来生えつこ","売野雅勇","康珍化"], a:0, e:"作詞は阿木燿子、作曲は鈴木キサブローです。"},
     {q:"ファーストアルバムのタイトルは？", c:["プロローグ〈序幕〉","バリエーション〈変奏曲〉","ファンタジー〈幻想曲〉","不思議"], a:0, e:"1982年の『プロローグ〈序幕〉』です。"}
+  ],
+  fun: [
+    {q:"デビュー当時のキャッチフレーズは？", c:["ちょっとエッチな美新人娘（ミルキーっこ）","下町のプリンセス","100%少女","瞳はダイアモンド"], a:0, e:"「ちょっとエッチな美新人娘」。今だとなかなか攻めたコピーです。"},
+    {q:"「少女A」を初めて渡されたとき、明菜さんの反応は？", c:["「歌いたくない」と嫌がった","その場で振り付けを考えた","泣いて喜んだ","タイトルを「少女B」にしてと頼んだ"], a:0, e:"ツッパリ風の歌詞に抵抗があり、嫌がったというのは有名な話。それが大ヒットになりました。"},
+    {q:"「DESIRE -情熱-」のサビ、空耳で有名なのは？", c:["ゲラゲラゲラゲラ","ドンドンドンドン","ニャンニャンニャンニャン","ワッショイワッショイ"], a:0, e:"正しくは「Get up, Get up」。でも宴会では「ゲラゲラ」で歌う人が続出します。"},
+    {q:"「いいかげんにして」と言い放つのはどの曲？", c:["1/2の神話","セカンド・ラブ","スローモーション","難破船"], a:0, e:"「1/2の神話」。カラオケで叫ぶと気持ちいい一言です。"},
+    {q:"「飾りじゃないのよ涙は」の歌い出し「私は○○○ことがない」。○○○は？", c:["泣いた","笑った","恋した","寝坊した"], a:0, e:"「私は泣いたことがない」。タイトルとの落差がしびれます。"},
+    {q:"『スター誕生！』で合格したのは何度目の挑戦？", c:["1度目","2度目","3度目","10度目"], a:2, e:"3度目でようやく合格。あきらめなかったから今日の会があります。"},
+    {q:"1982年デビューのアイドルたちは何と呼ばれる？", c:["花の82年組","黄金の82年組","奇跡の82年組","昭和の82年組"], a:0, e:"「花の82年組」。小泉今日子、早見優、堀ちえみ、石川秀美、シブがき隊などが同期です。"},
+    {q:"今日のスペシャルゲスト「店主A」の「A」は何の頭文字？", c:["明菜（Akina）","愛（Ai）","ありがとう（Arigato）","本人に聞いてみよう"], a:3, e:"答えはプログラム5で本人に直接どうぞ！"}
   ]
 };
-const LEVEL_NAME = {easy:"初級", mid:"中級", hard:"上級", orig:"オリジナル"};
+const LEVEL_NAME = {easy:"初級", mid:"中級", hard:"上級", fun:"お笑い", orig:"オリジナル"};
 
 /* ---------- helpers ---------- */
 const $ = id => document.getElementById(id);
@@ -448,7 +459,7 @@ function renderQuiz(){
     const again = el("button","btn gold","もう一度挑戦する");
     again.addEventListener("click",()=>startQuiz(quizLv));
     r.append(again);
-    const order = ["easy","mid","hard"], nx = order[order.indexOf(quizLv)+1];
+    const order = ["easy","mid","hard","fun"], nx = order[order.indexOf(quizLv)+1];
     if(nx){ const up = el("button","btn", LEVEL_NAME[nx]+"に進む"); up.addEventListener("click",()=>startQuiz(nx)); r.append(up); }
     box.append(r); return;
   }
