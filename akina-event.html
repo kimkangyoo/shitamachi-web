@@ -26,7 +26,7 @@ button,input,textarea,select{font:inherit;color:inherit}
 a{color:var(--spot)}
 :focus-visible{outline:2px solid var(--spot);outline-offset:2px}
 
-.wrap{max-width:760px;margin:0 auto}
+.wrap{max-width:1320px;margin:0 auto}
 
 /* Header: curtain + spotlight */
 .marquee{position:relative;margin-inline:-16px;padding:36px 16px 28px;text-align:center;overflow:hidden;
@@ -92,6 +92,7 @@ textarea{min-height:84px;resize:vertical}
 .timeline .ev b{display:block}
 .timeline .ev span{color:var(--mute);font-size:13px}
 .timeline li.hl .ev b{color:var(--neon)}
+.tl-hint{display:none}
 
 /* 2: quiz */
 .qmeta{display:flex;justify-content:space-between;font-size:12px;color:var(--mute);font-variant-numeric:tabular-nums}
@@ -169,6 +170,8 @@ fieldset.mk-choices legend{font-size:12px;font-weight:700;color:var(--mute);marg
 /* 4: best song */
 .rank{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
 .rank li{display:grid;grid-template-columns:30px 1fr 36px;gap:10px;align-items:center}
+.rank li.empty{display:block}
+.cards .empty{grid-column:1/-1}
 .rank .pos{font-family:var(--f-display);color:var(--spot);text-align:center}
 .rank .lbl{min-width:0}
 .rank .lbl b{display:block;overflow-wrap:anywhere}
@@ -204,6 +207,45 @@ fieldset.mk-choices legend{font-size:12px;font-weight:700;color:var(--mute);marg
 
 .confirm{display:inline-flex;gap:4px}
 footer{margin-top:40px;text-align:center;font-size:12px;color:var(--mute)}
+.split{display:flex;flex-direction:column;gap:16px}
+.split > *{min-width:0}
+
+/* ---------- 横型（ワイド画面・プロジェクター） ---------- */
+@media (min-width:900px){
+  body{font-size:16px}
+  .marquee{padding:22px 110px 18px;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:24px}
+  .marquee h1{display:flex;align-items:baseline;gap:20px;flex-wrap:wrap}
+  .marquee .name{font-size:clamp(44px,5vw,64px)}
+  .marquee .sub{margin-top:0;font-size:clamp(26px,3vw,38px)}
+  .marquee p{margin:0;max-width:22em;text-align:right;font-size:13px;text-wrap:balance}
+  .tabs{justify-content:center}
+  .tab{font-size:14px;padding:8px 16px 8px 8px}
+  .phead{display:grid;grid-template-columns:minmax(0,auto) minmax(0,1fr);gap:32px;align-items:center;margin-bottom:18px}
+  .phead .lead{margin:0;border-left:2px solid var(--line);padding-left:24px}
+  .split{display:grid;grid-template-columns:minmax(300px,380px) minmax(0,1fr);gap:24px;align-items:start}
+  .split > .side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px)}
+  .songs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .setlist{columns:2;column-gap:40px}
+  .setlist li{break-inside:avoid}
+  .choices{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .qtext{font-size:26px}
+  .choice{padding:16px;font-size:17px}
+  .reveal{grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:28px;padding:22px}
+  .rtext p{font-size:15px}
+  #mk-form{display:grid;grid-template-columns:1fr 1fr;gap:12px 24px}
+  #mk-form > div:first-child,#mk-form > .row{grid-column:1/-1}
+  /* 年表は横に流れるタイムライン */
+  .timeline{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(200px,1fr);gap:0;overflow-x:auto;padding:0 0 16px;scroll-snap-type:x proximity}
+  .timeline::before{left:0;right:0;top:44px;bottom:auto;width:auto;height:2px;background:linear-gradient(90deg,var(--curtain),var(--spot))}
+  .timeline li{display:flex;flex-direction:column;gap:22px;padding:0 18px 0 0;scroll-snap-align:start}
+  .timeline .yr{text-align:left;font-size:22px;line-height:1.2;height:28px}
+  .timeline .ev::before{left:0;top:-24px}
+  .timeline .ev{padding-top:6px}
+  .tl-hint{display:block;text-align:right;margin:4px 0 0}
+}
+@media (min-width:1200px){
+  .songs{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
@@ -225,15 +267,20 @@ footer{margin-top:40px;text-align:center;font-size:12px;color:var(--mute)}
 
   <!-- 1 歴史 -->
   <section class="panel" id="p-history" role="tabpanel">
+    <div class="phead">
     <div class="ph"><div class="big">1</div><div><div class="eyebrow">PROGRAM 1</div><h2>中森明菜の歴史</h2></div></div>
     <p class="lead">デビュー当時から現在までを年表で振り返ります。スライドや映像と一緒に、手元のスマホでも追いかけてください。</p>
+    </div>
     <ol class="timeline" id="timeline"></ol>
+    <p class="note tl-hint">横にスクロールすると、現在まで続きます →</p>
   </section>
 
   <!-- 2 クイズ -->
   <section class="panel" id="p-quiz" role="tabpanel" hidden>
+    <div class="phead">
     <div class="ph"><div class="big">2</div><div><div class="eyebrow">PROGRAM 2</div><h2>中森明菜クイズ</h2></div></div>
     <p class="lead">レベルを選んで挑戦する4択クイズです。答えると正解と解説が出ます。「オリジナル」では、司会やみなさんが作った問題で遊べます。</p>
+    </div>
     <div class="levels" role="group" aria-label="レベル">
       <button class="lv" type="button" data-lv="easy"><b>初級</b><span>まずは肩慣らし</span></button>
       <button class="lv" type="button" data-lv="mid"><b>中級</b><span>ファンなら答えたい</span></button>
@@ -266,9 +313,12 @@ footer{margin-top:40px;text-align:center;font-size:12px;color:var(--mute)}
 
   <!-- 3 イントロ -->
   <section class="panel" id="p-intro" role="tabpanel" hidden>
+    <div class="phead">
     <div class="ph"><div class="big">3</div><div><div class="eyebrow">PROGRAM 3</div><h2>イントロクイズ</h2></div></div>
     <p class="lead">司会がイントロを流して、わかった人から歌い出し。正解したチームに点を入れましょう。曲名は「答え」を押すまで隠れています。</p>
-    <div class="box stack" style="margin-bottom:16px">
+    </div>
+    <div class="split">
+    <div class="box stack side">
       <div class="eyebrow">得点ボード</div>
       <div class="teams" id="teams"></div>
       <form class="row" id="team-form">
@@ -278,13 +328,17 @@ footer{margin-top:40px;text-align:center;font-size:12px;color:var(--mute)}
       </form>
     </div>
     <ol class="songs" id="intro-songs"></ol>
+    </div>
   </section>
 
   <!-- 4 ベストソング -->
   <section class="panel" id="p-best" role="tabpanel" hidden>
+    <div class="phead">
     <div class="ph"><div class="big">4</div><div><div class="eyebrow">PROGRAM 4</div><h2>あなたのベストソングは？</h2></div></div>
     <p class="lead">一番好きな曲と、その曲にまつわる思い出を書いてください。集まった曲はランキングになり、最後の「みんなで歌おう」のセットリストになります。</p>
-    <form class="box stack" id="best-form" style="margin-bottom:18px">
+    </div>
+    <div class="split">
+    <form class="box stack side" id="best-form">
       <div><label for="bs-name">お名前（ニックネーム可）</label><input type="text" id="bs-name" maxlength="30" placeholder="例：北ウイングの佐藤"></div>
       <div><label for="bs-song">ベストソング</label><input type="text" id="bs-song" list="song-list" maxlength="60" placeholder="例：難破船" required></div>
       <div><label for="bs-story">思い出・エピソード</label><textarea id="bs-story" maxlength="400" placeholder="例：受験の夜、ラジオで初めて聴いて…"></textarea></div>
@@ -295,32 +349,42 @@ footer{margin-top:40px;text-align:center;font-size:12px;color:var(--mute)}
       <div class="eyebrow" style="margin-top:6px">みんなの思い出</div>
       <div class="cards" id="stories"></div>
     </div>
+    </div>
   </section>
 
   <!-- 5 店主A -->
   <section class="panel" id="p-guest" role="tabpanel" hidden>
+    <div class="phead">
     <div class="ph"><div class="big">5</div><div><div class="eyebrow">PROGRAM 5 ・ オンライン</div><h2>スペシャルゲスト 店主Aに質問</h2></div></div>
     <p class="lead">デビュー当時からの筋金入りファン「店主A」が、時間内のどこかでオンライン登場します。聞いてみたいことを先に集めておきましょう。お店の状況次第で出られない場合もあります。</p>
-    <form class="box stack" id="q-form" style="margin-bottom:18px">
+    </div>
+    <div class="split">
+    <form class="box stack side" id="q-form">
       <div><label for="gq-text">質問</label><textarea id="gq-text" maxlength="300" placeholder="例：一番思い出に残っているコンサートは？" required></textarea></div>
       <div><label for="gq-name">お名前（空欄なら匿名）</label><input type="text" id="gq-name" maxlength="30"></div>
       <div class="row"><button class="btn" type="submit" id="gq-submit">質問を送る</button><span class="status" id="gq-status"></span></div>
     </form>
     <ul class="qlist" id="qlist"></ul>
+    </div>
   </section>
 
   <!-- 6 歌おう -->
   <section class="panel" id="p-sing" role="tabpanel" hidden>
+    <div class="phead">
     <div class="ph"><div class="big">6</div><div><div class="eyebrow">PROGRAM 6</div><h2>みんなのベストソングを歌おう！</h2></div></div>
     <p class="lead">プログラム4で集まった「私のベストソング」を、票の多い順に並べたセットリストです。歌い終わったら「歌った」を押して消していきましょう。</p>
+    </div>
     <ol class="setlist" id="setlist"></ol>
   </section>
 
   <!-- 交流会 -->
   <section class="panel" id="p-party" role="tabpanel" hidden>
+    <div class="phead">
     <div class="ph"><div class="big">★</div><div><div class="eyebrow">AFTER PARTY ・ 実費</div><h2>店主Aのお店で交流会</h2></div></div>
     <p class="lead">イベント終了後、希望者はスペシャルゲスト店主Aのお店で交流会を行います。お宝話やマニアックなコレクションが見られるかも。参加する方は名前を入れてください。</p>
-    <div class="box stack" style="margin-bottom:16px">
+    </div>
+    <div class="split">
+    <div class="box stack side">
       <div class="tally"><span class="num" id="party-total">0</span><span>人が参加予定</span></div>
       <form class="row" id="party-form">
         <input type="text" id="pt-name" maxlength="30" placeholder="お名前" required style="flex:2;min-width:140px" aria-label="お名前">
@@ -331,6 +395,7 @@ footer{margin-top:40px;text-align:center;font-size:12px;color:var(--mute)}
       <span class="status" id="pt-status"></span>
     </div>
     <ul class="qlist" id="party-list"></ul>
+    </div>
   </section>
 
   <footer>中森明菜マニアックビューイング ・ 投稿はこのページを開いている全員に共有されます</footer>
