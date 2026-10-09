@@ -104,6 +104,35 @@ textarea{min-height:84px;resize:vertical}
 .choice .k{display:inline-block;width:1.6em;color:var(--spot);font-family:var(--f-display)}
 .choice.right{background:rgba(98,211,154,.18);border-color:var(--ok)}
 .choice.wrong{background:rgba(255,122,122,.15);border-color:var(--ng)}
+.reveal{display:grid;grid-template-columns:minmax(0,240px) minmax(0,1fr);gap:18px;align-items:start;background:var(--panel-2);border-radius:14px;padding:16px;border-top:3px solid var(--spot)}
+@media (max-width:560px){.reveal{grid-template-columns:1fr}.reveal .media{max-width:280px}}
+.media{display:flex;flex-direction:column;gap:8px;min-width:0}
+.vis{aspect-ratio:1;max-width:100%;border-radius:6px;position:relative;overflow:hidden}
+.jacket{background:linear-gradient(145deg,hsl(var(--h) 55% 30%),hsl(calc(var(--h) + 40) 60% 14%));box-shadow:0 10px 24px rgba(0,0,0,.45)}
+.jacket .disc{position:absolute;right:-38%;top:8%;width:84%;aspect-ratio:1;border-radius:50%;
+  background:radial-gradient(circle,var(--curtain) 0 13%,#111 14% 15%,#1b1b1b 16% 100%);
+  box-shadow:inset 0 0 0 6px #0c0c0c,inset 0 0 0 7px #2a2a2a,inset 0 0 0 16px #141414,inset 0 0 0 17px #2a2a2a,inset 0 0 0 28px #151515,inset 0 0 0 29px #2a2a2a}
+.jacket .face{position:absolute;inset:0;right:22%;padding:14px;display:flex;flex-direction:column;gap:4px;
+  background:linear-gradient(90deg,rgba(0,0,0,.25),transparent)}
+.jacket .jy{font-family:var(--f-display);color:var(--spot);font-size:14px;font-variant-numeric:tabular-nums}
+.jacket .jt{font-family:var(--f-display);font-size:clamp(17px,4.6vw,21px);word-break:keep-all;line-height:1.2;overflow-wrap:anywhere;text-shadow:0 2px 0 rgba(0,0,0,.4)}
+.jacket .js{font-size:11px;line-height:1.5;white-space:pre-line;color:var(--mute);overflow-wrap:anywhere}
+.jacket .ja{margin-top:auto;font-size:11px;letter-spacing:.3em;color:var(--ink);opacity:.8}
+.big-card{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;text-align:center;padding:14px;
+  background:radial-gradient(circle at 50% 35%,hsl(var(--h) 60% 28%),var(--stage) 75%);border:1px solid var(--line)}
+.big-card .bt{font-family:var(--f-display);font-size:clamp(34px,10vw,56px);line-height:1.05;color:var(--spot);overflow-wrap:anywhere;text-shadow:0 0 24px rgba(244,200,90,.35)}
+.big-card.long .bt{font-size:clamp(26px,7vw,38px)}
+.big-card .bc{font-size:12px;color:var(--ink);font-weight:700}
+.photo{width:100%;max-width:100%;border-radius:6px;object-fit:cover;box-shadow:0 10px 24px rgba(0,0,0,.45)}
+.photo-tools{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.photo-tools label.btn{margin:0;color:var(--mute);font-weight:700;letter-spacing:0}
+.rtext{min-width:0;display:flex;flex-direction:column;gap:8px}
+.rtext p{margin:0;font-size:14px}
+.rtext .lead-e{font-weight:700;font-size:15px}
+.verdict{font-family:var(--f-display);font-size:22px}
+.verdict.ok{color:var(--ok)}
+.verdict.ng{color:var(--ng)}
+.listen{font-size:13px;font-weight:700;text-decoration:none}
 .explain{border-left:3px solid var(--spot);padding:6px 12px;background:var(--panel-2);border-radius:0 10px 10px 0;font-size:14px}
 .score-big{font-family:var(--f-display);font-size:56px;color:var(--spot);line-height:1;font-variant-numeric:tabular-nums}
 
@@ -225,7 +254,8 @@ footer{margin-top:40px;text-align:center;font-size:12px;color:var(--mute)}
           <div class="mk-c"><input type="radio" name="mk-a" id="mk-a2" value="2" aria-label="Cを正解にする"><input type="text" id="mk-c2" maxlength="60" placeholder="選択肢C（省略可）" aria-label="選択肢C"></div>
           <div class="mk-c"><input type="radio" name="mk-a" id="mk-a3" value="3" aria-label="Dを正解にする"><input type="text" id="mk-c3" maxlength="60" placeholder="選択肢D（省略可）" aria-label="選択肢D"></div>
         </fieldset>
-        <div><label for="mk-e">解説（省略可）</label><input type="text" id="mk-e" maxlength="200" placeholder="答えのあとに表示されます"></div>
+        <div><label for="mk-e">解説（省略可）</label><textarea id="mk-e" maxlength="600" placeholder="答えのあとに表示されます。エピソードや豆知識をどうぞ"></textarea></div>
+        <div><label for="mk-img">写真（省略可）</label><input type="file" id="mk-img" accept="image/*"><div class="note">答えのあとに大きく表示されます。ご自身で撮った写真や、使ってよい画像を選んでください。</div></div>
         <div><label for="mk-by">作った人（省略可）</label><input type="text" id="mk-by" maxlength="30"></div>
         <div class="row"><button class="btn" type="submit" id="mk-submit">問題を追加する</button><span class="status" id="mk-status"></span></div>
       </form>
@@ -349,48 +379,120 @@ const HISTORY = [
   {y:"現在", b:"ファンと一緒に、次のステージへ", s:"今日はここから先の話も語り合いましょう。"}
 ];
 
+/* v: 答え合わせのあとに出す図版。j=ジャケット風カード（曲名 or {title,year,sub}）、big=大きな文字のカード
+   e: ひとこと解説 / d: くわしい解説（段落ごとに配列） */
+const J = (title, year, sub) => ({t:"j", title, year, sub});
+const BIG = (text, cap) => ({t:"big", text, cap});
 const QUIZ_SETS = {
   easy: [
-    {q:"中森明菜のデビュー曲は？", c:["少女A","スローモーション","セカンド・ラブ","北ウイング"], a:1, e:"1982年5月1日発売の「スローモーション」です。"},
-    {q:"デビューした年は？", c:["1980年","1982年","1984年","1986年"], a:1, e:"1982年。同期には小泉今日子、早見優、堀ちえみらがいて「花の82年組」と呼ばれます。"},
-    {q:"明菜さんの誕生日は？", c:["5月1日","7月13日","10月9日","12月31日"], a:1, e:"1965年7月13日生まれ。5月1日はデビュー日です。"},
-    {q:"明菜さんが合格したオーディション番組は？", c:["スター誕生！","ザ・ベストテン","夜のヒットスタジオ","ホリプロタレントスカウトキャラバン"], a:0, e:"日本テレビの『スター誕生！』です。"},
-    {q:"「じれったい　じれったい」と歌う曲は？", c:["少女A","1/2の神話","禁区","十戒 (1984)"], a:0, e:"「少女A」。ツッパリ路線の代表曲です。"},
-    {q:"1985年の日本レコード大賞を受賞した曲は？", c:["十戒 (1984)","ミ・アモーレ","SAND BEIGE -砂漠へ-","難破船"], a:1, e:"「ミ・アモーレ」で初の大賞を受賞しました。"},
-    {q:"1986年、2年連続のレコード大賞を受賞した曲は？", c:["ジプシー・クイーン","難破船","DESIRE -情熱-","TATTOO"], a:2, e:"「DESIRE -情熱-」。2年連続の大賞は史上初の快挙でした。"},
-    {q:"「DESIRE -情熱-」で話題になった髪型は？", c:["ボブ","聖子ちゃんカット","ソバージュ","ポニーテール"], a:0, e:"ボブヘアに着物風の衣装。真似する人が続出しました。"}
+    {q:"中森明菜のデビュー曲は？", c:["少女A","スローモーション","セカンド・ラブ","北ウイング"], a:1, v:J("スローモーション"),
+     e:"1982年5月1日発売の「スローモーション」です。",
+     d:["作詞・来生えつこ、作曲・来生たかおの姉弟コンビによるしっとりしたバラード。16歳のデビューとは思えない落ち着いた歌声でした。","大ヒットとまではいきませんでしたが、2枚目の「少女A」で一気にブレイク。“バラードの明菜”と“ツッパリの明菜”、2つの顔がここからそろいます。"]},
+    {q:"デビューした年は？", c:["1980年","1982年","1984年","1986年"], a:1, v:BIG("1982","花の82年組"),
+     e:"1982年デビューです。",
+     d:["同じ年には小泉今日子、早見優、堀ちえみ、石川秀美、松本伊代、シブがき隊らがデビュー。アイドルの当たり年で「花の82年組」と呼ばれます。","その中でも明菜さんは、歌唱力と表現力で頭ひとつ抜けた存在になっていきます。"]},
+    {q:"明菜さんの誕生日は？", c:["5月1日","7月13日","10月9日","12月31日"], a:1, v:BIG("7.13","1965年 東京都生まれ"),
+     e:"1965年7月13日生まれです。",
+     d:["東京都生まれ、清瀬市育ち。5月1日はデビュー日なので、ひっかけの選択肢でした。","7月13日はファンにとって特別な日。毎年SNSなどでお祝いの声があふれます。"]},
+    {q:"明菜さんが合格したオーディション番組は？", c:["スター誕生！","ザ・ベストテン","夜のヒットスタジオ","ホリプロタレントスカウトキャラバン"], a:0, v:BIG("スタ誕","日本テレビ『スター誕生！』"),
+     e:"日本テレビの『スター誕生！』です。",
+     d:["山口百恵、森昌子、桜田淳子、ピンク・レディー、小泉今日子などを生んだ伝説のオーディション番組。","明菜さんは3度目の挑戦で決戦大会へ進み、山口百恵の「夢先案内人」を歌って合格しました。"]},
+    {q:"「じれったい　じれったい」と歌う曲は？", c:["少女A","1/2の神話","禁区","十戒 (1984)"], a:0, v:J("少女A"),
+     e:"「少女A」。ツッパリ路線の代表曲です。",
+     d:["作詞・売野雅勇、作曲・芹澤廣明。2枚目のシングルで、明菜さんの名前を一気に全国区にしました。","大人びた歌詞と、カメラをにらむような表情が強烈な印象を残し、ここから“ツッパリの明菜”のイメージが生まれます。"]},
+    {q:"1985年の日本レコード大賞を受賞した曲は？", c:["十戒 (1984)","ミ・アモーレ","SAND BEIGE -砂漠へ-","難破船"], a:1, v:J("ミ・アモーレ"),
+     e:"「ミ・アモーレ」で初の大賞を受賞しました。",
+     d:["作曲はラテン・フュージョンの松岡直也。サンバのリズムに乗せた情熱的な1曲です。","受賞時は20歳。アイドルの枠を超えた“歌手・中森明菜”が認められた瞬間でした。"]},
+    {q:"1986年、2年連続のレコード大賞を受賞した曲は？", c:["ジプシー・クイーン","難破船","DESIRE -情熱-","TATTOO"], a:2, v:J("DESIRE -情熱-"),
+     e:"「DESIRE -情熱-」で2年連続の大賞です。",
+     d:["作詞・阿木燿子、作曲・鈴木キサブロー。前年の「ミ・アモーレ」に続く連覇でした。","ボブヘアに着物風の衣装、ダイナミックな振り付け。音楽番組で披露されるたびに話題になりました。"]},
+    {q:"「DESIRE -情熱-」で話題になった髪型は？", c:["ボブ","聖子ちゃんカット","ソバージュ","ポニーテール"], a:0, v:J("DESIRE -情熱-"),
+     e:"ボブヘアに着物風の衣装。真似する人が続出しました。",
+     d:["衣装やヘアスタイルには明菜さん自身のこだわりが強く反映されていたと言われます。","曲ごとに世界観をがらりと変えるスタイルは、のちのアーティストにも大きな影響を与えました。"]}
   ],
   mid: [
-    {q:"初めてオリコン1位を獲ったシングルは？", c:["スローモーション","少女A","セカンド・ラブ","北ウイング"], a:2, e:"3枚目のシングル「セカンド・ラブ」で初の1位です。"},
-    {q:"『スター誕生！』の決戦大会で歌った山口百恵の曲は？", c:["プレイバックPart2","夢先案内人","秋桜","いい日旅立ち"], a:1, e:"「夢先案内人」。3度目の挑戦で合格をつかみました。"},
-    {q:"「セカンド・ラブ」の作詞者は？", c:["阿木燿子","松本隆","来生えつこ","康珍化"], a:2, e:"来生えつこ作詞、来生たかお作曲です。"},
-    {q:"「飾りじゃないのよ涙は」を作詞・作曲したのは？", c:["加藤登紀子","竹内まりや","井上陽水","中島みゆき"], a:2, e:"井上陽水の作品で、のちに陽水自身もセルフカバーしています。"},
-    {q:"「難破船」を明菜さんに贈ったのは？", c:["加藤登紀子","井上陽水","玉置浩二","中島みゆき"], a:0, e:"加藤登紀子の作詞・作曲。1987年のシングルです。"},
-    {q:"「北ウイング」の“北ウイング”とは？", c:["成田空港の出発ロビー","北海道の灯台","船の名前","劇場の座席"], a:0, e:"当時の新東京国際空港（成田）の北ウイングのこと。恋人を追ってロンドンへ旅立つ歌です。"},
-    {q:"1994年から続くカバーアルバムのシリーズ名は？", c:["歌姫","ZERO album","Femme Fatale","BITTER AND SWEET"], a:0, e:"『歌姫』シリーズです。"},
-    {q:"2014年の紅白歌合戦で、ニューヨークから中継で歌った曲は？", c:["少女A","Rojo -Tierra-","難破船","Dear Friend"], a:1, e:"新曲「Rojo -Tierra-」を披露しました。"}
+    {q:"初めてオリコン1位を獲ったシングルは？", c:["スローモーション","少女A","セカンド・ラブ","北ウイング"], a:2, v:J("セカンド・ラブ"),
+     e:"3枚目のシングル「セカンド・ラブ」で初の1位です。",
+     d:["「少女A」の勢いのまま、今度はしっとりしたバラードで頂点へ。","ツッパリ曲とバラードを交互に出す戦略で、幅広いファンをつかんでいきました。"]},
+    {q:"『スター誕生！』の決戦大会で歌った山口百恵の曲は？", c:["プレイバックPart2","夢先案内人","秋桜","いい日旅立ち"], a:1, v:BIG("夢先案内人","山口百恵の1977年のシングル"),
+     e:"「夢先案内人」。3度目の挑戦で合格をつかみました。",
+     d:["明菜さんは山口百恵の大ファンだったことで知られています。","百恵さんが引退した翌年にデビューしたこともあり、“ポスト百恵”と呼ばれることもありました。"]},
+    {q:"「セカンド・ラブ」の作詞者は？", c:["阿木燿子","松本隆","来生えつこ","康珍化"], a:2, v:J("セカンド・ラブ"),
+     e:"来生えつこ作詞、来生たかお作曲です。",
+     d:["来生姉弟はデビュー曲「スローモーション」や「トワイライト -夕暮れ便り-」も手がけています。","明菜さんのバラードの世界を形づくった、欠かせないコンビです。"]},
+    {q:"「飾りじゃないのよ涙は」を作詞・作曲したのは？", c:["加藤登紀子","竹内まりや","井上陽水","中島みゆき"], a:2, v:J("飾りじゃないのよ涙は"),
+     e:"井上陽水の作品です。",
+     d:["1984年発売。それまでのアイドル歌謡とはひと味違う、ロック色の強い1曲になりました。","のちに陽水自身もセルフカバーしていて、聴き比べるのも楽しい曲です。"]},
+    {q:"「難破船」を明菜さんに贈ったのは？", c:["加藤登紀子","井上陽水","玉置浩二","中島みゆき"], a:0, v:J("難破船"),
+     e:"加藤登紀子の作詞・作曲。1987年のシングルです。",
+     d:["失恋の痛みを“難破船”にたとえた、胸をしめつけるバラード。","加藤登紀子自身も歌っていて、2人の歌い方の違いがよく話題になります。"]},
+    {q:"「北ウイング」の“北ウイング”とは？", c:["成田空港の出発ロビー","北海道の灯台","船の名前","劇場の座席"], a:0, v:J("北ウイング"),
+     e:"当時の新東京国際空港（成田）の北ウイングのことです。",
+     d:["恋人を追って夜の便で旅立つ女性を描いた1984年のシングル。","作詞・康珍化、作曲・林哲司。異国への旅をテーマにした曲の始まりとも言える1曲です。"]},
+    {q:"1994年から続くカバーアルバムのシリーズ名は？", c:["歌姫","ZERO album","Femme Fatale","BITTER AND SWEET"], a:0, v:BIG("歌姫","カバーアルバム・シリーズ"),
+     e:"『歌姫』シリーズです。",
+     d:["昭和の名曲を、明菜さんならではの解釈と低くささやくような声で歌い直したシリーズ。","オリジナルとはまったく違う表情になる曲も多く、カバーの名手としての評価を決定づけました。"]},
+    {q:"2014年の紅白歌合戦で、ニューヨークから中継で歌った曲は？", c:["少女A","Rojo -Tierra-","難破船","Dear Friend"], a:1, v:BIG("NY","2014年 紅白歌合戦 中継"),
+     e:"新曲「Rojo -Tierra-」を披露しました。",
+     d:["2010年から休養していた明菜さんが、約4年ぶりに歌声を届けた特別なステージ。","スペイン語で「赤 -大地-」を意味するタイトル。テレビの前で涙したファンも多かった名場面です。"]}
   ],
   hard: [
-    {q:"デビュー当時のレコード会社は？", c:["CBS・ソニー","ワーナー・パイオニア","ビクター音楽産業","キャニオン・レコード"], a:1, e:"ワーナー・パイオニアからのデビューでした。"},
-    {q:"「セカンド・ラブ」は何枚目のシングル？", c:["2枚目","3枚目","4枚目","5枚目"], a:1, e:"「スローモーション」「少女A」に続く3枚目。“セカンド”なのに3枚目です。"},
-    {q:"1982年のレコード大賞・最優秀新人賞を受賞したのは？", c:["中森明菜","小泉今日子","シブがき隊","早見優"], a:2, e:"受賞はシブがき隊。明菜さんはこの賞を逃しましたが、3年後に大賞を獲ります。"},
-    {q:"「北ウイング」というタイトルを提案したのは？", c:["作詞の康珍化","作曲の林哲司","明菜さん本人","レコード会社の社長"], a:2, e:"明菜さん自身のアイデアと言われています。セルフプロデュースの始まりとも語られる1曲です。"},
-    {q:"「禁区」を作曲したのは？", c:["坂本龍一","細野晴臣","大沢誉志幸","玉置浩二"], a:1, e:"YMOの細野晴臣。アイドル歌謡にテクノポップの風が吹き込みました。"},
-    {q:"「ミ・アモーレ」の正式タイトルに続く言葉は？", c:["〔Meu amor é・・・〕","〔Te quiero〕","〔Bésame mucho〕","〔Je t'aime〕"], a:0, e:"「ミ・アモーレ〔Meu amor é・・・〕」。ポルトガル語で「私の愛は…」という意味です。"},
-    {q:"「ミ・アモーレ」と同じメロディーに別の歌詞をつけた曲は？", c:["赤い鳥逃げた","SAND BEIGE -砂漠へ-","ジプシー・クイーン","BLONDE"], a:0, e:"「赤い鳥逃げた」。12インチシングルで発表されました。"},
-    {q:"1986年のアルバム『不思議』が驚かれた理由は？", c:["全曲が英語詞","ボーカルが深いエコーに沈んで聞き取りにくい","アカペラだけで録音","ライブ録音だけで構成"], a:1, e:"声を楽器のように扱った実験作。「不良品では？」という問い合わせもあったと言われます。"},
-    {q:"「DESIRE -情熱-」の作詞者は？", c:["阿木燿子","来生えつこ","売野雅勇","康珍化"], a:0, e:"作詞は阿木燿子、作曲は鈴木キサブローです。"},
-    {q:"ファーストアルバムのタイトルは？", c:["プロローグ〈序幕〉","バリエーション〈変奏曲〉","ファンタジー〈幻想曲〉","不思議"], a:0, e:"1982年の『プロローグ〈序幕〉』です。"}
+    {q:"デビュー当時のレコード会社は？", c:["CBS・ソニー","ワーナー・パイオニア","ビクター音楽産業","キャニオン・レコード"], a:1, v:BIG("WARNER","ワーナー・パイオニア"),
+     e:"ワーナー・パイオニアからのデビューでした。",
+     d:["1980年代の代表曲の多くはこの時代に生まれています。","レコード会社ごとの時代で作品の雰囲気が変わるので、マニアは“どの時代の明菜が好きか”でも盛り上がります。"]},
+    {q:"「セカンド・ラブ」は何枚目のシングル？", c:["2枚目","3枚目","4枚目","5枚目"], a:1, v:J("セカンド・ラブ"),
+     e:"「スローモーション」「少女A」に続く3枚目です。",
+     d:["“セカンド”なのに3枚目、というのがひっかけポイント。","タイトルの「セカンド」は2度目の恋のこと。初めての恋ではない、少し大人びた切なさを歌っています。"]},
+    {q:"1982年のレコード大賞・最優秀新人賞を受賞したのは？", c:["中森明菜","小泉今日子","シブがき隊","早見優"], a:2, v:BIG("1982","最優秀新人賞はシブがき隊"),
+     e:"受賞はシブがき隊でした。",
+     d:["明菜さんはデビューの年、この賞を逃しています。","ところが3年後の1985年には「ミ・アモーレ」で大賞を受賞。悔しさをバネにした逆転劇としても語られます。"]},
+    {q:"「北ウイング」というタイトルを提案したのは？", c:["作詞の康珍化","作曲の林哲司","明菜さん本人","レコード会社の社長"], a:2, v:J("北ウイング"),
+     e:"明菜さん自身のアイデアと言われています。",
+     d:["曲のイメージから空港の“北ウイング”を思いついたというエピソードが知られています。","10代にして作品づくりに意見を出していた、セルフプロデュースの始まりとも語られる1曲です。"]},
+    {q:"「禁区」を作曲したのは？", c:["坂本龍一","細野晴臣","大沢誉志幸","玉置浩二"], a:1, v:J("禁区"),
+     e:"YMOの細野晴臣が作曲しました。",
+     d:["1983年のシングル。作詞は売野雅勇。","アイドル歌謡にテクノポップの感覚が持ち込まれた1曲で、ツッパリ路線の中でも独特の響きがあります。"]},
+    {q:"「ミ・アモーレ」の正式タイトルに続く言葉は？", c:["〔Meu amor é・・・〕","〔Te quiero〕","〔Bésame mucho〕","〔Je t'aime〕"], a:0, v:J("ミ・アモーレ", null, "〔Meu amor é・・・〕"),
+     e:"「ミ・アモーレ〔Meu amor é・・・〕」です。",
+     d:["“Meu amor é”はポルトガル語で「私の愛は…」という意味。","ブラジルのカーニバルを思わせるサンバのリズムと、言葉の響きがぴったり合っています。"]},
+    {q:"「ミ・アモーレ」と同じメロディーに別の歌詞をつけた曲は？", c:["赤い鳥逃げた","SAND BEIGE -砂漠へ-","ジプシー・クイーン","BLONDE"], a:0, v:J("赤い鳥逃げた", 1985, "「ミ・アモーレ」の別バージョン"),
+     e:"「赤い鳥逃げた」。12インチシングルで発表されました。",
+     d:["同じメロディーでも、歌詞とアレンジが変わるとまったく違う物語に聞こえます。","イントロクイズで流すと、ベテランファンでも一瞬迷うかもしれません。"]},
+    {q:"1986年のアルバム『不思議』が驚かれた理由は？", c:["全曲が英語詞","ボーカルが深いエコーに沈んで聞き取りにくい","アカペラだけで録音","ライブ録音だけで構成"], a:1, v:J("不思議", 1986, "アルバム"),
+     e:"声を楽器のように扱った実験作です。",
+     d:["歌詞がはっきり聞き取れないほど、ボーカルが音の中に溶け込んでいます。","「不良品では？」という問い合わせもあったと言われますが、今では明菜さんの攻めた姿勢を象徴する名盤として評価されています。"]},
+    {q:"「DESIRE -情熱-」の作詞者は？", c:["阿木燿子","来生えつこ","売野雅勇","康珍化"], a:0, v:J("DESIRE -情熱-"),
+     e:"作詞は阿木燿子、作曲は鈴木キサブローです。",
+     d:["阿木燿子は山口百恵の「プレイバックPart2」なども手がけた作詞家。","百恵さんに憧れていた明菜さんが、同じ作詞家の言葉でレコード大賞を獲った、というつながりも味わい深いところです。"]},
+    {q:"ファーストアルバムのタイトルは？", c:["プロローグ〈序幕〉","バリエーション〈変奏曲〉","ファンタジー〈幻想曲〉","不思議"], a:0, v:J("プロローグ〈序幕〉", 1982, "1stアルバム"),
+     e:"1982年の『プロローグ〈序幕〉』です。",
+     d:["『バリエーション〈変奏曲〉』『ファンタジー〈幻想曲〉』は、そのあとに続くアルバム。選択肢はどれも実在のタイトルでした。","初期のアルバムは〈 〉つきの音楽用語のタイトルが並んでいて、並べると楽しいシリーズです。"]}
   ],
   fun: [
-    {q:"デビュー当時のキャッチフレーズは？", c:["ちょっとエッチな美新人娘（ミルキーっこ）","下町のプリンセス","100%少女","瞳はダイアモンド"], a:0, e:"「ちょっとエッチな美新人娘」。今だとなかなか攻めたコピーです。"},
-    {q:"「少女A」を初めて渡されたとき、明菜さんの反応は？", c:["「歌いたくない」と嫌がった","その場で振り付けを考えた","泣いて喜んだ","タイトルを「少女B」にしてと頼んだ"], a:0, e:"ツッパリ風の歌詞に抵抗があり、嫌がったというのは有名な話。それが大ヒットになりました。"},
-    {q:"「DESIRE -情熱-」のサビ、空耳で有名なのは？", c:["ゲラゲラゲラゲラ","ドンドンドンドン","ニャンニャンニャンニャン","ワッショイワッショイ"], a:0, e:"正しくは「Get up, Get up」。でも宴会では「ゲラゲラ」で歌う人が続出します。"},
-    {q:"「いいかげんにして」と言い放つのはどの曲？", c:["1/2の神話","セカンド・ラブ","スローモーション","難破船"], a:0, e:"「1/2の神話」。カラオケで叫ぶと気持ちいい一言です。"},
-    {q:"「飾りじゃないのよ涙は」の歌い出し「私は○○○ことがない」。○○○は？", c:["泣いた","笑った","恋した","寝坊した"], a:0, e:"「私は泣いたことがない」。タイトルとの落差がしびれます。"},
-    {q:"『スター誕生！』で合格したのは何度目の挑戦？", c:["1度目","2度目","3度目","10度目"], a:2, e:"3度目でようやく合格。あきらめなかったから今日の会があります。"},
-    {q:"1982年デビューのアイドルたちは何と呼ばれる？", c:["花の82年組","黄金の82年組","奇跡の82年組","昭和の82年組"], a:0, e:"「花の82年組」。小泉今日子、早見優、堀ちえみ、石川秀美、シブがき隊などが同期です。"},
-    {q:"今日のスペシャルゲスト「店主A」の「A」に込められた意味は？", c:["明菜（Akina）の頭文字","「少女A」にかけている","愛（Ai）の頭文字","A型だから"], a:1, e:"正解は「少女A」！筋金入りのファンならではのネーミングです。由来の詳しい話はプログラム5で本人にどうぞ。"}
+    {q:"デビュー当時のキャッチフレーズは？", c:["ちょっとエッチな美新人娘（ミルキーっこ）","下町のプリンセス","100%少女","瞳はダイアモンド"], a:0, v:BIG("美新人娘","読み方は「ミルキーっこ」"),
+     e:"「ちょっとエッチな美新人娘」。今だとなかなか攻めたコピーです。",
+     d:["80年代のアイドルには、それぞれキャッチフレーズがついていました。","“美新人娘”を“ミルキーっこ”と読ませるのも、当時ならではのセンスです。"]},
+    {q:"「少女A」を初めて渡されたとき、明菜さんの反応は？", c:["「歌いたくない」と嫌がった","その場で振り付けを考えた","泣いて喜んだ","タイトルを「少女B」にしてと頼んだ"], a:0, v:J("少女A"),
+     e:"ツッパリ風の歌詞に抵抗があり、嫌がったというのは有名な話です。",
+     d:["自分のことを歌われているようでイヤだった、とも語られています。","ところがその曲が大ヒットし、明菜さんの代名詞に。人生、何が当たるかわかりません。"]},
+    {q:"「DESIRE -情熱-」のサビ、空耳で有名なのは？", c:["ゲラゲラゲラゲラ","ドンドンドンドン","ニャンニャンニャンニャン","ワッショイワッショイ"], a:0, v:J("DESIRE -情熱-"),
+     e:"正しくは「Get up, Get up」です。",
+     d:["“Get up”が“ゲラ”と聞こえるため、子どもたちが「ゲラゲラ」と真似したのは当時のあるある。","今日の最後に歌うときは、ぜひ本気の「ゲラゲラ」でどうぞ。"]},
+    {q:"「いいかげんにして」と言い放つのはどの曲？", c:["1/2の神話","セカンド・ラブ","スローモーション","難破船"], a:0, v:J("1/2の神話"),
+     e:"「1/2の神話」です。",
+     d:["「少女A」に続くツッパリ路線の1983年のシングル。","カラオケで叫ぶと気持ちいい一言。日ごろの「いいかげんにして」をここで発散しましょう。"]},
+    {q:"「飾りじゃないのよ涙は」の歌い出し「私は○○○ことがない」。○○○は？", c:["泣いた","笑った","恋した","寝坊した"], a:0, v:J("飾りじゃないのよ涙は"),
+     e:"「私は泣いたことがない」です。",
+     d:["いきなり「泣いたことがない」と言い切っておいて、タイトルは「飾りじゃないのよ涙は」。","強がりと本音が入り混じる、井上陽水らしい言葉の仕掛けです。"]},
+    {q:"『スター誕生！』で合格したのは何度目の挑戦？", c:["1度目","2度目","3度目","10度目"], a:2, v:BIG("3度目","あきらめなかった明菜さん"),
+     e:"3度目でようやく合格しました。",
+     d:["1度や2度ではくじけなかったことが、あの伝説の始まりでした。","10度目を選んだ人、その根性は明菜さんに負けていません。"]},
+    {q:"1982年デビューのアイドルたちは何と呼ばれる？", c:["花の82年組","黄金の82年組","奇跡の82年組","昭和の82年組"], a:0, v:BIG("82","花の82年組"),
+     e:"「花の82年組」です。",
+     d:["小泉今日子、早見優、堀ちえみ、石川秀美、松本伊代、シブがき隊など、そうそうたる顔ぶれ。","会場のみなさんの“推し82年組”も聞いてみてください。"]},
+    {q:"今日のスペシャルゲスト「店主A」の「A」に込められた意味は？", c:["明菜（Akina）の頭文字","「少女A」にかけている","愛（Ai）の頭文字","A型だから"], a:1, v:BIG("A","少女A の A"),
+     e:"正解は「少女A」！筋金入りのファンならではのネーミングです。",
+     d:["デビュー当時から追いかけてきたファンだからこその名乗り。","由来の詳しい話や、ここでしか聞けないお宝話は、プログラム5で本人にどうぞ。"]}
   ]
 };
 const LEVEL_NAME = {easy:"初級", mid:"中級", hard:"上級", fun:"お笑い", orig:"オリジナル"};
@@ -476,7 +578,7 @@ function renderQuiz(){
       if(answered) return; answered = true;
       if(i===q.a) qscore++;
       ch.querySelectorAll(".choice").forEach((x,j)=>{ if(j===q.a) x.classList.add("right"); else if(j===i) x.classList.add("wrong"); x.disabled=true; });
-      const ex = el("div","explain"); ex.append(el("b",null,i===q.a?"正解！ ":"残念！ 正解は「"+q.c[q.a]+"」 "), document.createTextNode(q.e||""));
+      const ex = buildExplain(q, i);
       const next = el("button","btn", qi+1<QUIZ.length?"次の問題へ":"結果を見る");
       next.addEventListener("click",()=>{ qi++; answered=false; renderQuiz(); });
       box.append(ex, next); next.focus();
@@ -485,6 +587,105 @@ function renderQuiz(){
   });
   box.append(ch);
 }
+
+/* 答え合わせカード：図版（または登録した写真）＋くわしい解説 */
+function qKey(q){ return quizLv==="orig" ? "o-"+q.id : quizLv+"-"+QUIZ_SETS[quizLv].indexOf(q); }
+function hueOf(s){ let h=0; for(const ch of String(s)) h=(h*31+ch.codePointAt(0))%360; return h; }
+function visual(v){
+  if(!v) return null;
+  if(v.t==="big"){
+    const d = el("div","vis big-card"+([...v.text].length>4?" long":"")); d.style.setProperty("--h", hueOf(v.text));
+    d.append(el("div","bt",v.text), el("div","bc",v.cap||"")); return d;
+  }
+  const s = SONGS.find(x=>x.t===v.title);
+  const d = el("div","vis jacket"); d.style.setProperty("--h", hueOf(v.title));
+  d.append(el("div","disc"));
+  const face = el("div","face");
+  face.append(el("div","jy", String(v.year || (s&&s.y) || "")), el("div","jt",v.title), el("div","js", v.sub || (s ? s.c.replace("／","\n") : "")), el("div","ja","中森明菜"));
+  d.append(face); return d;
+}
+async function getImg(key){
+  if(db){ try{ const s = await db.collection("qimg").doc(key).get(); return s.exists ? (s.data().img||null) : null; }catch(_){ return null; } }
+  return store.get("img:"+key, null);
+}
+async function setImg(key, src){
+  if(db){ await db.collection("qimg").doc(key).set({img:src, ts:Date.now()}); return; }
+  store.set("img:"+key, src);
+  if(store.get("img:"+key, null)!==src) throw {code:"local_full"};
+}
+async function delImg(key){
+  if(db){ await db.collection("qimg").doc(key).delete(); return; }
+  try{ localStorage.removeItem("akina:img:"+key); }catch(_){}
+}
+/* 写真を縮小して JPEG の data URL にする（共有データの1件あたりの上限に収める） */
+function shrink(file){
+  return new Promise((ok, ng)=>{
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onload = ()=>{
+      let w = img.naturalWidth, h = img.naturalHeight, max = 900, out = "";
+      for(let tries=0; tries<6; tries++){
+        const k = Math.min(1, max/Math.max(w,h)), cw = Math.round(w*k), ch = Math.round(h*k);
+        const c = document.createElement("canvas"); c.width = cw; c.height = ch;
+        c.getContext("2d").drawImage(img, 0, 0, cw, ch);
+        for(let q=0.82; q>=0.5; q-=0.08){ out = c.toDataURL("image/jpeg", q); if(out.length < 220000) break; }
+        if(out.length < 220000) break;
+        max = Math.round(max*0.75);
+      }
+      URL.revokeObjectURL(url);
+      out.length < 220000 ? ok(out) : ng(new Error("too_big"));
+    };
+    img.onerror = ()=>{ URL.revokeObjectURL(url); ng(new Error("bad_image")); };
+    img.src = url;
+  });
+}
+function buildExplain(q, chosen){
+  const right = chosen===q.a, key = qKey(q);
+  const card = el("div","reveal");
+  const media = el("div","media");
+  const vis = visual(q.v);
+  if(vis) media.append(vis);
+  const text = el("div","rtext");
+  text.append(el("div","verdict "+(right?"ok":"ng"), right ? "正解！" : "残念！ 正解は「"+q.c[q.a]+"」"));
+  if(q.e) text.append(el("p","lead-e",q.e));
+  (q.d||[]).forEach(p=>text.append(el("p",null,p)));
+  const listen = q.v && q.v.t==="j" ? q.v.title : null;
+  if(listen){
+    const a = el("a","listen","♪ 「"+listen+"」を聴く（YouTube）");
+    a.href = "https://www.youtube.com/results?search_query="+encodeURIComponent("中森明菜 "+listen);
+    a.target = "_blank"; a.rel = "noopener"; text.append(a);
+  }
+  card.append(media, text);
+
+  function showPhoto(src){
+    media.querySelectorAll(".photo").forEach(x=>x.remove());
+    if(vis) vis.hidden = !!src;
+    if(src){ const im = el("img","photo"); im.src = src; im.alt = "「"+q.c[q.a]+"」の写真"; media.prepend(im); }
+    media.hidden = !src && !vis && !canEditPhotos();
+    if(tools) tools.hidden = !canEditPhotos();
+    if(delBtn) delBtn.hidden = !src;
+  }
+  let tools = null, delBtn = null;
+  if(canEditPhotos()){
+    tools = el("div","photo-tools");
+    const lab = el("label","btn small ghost"); lab.textContent = "写真を登録";
+    const inp = document.createElement("input"); inp.type = "file"; inp.accept = "image/*"; inp.hidden = true; inp.id = "ph-"+key;
+    lab.htmlFor = inp.id;
+    const st = el("span","note");
+    inp.addEventListener("change", async ()=>{
+      const f = inp.files && inp.files[0]; inp.value = ""; if(!f) return;
+      st.textContent = "登録中…";
+      try{ const src = await shrink(f); await setImg(key, src); showPhoto(src); st.textContent = "登録しました。"; }
+      catch(e){ st.textContent = e && e.code==="local_full" ? "この端末の保存容量がいっぱいです。" : e && e.message==="bad_image" ? "画像として読み込めませんでした。" : "登録できませんでした。"; }
+    });
+    delBtn = el("button","btn small ghost","写真を外す"); delBtn.type = "button"; delBtn.hidden = true;
+    delBtn.addEventListener("click", async ()=>{ try{ await delImg(key); showPhoto(null); st.textContent = "外しました。"; }catch(_){ st.textContent = "外せませんでした。"; } });
+    tools.append(lab, inp, delBtn, st); media.append(tools);
+  }
+  showPhoto(null);
+  getImg(key).then(src=>{ if(src) showPhoto(src); });
+  return card;
+}
+function canEditPhotos(){ return !db || canWrite; }
 
 /* オリジナル問題：claude.ai ではみんなで共有、それ以外ではこの端末に保存 */
 function origChanged(list){
@@ -522,14 +723,21 @@ $("mk-form").addEventListener("submit", async e=>{
   const c = [], a = raw.slice(0,pick).filter(Boolean).length;
   raw.forEach(x=>{ if(x) c.push(x); });
   if(!q || c.length<2){ $("mk-status").textContent = "問題文と、選択肢を2つ以上入れてください。"; return; }
-  const item = {q:q.slice(0,200), c, a, e:$("mk-e").value.trim().slice(0,200), by:$("mk-by").value.trim().slice(0,30)};
-  let ok;
-  if(db) ok = await add("quiz", item, "mk-status", "mk-submit");
+  const item = {q:q.slice(0,200), c, a, e:$("mk-e").value.trim().slice(0,600), by:$("mk-by").value.trim().slice(0,30)};
+  const file = $("mk-img").files && $("mk-img").files[0];
+  let photo = null;
+  if(file){ try{ photo = await shrink(file); }catch(_){ $("mk-status").textContent = "写真を読み込めませんでした。別の画像を選ぶか、写真なしで追加してください。"; return; } }
+  let id = null;
+  if(db){ const ref = await add("quiz", item, "mk-status", "mk-submit"); if(ref) id = ref.id; }
   else {
-    const list = origQuiz.concat([Object.assign({id:"l"+Date.now(), ts:Date.now()}, item)]);
-    store.set("origQuiz", list); origChanged(list); $("mk-status").textContent = "この端末に保存しました。"; ok = true;
+    id = "l"+Date.now();
+    const list = origQuiz.concat([Object.assign({id, ts:Date.now()}, item)]);
+    store.set("origQuiz", list); origChanged(list); $("mk-status").textContent = "この端末に保存しました。";
   }
-  if(ok){ ["mk-q","mk-c0","mk-c1","mk-c2","mk-c3","mk-e"].forEach(id=>$(id).value=""); $("mk-a0").checked = true; }
+  if(id){
+    if(photo){ try{ await setImg("o-"+id, photo); }catch(_){ $("mk-status").textContent = "問題は追加しましたが、写真は保存できませんでした。"; } }
+    ["mk-q","mk-c0","mk-c1","mk-c2","mk-c3","mk-e","mk-img"].forEach(x=>$(x).value=""); $("mk-a0").checked = true;
+  }
 });
 
 /* ---------- 3 intro ---------- */
@@ -685,8 +893,8 @@ async function add(col, data, statusId, btnId){
   if(!db || !canWrite) return false;
   $(btnId).disabled = true; $(statusId).textContent = "送信中…";
   try{
-    await db.collection(col).add(Object.assign({ts:Date.now()}, data));
-    $(statusId).textContent = "送信しました。"; return true;
+    const ref = await db.collection(col).add(Object.assign({ts:Date.now()}, data));
+    $(statusId).textContent = "送信しました。"; return ref;
   }catch(e){
     if(e && e.code==="invalid_argument"){ setReadOnly("このページは閲覧のみです。投稿は司会者が代わりに入力します。"); return false; }
     $(statusId).textContent = e && e.code==="quota_exceeded" ? "投稿の上限に達しました。古い投稿を削除してください。" : "送信できませんでした。もう一度お試しください。";
