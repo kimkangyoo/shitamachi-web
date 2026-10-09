@@ -1,0 +1,595 @@
+<title>中森明菜マニアックビューイング</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@400;700;900&display=swap">
+<style>
+/* Layout: stage curtain header → sticky program tabs (1〜6 + 交流会) → one panel per program, single column */
+:root{
+  --stage:#140a0d;        /* 客席の暗がり */
+  --panel:#21131a;        /* パネル面 */
+  --panel-2:#2c1a22;
+  --line:#4a2b36;
+  --curtain:#b3142f;      /* 緞帳の赤 */
+  --spot:#f4c85a;         /* スポットライトの金 */
+  --neon:#ff4f8b;         /* 看板のネオンピンク */
+  --ink:#f7ede6;
+  --mute:#c4aab2;
+  --ok:#62d39a;
+  --ng:#ff7a7a;
+  --f-display:"Dela Gothic One","Hiragino Sans","Yu Gothic",sans-serif;
+  --f-body:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{background:var(--stage);color:var(--ink)}
+body{font-family:var(--f-body);font-size:15px;line-height:1.75;padding-inline:16px;padding-block:0 48px}
+button,input,textarea,select{font:inherit;color:inherit}
+a{color:var(--spot)}
+:focus-visible{outline:2px solid var(--spot);outline-offset:2px}
+
+.wrap{max-width:760px;margin:0 auto}
+
+/* Header: curtain + spotlight */
+.marquee{position:relative;margin-inline:-16px;padding:36px 16px 28px;text-align:center;overflow:hidden;
+  background:
+    radial-gradient(ellipse 40% 70% at 30% -10%, rgba(244,200,90,.28), transparent 70%),
+    radial-gradient(ellipse 40% 70% at 70% -10%, rgba(244,200,90,.22), transparent 70%),
+    var(--stage)}
+.marquee::before,.marquee::after{content:"";position:absolute;top:0;bottom:0;width:clamp(28px,9vw,90px);
+  background:repeating-linear-gradient(90deg,#7d0b1f 0 10px,var(--curtain) 10px 20px,#8e0f25 20px 26px);
+  box-shadow:inset -8px 0 18px rgba(0,0,0,.45)}
+.marquee::before{left:0;border-bottom-right-radius:60% 30%}
+.marquee::after{right:0;transform:scaleX(-1);border-bottom-right-radius:60% 30%}
+.marquee h1{font-family:var(--f-display);font-weight:400;margin:0;line-height:1.15;text-wrap:balance}
+.marquee .name{display:block;font-size:clamp(38px,11vw,72px);letter-spacing:.06em;color:var(--ink);
+  text-shadow:0 3px 0 #000,0 0 30px rgba(244,200,90,.25)}
+.marquee .sub{display:inline-block;margin-top:6px;font-size:clamp(20px,6vw,36px);color:var(--neon);transform:rotate(-3deg);
+  text-shadow:0 0 12px rgba(255,79,139,.6),0 2px 0 #000}
+.marquee p{margin:14px auto 0;max-width:30em;color:var(--mute);font-size:13px;letter-spacing:.08em}
+
+/* Program tabs */
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;margin-inline:-16px;padding:10px 16px;
+  background:rgba(20,10,13,.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);
+  display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;display:flex;align-items:center;gap:6px;padding:7px 12px 7px 7px;border-radius:999px;
+  border:1px solid var(--line);background:var(--panel);cursor:pointer;font-size:13px;font-weight:700;white-space:nowrap}
+.tab .no{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--panel-2);
+  font-family:var(--f-display);font-size:13px;color:var(--spot)}
+.tab[aria-selected="true"]{background:var(--curtain);border-color:var(--curtain)}
+.tab[aria-selected="true"] .no{background:var(--spot);color:var(--stage)}
+
+/* Panels */
+section.panel{padding-top:24px}
+.ph{display:flex;align-items:flex-start;gap:14px;margin-bottom:6px}
+.ph .big{flex:0 0 auto;display:grid;place-items:center;width:52px;height:52px;border-radius:50%;
+  background:var(--curtain);font-family:var(--f-display);font-size:28px;color:var(--ink);box-shadow:0 0 0 3px var(--stage),0 0 0 4px var(--curtain)}
+.ph h2{font-family:var(--f-display);font-weight:400;font-size:clamp(22px,6vw,30px);line-height:1.25;margin:4px 0 0;text-wrap:balance}
+.lead{color:var(--mute);margin:4px 0 20px;max-width:36em}
+.eyebrow{font-size:11px;letter-spacing:.18em;color:var(--spot);font-weight:700}
+
+.box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{border:0;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer;background:var(--curtain);color:var(--ink)}
+.btn.gold{background:var(--spot);color:var(--stage)}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--mute)}
+.btn.small{padding:5px 10px;font-size:12px;border-radius:8px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+label{display:block;font-size:12px;font-weight:700;color:var(--mute);margin-bottom:4px;letter-spacing:.05em}
+input[type=text],input[type=number],textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--stage)}
+textarea{min-height:84px;resize:vertical}
+.note{font-size:12px;color:var(--mute)}
+.status{font-size:13px;color:var(--spot);min-height:1.4em}
+.empty{border:1px dashed var(--line);border-radius:12px;padding:18px;color:var(--mute);text-align:center;font-size:13px}
+
+/* 1: timeline */
+.timeline{list-style:none;margin:0;padding:0;position:relative}
+.timeline::before{content:"";position:absolute;left:58px;top:6px;bottom:6px;width:2px;background:linear-gradient(var(--curtain),var(--spot))}
+.timeline li{display:grid;grid-template-columns:48px 1fr;gap:22px;padding:10px 0}
+.timeline .yr{font-family:var(--f-display);color:var(--spot);font-size:17px;text-align:right;font-variant-numeric:tabular-nums}
+.timeline .ev{position:relative;min-width:0}
+.timeline .ev::before{content:"";position:absolute;left:-17px;top:9px;width:10px;height:10px;border-radius:50%;background:var(--stage);border:2px solid var(--spot)}
+.timeline .ev b{display:block}
+.timeline .ev span{color:var(--mute);font-size:13px}
+.timeline li.hl .ev b{color:var(--neon)}
+
+/* 2: quiz */
+.qmeta{display:flex;justify-content:space-between;font-size:12px;color:var(--mute);font-variant-numeric:tabular-nums}
+.bar{height:6px;border-radius:9px;background:var(--panel-2);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--neon);transition:width .3s}
+.qtext{font-size:19px;font-weight:900;line-height:1.5;text-wrap:balance}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (max-width:480px){.choices{grid-template-columns:1fr}}
+.choice{text-align:left;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--panel-2);cursor:pointer;font-weight:700}
+.choice .k{display:inline-block;width:1.6em;color:var(--spot);font-family:var(--f-display)}
+.choice.right{background:rgba(98,211,154,.18);border-color:var(--ok)}
+.choice.wrong{background:rgba(255,122,122,.15);border-color:var(--ng)}
+.explain{border-left:3px solid var(--spot);padding:6px 12px;background:var(--panel-2);border-radius:0 10px 10px 0;font-size:14px}
+.score-big{font-family:var(--f-display);font-size:56px;color:var(--spot);line-height:1;font-variant-numeric:tabular-nums}
+
+/* 3: intro */
+.teams{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.team{background:var(--panel-2);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.team .tn{font-weight:900;overflow-wrap:anywhere}
+.team .pt{font-family:var(--f-display);font-size:34px;color:var(--spot);line-height:1;font-variant-numeric:tabular-nums}
+.songs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.song{display:grid;grid-template-columns:40px 1fr auto;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.song .n{font-family:var(--f-display);color:var(--spot);font-size:18px;text-align:center}
+.song .t{min-width:0}
+.song .t b{display:block}
+.song .t span{font-size:12px;color:var(--mute)}
+.song .hidden-t{letter-spacing:.3em;color:var(--mute)}
+
+/* 4: best song */
+.rank{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.rank li{display:grid;grid-template-columns:30px 1fr 36px;gap:10px;align-items:center}
+.rank .pos{font-family:var(--f-display);color:var(--spot);text-align:center}
+.rank .lbl{min-width:0}
+.rank .lbl b{display:block;overflow-wrap:anywhere}
+.rank .meter{height:8px;border-radius:9px;background:var(--panel-2);overflow:hidden}
+.rank .meter i{display:block;height:100%;background:linear-gradient(90deg,var(--curtain),var(--neon))}
+.rank .cnt{text-align:right;font-weight:900;font-variant-numeric:tabular-nums}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.card .song-t{font-weight:900;color:var(--neon);overflow-wrap:anywhere}
+.card .story{white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px}
+.card .who{font-size:12px;color:var(--mute);margin-top:auto;display:flex;justify-content:space-between;gap:6px;align-items:center}
+
+/* 5: questions */
+.qlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.qitem{display:flex;gap:10px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px}
+.qitem .body{flex:1;min-width:0}
+.qitem .body p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.qitem .body span{font-size:12px;color:var(--mute)}
+.qitem.done{opacity:.55}
+.qitem.done .body p{text-decoration:line-through}
+
+/* 6: sing */
+.setlist{list-style:none;margin:0;padding:0;counter-reset:s}
+.setlist li{counter-increment:s;display:flex;gap:12px;align-items:center;padding:12px 4px;border-bottom:1px dashed var(--line)}
+.setlist li::before{content:"M" counter(s);font-family:var(--f-display);color:var(--spot);width:2.6em;flex:0 0 auto}
+.setlist .st{flex:1;min-width:0;font-weight:900;font-size:17px;overflow-wrap:anywhere}
+.setlist .st span{display:block;font-weight:400;font-size:12px;color:var(--mute)}
+.setlist li.sung .st{color:var(--mute);text-decoration:line-through}
+
+/* 交流会 */
+.tally{display:flex;align-items:baseline;gap:8px}
+.tally .num{font-family:var(--f-display);font-size:48px;color:var(--spot);line-height:1;font-variant-numeric:tabular-nums}
+
+.confirm{display:inline-flex;gap:4px}
+footer{margin-top:40px;text-align:center;font-size:12px;color:var(--mute)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="marquee">
+    <h1><span class="name">中森明菜</span><span class="sub">マニアックビューイング</span></h1>
+    <p>見て、聞いて、語って、歌って。みんなで楽しむ中森明菜の時間</p>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="プログラム">
+    <button class="tab" role="tab" data-tab="history"><span class="no">1</span>歴史</button>
+    <button class="tab" role="tab" data-tab="quiz"><span class="no">2</span>クイズ</button>
+    <button class="tab" role="tab" data-tab="intro"><span class="no">3</span>イントロ</button>
+    <button class="tab" role="tab" data-tab="best"><span class="no">4</span>ベストソング</button>
+    <button class="tab" role="tab" data-tab="guest"><span class="no">5</span>店主Aに質問</button>
+    <button class="tab" role="tab" data-tab="sing"><span class="no">6</span>みんなで歌おう</button>
+    <button class="tab" role="tab" data-tab="party"><span class="no">★</span>交流会</button>
+  </nav>
+
+  <!-- 1 歴史 -->
+  <section class="panel" id="p-history" role="tabpanel">
+    <div class="ph"><div class="big">1</div><div><div class="eyebrow">PROGRAM 1</div><h2>中森明菜の歴史</h2></div></div>
+    <p class="lead">デビュー当時から現在までを年表で振り返ります。スライドや映像と一緒に、手元のスマホでも追いかけてください。</p>
+    <ol class="timeline" id="timeline"></ol>
+  </section>
+
+  <!-- 2 クイズ -->
+  <section class="panel" id="p-quiz" role="tabpanel" hidden>
+    <div class="ph"><div class="big">2</div><div><div class="eyebrow">PROGRAM 2</div><h2>中森明菜クイズ</h2></div></div>
+    <p class="lead">全<span id="q-total"></span>問の4択クイズです。答えると正解と解説が出ます。</p>
+    <div class="box stack" id="quiz"></div>
+  </section>
+
+  <!-- 3 イントロ -->
+  <section class="panel" id="p-intro" role="tabpanel" hidden>
+    <div class="ph"><div class="big">3</div><div><div class="eyebrow">PROGRAM 3</div><h2>イントロクイズ</h2></div></div>
+    <p class="lead">司会がイントロを流して、わかった人から歌い出し。正解したチームに点を入れましょう。曲名は「答え」を押すまで隠れています。</p>
+    <div class="box stack" style="margin-bottom:16px">
+      <div class="eyebrow">得点ボード</div>
+      <div class="teams" id="teams"></div>
+      <form class="row" id="team-form">
+        <input type="text" id="team-name" placeholder="チーム名・名前" maxlength="20" style="flex:1;min-width:140px" aria-label="チーム名">
+        <button class="btn small" type="submit">追加</button>
+        <button class="btn small ghost" type="button" id="team-reset">得点を0に戻す</button>
+      </form>
+    </div>
+    <ol class="songs" id="intro-songs"></ol>
+  </section>
+
+  <!-- 4 ベストソング -->
+  <section class="panel" id="p-best" role="tabpanel" hidden>
+    <div class="ph"><div class="big">4</div><div><div class="eyebrow">PROGRAM 4</div><h2>あなたのベストソングは？</h2></div></div>
+    <p class="lead">一番好きな曲と、その曲にまつわる思い出を書いてください。集まった曲はランキングになり、最後の「みんなで歌おう」のセットリストになります。</p>
+    <form class="box stack" id="best-form" style="margin-bottom:18px">
+      <div><label for="bs-name">お名前（ニックネーム可）</label><input type="text" id="bs-name" maxlength="30" placeholder="例：北ウイングの佐藤"></div>
+      <div><label for="bs-song">ベストソング</label><input type="text" id="bs-song" list="song-list" maxlength="60" placeholder="例：難破船" required></div>
+      <div><label for="bs-story">思い出・エピソード</label><textarea id="bs-story" maxlength="400" placeholder="例：受験の夜、ラジオで初めて聴いて…"></textarea></div>
+      <div class="row"><button class="btn" type="submit" id="bs-submit">投稿する</button><span class="status" id="bs-status"></span></div>
+    </form>
+    <div class="stack">
+      <div class="box stack"><div class="eyebrow">いまのランキング</div><ol class="rank" id="rank"></ol></div>
+      <div class="eyebrow" style="margin-top:6px">みんなの思い出</div>
+      <div class="cards" id="stories"></div>
+    </div>
+  </section>
+
+  <!-- 5 店主A -->
+  <section class="panel" id="p-guest" role="tabpanel" hidden>
+    <div class="ph"><div class="big">5</div><div><div class="eyebrow">PROGRAM 5 ・ オンライン</div><h2>スペシャルゲスト 店主Aに質問</h2></div></div>
+    <p class="lead">デビュー当時からの筋金入りファン「店主A」が、時間内のどこかでオンライン登場します。聞いてみたいことを先に集めておきましょう。お店の状況次第で出られない場合もあります。</p>
+    <form class="box stack" id="q-form" style="margin-bottom:18px">
+      <div><label for="gq-text">質問</label><textarea id="gq-text" maxlength="300" placeholder="例：一番思い出に残っているコンサートは？" required></textarea></div>
+      <div><label for="gq-name">お名前（空欄なら匿名）</label><input type="text" id="gq-name" maxlength="30"></div>
+      <div class="row"><button class="btn" type="submit" id="gq-submit">質問を送る</button><span class="status" id="gq-status"></span></div>
+    </form>
+    <ul class="qlist" id="qlist"></ul>
+  </section>
+
+  <!-- 6 歌おう -->
+  <section class="panel" id="p-sing" role="tabpanel" hidden>
+    <div class="ph"><div class="big">6</div><div><div class="eyebrow">PROGRAM 6</div><h2>みんなのベストソングを歌おう！</h2></div></div>
+    <p class="lead">プログラム4で集まった「私のベストソング」を、票の多い順に並べたセットリストです。歌い終わったら「歌った」を押して消していきましょう。</p>
+    <ol class="setlist" id="setlist"></ol>
+  </section>
+
+  <!-- 交流会 -->
+  <section class="panel" id="p-party" role="tabpanel" hidden>
+    <div class="ph"><div class="big">★</div><div><div class="eyebrow">AFTER PARTY ・ 実費</div><h2>店主Aのお店で交流会</h2></div></div>
+    <p class="lead">イベント終了後、希望者はスペシャルゲスト店主Aのお店で交流会を行います。お宝話やマニアックなコレクションが見られるかも。参加する方は名前を入れてください。</p>
+    <div class="box stack" style="margin-bottom:16px">
+      <div class="tally"><span class="num" id="party-total">0</span><span>人が参加予定</span></div>
+      <form class="row" id="party-form">
+        <input type="text" id="pt-name" maxlength="30" placeholder="お名前" required style="flex:2;min-width:140px" aria-label="お名前">
+        <input type="number" id="pt-count" min="1" max="10" value="1" style="width:80px" aria-label="人数">
+        <span class="note">人</span>
+        <button class="btn" type="submit" id="pt-submit">参加する</button>
+      </form>
+      <span class="status" id="pt-status"></span>
+    </div>
+    <ul class="qlist" id="party-list"></ul>
+  </section>
+
+  <footer>中森明菜マニアックビューイング ・ 投稿はこのページを開いている全員に共有されます</footer>
+</div>
+
+<datalist id="song-list"></datalist>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- data ---------- */
+const SONGS = [
+  {t:"スローモーション", y:1982, c:"作詞：来生えつこ／作曲：来生たかお"},
+  {t:"少女A", y:1982, c:"作詞：売野雅勇／作曲：芹澤廣明"},
+  {t:"セカンド・ラブ", y:1982, c:"作詞：来生えつこ／作曲：来生たかお"},
+  {t:"1/2の神話", y:1983, c:"作詞：売野雅勇／作曲：大沢誉志幸"},
+  {t:"トワイライト -夕暮れ便り-", y:1983, c:"作詞：来生えつこ／作曲：来生たかお"},
+  {t:"禁区", y:1983, c:"作詞：売野雅勇／作曲：細野晴臣"},
+  {t:"北ウイング", y:1984, c:"作詞：康珍化／作曲：林哲司"},
+  {t:"サザン・ウインド", y:1984, c:"作詞：来生えつこ／作曲：玉置浩二"},
+  {t:"十戒 (1984)", y:1984, c:"作詞：売野雅勇／作曲：高中正義"},
+  {t:"飾りじゃないのよ涙は", y:1984, c:"作詞・作曲：井上陽水"},
+  {t:"ミ・アモーレ", y:1985, c:"作詞：康珍化／作曲：松岡直也"},
+  {t:"SAND BEIGE -砂漠へ-", y:1985, c:"作詞：許瑛子／作曲：都志見隆"},
+  {t:"ジプシー・クイーン", y:1986, c:"作詞：松本一起／作曲：国安わたる"},
+  {t:"DESIRE -情熱-", y:1986, c:"作詞：阿木燿子／作曲：鈴木キサブロー"},
+  {t:"難破船", y:1987, c:"作詞・作曲：加藤登紀子"},
+  {t:"TATTOO", y:1988, c:"作詞：森由里子／作曲：関根安里"}
+];
+
+const HISTORY = [
+  {y:"1965", b:"7月13日、東京都に生まれる", s:"清瀬市で育つ。"},
+  {y:"1981", b:"『スター誕生！』に合格", s:"山口百恵「夢先案内人」を歌い、3度目の挑戦で決戦大会へ。"},
+  {y:"1982", b:"5月1日「スローモーション」でデビュー", s:"続く「少女A」が大ヒット。「セカンド・ラブ」で初のオリコン1位。", hl:1},
+  {y:"1983", b:"「1/2の神話」「禁区」", s:"ツッパリ路線とバラード路線を行き来して人気を固める。"},
+  {y:"1984", b:"「北ウイング」「十戒」「飾りじゃないのよ涙は」", s:"井上陽水作品で新しい表情を見せる。"},
+  {y:"1985", b:"「ミ・アモーレ」で日本レコード大賞", s:"21歳になる年での大賞受賞。", hl:1},
+  {y:"1986", b:"「DESIRE -情熱-」で2年連続レコード大賞", s:"ボブヘアと着物風の衣装が社会現象に。アルバム『不思議』も話題に。", hl:1},
+  {y:"1987", b:"「難破船」", s:"加藤登紀子から贈られたバラード。"},
+  {y:"1989", b:"活動を休止", s:"翌1990年「Dear Friend」で復帰する。"},
+  {y:"1994", b:"カバーアルバム『歌姫』", s:"以後「歌姫」シリーズとして続く。"},
+  {y:"2010", b:"体調不良で長期休養に入る", s:""},
+  {y:"2014", b:"紅白歌合戦にニューヨークから中継で出演", s:"新曲「Rojo -Tierra-」を歌い、活動再開。", hl:1},
+  {y:"2022", b:"デビュー40周年。個人事務所を設立", s:"再始動に向けた準備を始めたことを発表。"},
+  {y:"現在", b:"ファンと一緒に、次のステージへ", s:"今日はここから先の話も語り合いましょう。"}
+];
+
+const QUIZ = [
+  {q:"中森明菜のデビュー曲は？", c:["少女A","スローモーション","セカンド・ラブ","北ウイング"], a:1, e:"1982年5月1日発売の「スローモーション」。作詞は来生えつこ、作曲は来生たかおの姉弟コンビです。"},
+  {q:"明菜さんの誕生日は？", c:["5月1日","7月13日","10月9日","12月31日"], a:1, e:"1965年7月13日生まれです。5月1日はデビュー日。"},
+  {q:"明菜さんが合格したオーディション番組は？", c:["スター誕生！","ザ・ベストテン","夜のヒットスタジオ","ホリプロタレントスカウトキャラバン"], a:0, e:"日本テレビ『スター誕生！』。山口百恵の「夢先案内人」を歌いました。"},
+  {q:"「少女A」の作曲者は？", c:["筒美京平","芹澤廣明","林哲司","細野晴臣"], a:1, e:"作曲は芹澤廣明、作詞は売野雅勇です。"},
+  {q:"「セカンド・ラブ」の作詞者は？", c:["阿木燿子","松本隆","来生えつこ","康珍化"], a:2, e:"来生えつこ作詞、来生たかお作曲。初のオリコン1位を獲った曲です。"},
+  {q:"「北ウイング」の作曲者は？", c:["林哲司","玉置浩二","大沢誉志幸","高中正義"], a:0, e:"作曲は林哲司、作詞は康珍化。明菜さん自身がタイトルを提案したと言われています。"},
+  {q:"「飾りじゃないのよ涙は」を作詞・作曲したのは？", c:["加藤登紀子","竹内まりや","井上陽水","中島みゆき"], a:2, e:"井上陽水の作品。のちに陽水自身もセルフカバーしています。"},
+  {q:"1985年の日本レコード大賞を受賞した曲は？", c:["十戒 (1984)","ミ・アモーレ","SAND BEIGE -砂漠へ-","DESIRE -情熱-"], a:1, e:"「ミ・アモーレ」で初の大賞。作曲は松岡直也です。"},
+  {q:"1986年、2年連続のレコード大賞を受賞した曲は？", c:["ジプシー・クイーン","難破船","DESIRE -情熱-","TATTOO"], a:2, e:"「DESIRE -情熱-」。ボブヘアと着物風の衣装も話題になりました。"},
+  {q:"「難破船」を明菜さんに贈ったのは？", c:["加藤登紀子","井上陽水","玉置浩二","中島みゆき"], a:0, e:"加藤登紀子の作詞・作曲。1987年のシングルです。"},
+  {q:"1994年から続くカバーアルバムのシリーズ名は？", c:["歌姫","ZERO album","Femme Fatale","BITTER AND SWEET"], a:0, e:"『歌姫』シリーズ。昭和の名曲を明菜さんの解釈で歌っています。"},
+  {q:"2014年の紅白歌合戦で、ニューヨークから中継で歌った曲は？", c:["少女A","Rojo -Tierra-","難破船","Dear Friend"], a:1, e:"新曲「Rojo -Tierra-」を披露し、久しぶりの歌声に大きな反響がありました。"}
+];
+
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id);
+const el = (tag, cls, text) => { const e=document.createElement(tag); if(cls) e.className=cls; if(text!=null) e.textContent=text; return e; };
+const store = {
+  get(k,d){ try{ const v=localStorage.getItem("akina:"+k); return v?JSON.parse(v):d; }catch(_){ return d; } },
+  set(k,v){ try{ localStorage.setItem("akina:"+k, JSON.stringify(v)); }catch(_){} }
+};
+const norm = s => String(s||"").normalize("NFKC").replace(/\s+/g,"").toLowerCase();
+function canonical(song){
+  const n = norm(song);
+  const hit = SONGS.find(x => norm(x.t)===n || norm(x.t).startsWith(n) && n.length>=3);
+  return hit ? hit.t : String(song).trim();
+}
+const ago = ts => { const m=Math.round((Date.now()-ts)/60000); return m<1?"たった今":m<60?m+"分前":Math.round(m/60)+"時間前"; };
+
+/* ---------- tabs ---------- */
+const TABS = ["history","quiz","intro","best","guest","sing","party"];
+function show(name){
+  if(!TABS.includes(name)) name="history";
+  document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", String(t.dataset.tab===name)));
+  TABS.forEach(n => { $("p-"+n).hidden = n!==name; });
+  store.set("tab", name);
+}
+document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => { show(t.dataset.tab); window.scrollTo({top:0}); }));
+show((location.hash||"").slice(1) || store.get("tab","history"));
+
+/* ---------- 1 history ---------- */
+HISTORY.forEach(h => {
+  const li = el("li", h.hl?"hl":"");
+  li.append(el("div","yr",h.y));
+  const ev = el("div","ev"); ev.append(el("b",null,h.b)); if(h.s) ev.append(el("span",null,h.s));
+  li.append(ev); $("timeline").append(li);
+});
+
+/* ---------- 2 quiz ---------- */
+$("q-total").textContent = QUIZ.length;
+let qi = 0, qscore = 0, answered = false;
+function renderQuiz(){
+  const box = $("quiz"); box.replaceChildren();
+  if(qi >= QUIZ.length){
+    box.append(el("div","eyebrow","結果発表"));
+    const s = el("div","score-big", qscore+" / "+QUIZ.length); box.append(s);
+    const msg = qscore===QUIZ.length ? "全問正解！あなたこそ真のマニアです。"
+      : qscore>=QUIZ.length*0.7 ? "かなりのマニア。店主Aといい勝負です。"
+      : qscore>=QUIZ.length*0.4 ? "なかなかの明菜通。今日でもっと詳しくなりましょう。"
+      : "これから一緒に深めていきましょう！";
+    box.append(el("p",null,msg));
+    const again = el("button","btn gold","もう一度挑戦する");
+    again.addEventListener("click",()=>{ qi=0; qscore=0; answered=false; renderQuiz(); });
+    box.append(again); return;
+  }
+  const q = QUIZ[qi];
+  const meta = el("div","qmeta"); meta.append(el("span",null,"第"+(qi+1)+"問"), el("span",null,"正解 "+qscore));
+  const bar = el("div","bar"); const fill = el("i"); fill.style.width = (qi/QUIZ.length*100)+"%"; bar.append(fill);
+  box.append(meta, bar, el("div","qtext",q.q));
+  const ch = el("div","choices");
+  q.c.forEach((c,i) => {
+    const b = el("button","choice"); b.type="button";
+    b.append(el("span","k","ABCD"[i]), document.createTextNode(c));
+    b.addEventListener("click",()=>{
+      if(answered) return; answered = true;
+      if(i===q.a) qscore++;
+      ch.querySelectorAll(".choice").forEach((x,j)=>{ if(j===q.a) x.classList.add("right"); else if(j===i) x.classList.add("wrong"); x.disabled=true; });
+      const ex = el("div","explain"); ex.append(el("b",null,i===q.a?"正解！ ":"残念！ "), document.createTextNode(q.e));
+      const next = el("button","btn", qi+1<QUIZ.length?"次の問題へ":"結果を見る");
+      next.addEventListener("click",()=>{ qi++; answered=false; renderQuiz(); });
+      box.append(ex, next); next.focus();
+    });
+    ch.append(b);
+  });
+  box.append(ch);
+}
+renderQuiz();
+
+/* ---------- 3 intro ---------- */
+let teams = store.get("teams", [{n:"チームA",p:0},{n:"チームB",p:0},{n:"チームC",p:0}]);
+function renderTeams(){
+  const wrap = $("teams"); wrap.replaceChildren();
+  teams.forEach((t,i)=>{
+    const d = el("div","team");
+    d.append(el("div","tn",t.n), el("div","pt",String(t.p)));
+    const r = el("div","row");
+    const plus = el("button","btn small gold","＋1"); plus.addEventListener("click",()=>{ t.p++; saveTeams(); });
+    const minus = el("button","btn small ghost","−1"); minus.addEventListener("click",()=>{ t.p=Math.max(0,t.p-1); saveTeams(); });
+    const del = el("button","btn small ghost","削除"); del.addEventListener("click",()=>{ teams.splice(i,1); saveTeams(); });
+    r.append(plus, minus, del); d.append(r); wrap.append(d);
+  });
+}
+function saveTeams(){ store.set("teams", teams); renderTeams(); }
+$("team-form").addEventListener("submit", e => { e.preventDefault(); const n=$("team-name").value.trim(); if(!n) return; teams.push({n,p:0}); $("team-name").value=""; saveTeams(); });
+$("team-reset").addEventListener("click", () => { teams.forEach(t=>t.p=0); saveTeams(); });
+renderTeams();
+
+SONGS.forEach((s,i)=>{
+  const li = el("li","song");
+  li.append(el("div","n",String(i+1)));
+  const t = el("div","t"); const title = el("b","hidden-t","？？？？"); const sub = el("span",null,s.y+"年");
+  t.append(title, sub);
+  const r = el("div","row");
+  const reveal = el("button","btn small","答え");
+  reveal.addEventListener("click",()=>{
+    const open = reveal.textContent==="答え";
+    title.textContent = open ? s.t : "？？？？"; title.className = open ? "" : "hidden-t";
+    sub.textContent = open ? s.y+"年 ・ "+s.c : s.y+"年";
+    reveal.textContent = open ? "隠す" : "答え";
+  });
+  const yt = el("a","btn small ghost","音源を探す");
+  yt.href = "https://www.youtube.com/results?search_query="+encodeURIComponent("中森明菜 "+s.t); yt.target="_blank"; yt.rel="noopener";
+  yt.style.textDecoration="none";
+  r.append(reveal, yt); li.append(t, r); $("intro-songs").append(li);
+  const o = document.createElement("option"); o.value = s.t; $("song-list").append(o);
+});
+
+/* ---------- shared data (4, 5, 6, 交流会) ---------- */
+let best = [], questions = [], party = [];
+let db = null, canWrite = true, readOnlyNote = "";
+const sung = new Set(store.get("sung", []));
+
+function setReadOnly(msg){
+  canWrite = false; readOnlyNote = msg;
+  ["bs-submit","gq-submit","pt-submit"].forEach(id => $(id).disabled = true);
+  ["bs-status","gq-status","pt-status"].forEach(id => $(id).textContent = msg);
+  renderAll();
+}
+
+function confirmDelete(holder, onYes){
+  const b = el("button","btn small ghost","削除");
+  b.addEventListener("click",()=>{
+    const box = el("span","confirm");
+    const y = el("button","btn small","削除する"); const n = el("button","btn small ghost","やめる");
+    y.addEventListener("click", onYes); n.addEventListener("click",()=>box.replaceWith(b));
+    box.append(y,n); b.replaceWith(box);
+  });
+  holder.append(b);
+}
+async function remove(col, id, statusId){
+  try{ await db.collection(col).doc(id).delete(); }
+  catch(e){ if(statusId) $(statusId).textContent = "削除できませんでした。もう一度お試しください。"; }
+}
+
+function ranking(){
+  const m = new Map();
+  best.forEach(b => { const k = canonical(b.song); m.set(k, (m.get(k)||0)+1); });
+  return [...m.entries()].map(([song,n])=>({song,n})).sort((a,b)=>b.n-a.n || a.song.localeCompare(b.song,"ja"));
+}
+function yearOf(song){ const s = SONGS.find(x=>x.t===song); return s ? s.y+"年" : ""; }
+
+function renderBest(){
+  const rk = ranking(), rank = $("rank"); rank.replaceChildren();
+  if(!rk.length){ rank.append(el("li","empty", db ? "まだ投稿がありません。最初の1曲を投稿してください。" : "読み込み中…")); }
+  const max = rk.length ? rk[0].n : 1;
+  rk.slice(0,10).forEach((r,i)=>{
+    const li = el("li"); li.append(el("div","pos",String(i+1)));
+    const lbl = el("div","lbl"); lbl.append(el("b",null,r.song));
+    const m = el("div","meter"); const f = el("i"); f.style.width = (r.n/max*100)+"%"; m.append(f); lbl.append(m);
+    li.append(lbl, el("div","cnt",r.n+"票")); rank.append(li);
+  });
+  const st = $("stories"); st.replaceChildren();
+  best.filter(b=>b.story).forEach(b=>{
+    const c = el("article","card");
+    c.append(el("div","song-t","♪ "+canonical(b.song)), el("div","story",b.story));
+    const who = el("div","who"); who.append(el("span",null,(b.name||"匿名")+" ・ "+ago(b.ts)));
+    if(canWrite && db) confirmDelete(who, ()=>remove("best", b.id, "bs-status"));
+    c.append(who); st.append(c);
+  });
+  if(!st.children.length) st.append(el("div","empty","思い出つきの投稿がここに並びます。"));
+}
+
+function renderQuestions(){
+  const ul = $("qlist"); ul.replaceChildren();
+  if(!questions.length){ ul.append(el("li","empty", db ? "まだ質問がありません。" : "読み込み中…")); return; }
+  [...questions].sort((a,b)=>(a.done?1:0)-(b.done?1:0) || a.ts-b.ts).forEach(q=>{
+    const li = el("li","qitem"+(q.done?" done":""));
+    const body = el("div","body"); body.append(el("p",null,q.text), el("span",null,(q.name||"匿名")+" ・ "+ago(q.ts)));
+    li.append(body);
+    if(canWrite && db){
+      const r = el("div","row");
+      const d = el("button","btn small "+(q.done?"ghost":"gold"), q.done?"戻す":"聞いた");
+      d.addEventListener("click", async ()=>{ d.disabled=true; try{ await db.collection("questions").doc(q.id).update({done:!q.done}); }catch(_){ d.disabled=false; $("gq-status").textContent="更新できませんでした。"; } });
+      r.append(d); confirmDelete(r, ()=>remove("questions", q.id, "gq-status")); li.append(r);
+    }
+    ul.append(li);
+  });
+}
+
+function renderSing(){
+  const ol = $("setlist"); ol.replaceChildren();
+  const rk = ranking();
+  if(!rk.length){ ol.append(el("li","empty","プログラム4でベストソングが集まると、ここにセットリストができます。")); return; }
+  rk.forEach(r=>{
+    const li = el("li", sung.has(r.song)?"sung":"");
+    const st = el("div","st"); st.append(document.createTextNode(r.song), el("span",null,[yearOf(r.song), r.n+"人のベストソング"].filter(Boolean).join(" ・ ")));
+    const b = el("button","btn small "+(sung.has(r.song)?"ghost":"gold"), sung.has(r.song)?"戻す":"歌った");
+    b.addEventListener("click",()=>{ sung.has(r.song)?sung.delete(r.song):sung.add(r.song); store.set("sung",[...sung]); renderSing(); });
+    li.append(st, b); ol.append(li);
+  });
+}
+
+function renderParty(){
+  $("party-total").textContent = String(party.reduce((s,p)=>s+(Number(p.people)||1),0));
+  const ul = $("party-list"); ul.replaceChildren();
+  if(!party.length){ ul.append(el("li","empty", db ? "参加者の名前がここに並びます。" : "読み込み中…")); return; }
+  [...party].sort((a,b)=>a.ts-b.ts).forEach(p=>{
+    const li = el("li","qitem");
+    const body = el("div","body"); body.append(el("p",null,p.name+"さん"), el("span",null,(Number(p.people)||1)+"人"));
+    li.append(body);
+    if(canWrite && db){ const r = el("div","row"); confirmDelete(r, ()=>remove("rsvp", p.id, "pt-status")); li.append(r); }
+    ul.append(li);
+  });
+}
+function renderAll(){ renderBest(); renderQuestions(); renderSing(); renderParty(); }
+renderAll();
+
+function subscribe(col, setter){
+  db.collection(col).onSnapshot(snap=>{
+    setter(snap.docs.map(d=>Object.assign({id:d.id}, d.data())).filter(x=>typeof x.ts==="number"));
+    renderAll();
+  }, ()=>{});
+}
+
+async function add(col, data, statusId, btnId){
+  if(!db || !canWrite) return false;
+  $(btnId).disabled = true; $(statusId).textContent = "送信中…";
+  try{
+    await db.collection(col).add(Object.assign({ts:Date.now()}, data));
+    $(statusId).textContent = "送信しました。"; return true;
+  }catch(e){
+    if(e && e.code==="invalid_argument"){ setReadOnly("このページは閲覧のみです。投稿は司会者が代わりに入力します。"); return false; }
+    $(statusId).textContent = e && e.code==="quota_exceeded" ? "投稿の上限に達しました。古い投稿を削除してください。" : "送信できませんでした。もう一度お試しください。";
+    return false;
+  }finally{ if(canWrite) $(btnId).disabled = false; }
+}
+
+$("best-form").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const song = $("bs-song").value.trim(); if(!song) return;
+  const ok = await add("best", {name:$("bs-name").value.trim().slice(0,30), song:song.slice(0,60), story:$("bs-story").value.trim().slice(0,400)}, "bs-status", "bs-submit");
+  if(ok){ $("bs-song").value=""; $("bs-story").value=""; }
+});
+$("q-form").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const text = $("gq-text").value.trim(); if(!text) return;
+  const ok = await add("questions", {text:text.slice(0,300), name:$("gq-name").value.trim().slice(0,30), done:false}, "gq-status", "gq-submit");
+  if(ok) $("gq-text").value="";
+});
+$("party-form").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const name = $("pt-name").value.trim(); if(!name) return;
+  const people = Math.min(10, Math.max(1, parseInt($("pt-count").value,10)||1));
+  const ok = await add("rsvp", {name:name.slice(0,30), people}, "pt-status", "pt-submit");
+  if(ok){ $("pt-name").value=""; $("pt-count").value="1"; }
+});
+
+(async ()=>{
+  if(!window.claude || typeof window.claude.use!=="function"){
+    setReadOnly("共有機能はこのページを claude.ai で開いたときに使えます。"); renderNoDb(); return;
+  }
+  db = await window.claude.use("db");
+  if(!db){ setReadOnly("この端末ではみんなの投稿を読み込めません。サインインして開き直してください。"); renderNoDb(); return; }
+  const user = await window.claude.use("user");
+  const can = user ? await user.can("data.write") : null;
+  if(can===false) setReadOnly("このページは閲覧のみです。投稿は司会者が代わりに入力します。");
+  subscribe("best", v=>best=v);
+  subscribe("questions", v=>questions=v);
+  subscribe("rsvp", v=>party=v);
+})();
+
+function renderNoDb(){
+  [["rank","li"],["qlist","li"],["party-list","li"]].forEach(([id])=>{ const x=$(id); x.replaceChildren(el("li","empty","みんなの投稿はここに表示されます。")); });
+}
+})();
+</script>
