@@ -107,6 +107,23 @@ textarea{min-height:84px;resize:vertical}
 .explain{border-left:3px solid var(--spot);padding:6px 12px;background:var(--panel-2);border-radius:0 10px 10px 0;font-size:14px}
 .score-big{font-family:var(--f-display);font-size:56px;color:var(--spot);line-height:1;font-variant-numeric:tabular-nums}
 
+.levels{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+@media (max-width:560px){.levels{grid-template-columns:1fr 1fr}}
+.lv{display:flex;flex-direction:column;gap:2px;text-align:left;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--panel);cursor:pointer;min-width:0}
+.lv b{font-family:var(--f-display);font-weight:400;font-size:18px}
+.lv span{font-size:11px;color:var(--mute)}
+.lv[aria-pressed="true"]{background:var(--curtain);border-color:var(--curtain)}
+.lv[aria-pressed="true"] span{color:var(--ink)}
+.maker{margin-top:16px}
+.maker summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px}
+.maker summary::before{content:"＋";color:var(--spot);font-weight:900}
+.maker[open] summary::before{content:"−"}
+.maker[open] summary{margin-bottom:12px}
+fieldset.mk-choices{border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+fieldset.mk-choices legend{font-size:12px;font-weight:700;color:var(--mute);margin-bottom:4px;padding:0}
+.mk-c{display:flex;gap:8px;align-items:center}
+.mk-c input[type=radio]{width:20px;height:20px;accent-color:var(--spot);flex:0 0 auto}
+
 /* 3: intro */
 .teams{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
 .team{background:var(--panel-2);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:6px;min-width:0}
@@ -187,8 +204,33 @@ footer{margin-top:40px;text-align:center;font-size:12px;color:var(--mute)}
   <!-- 2 クイズ -->
   <section class="panel" id="p-quiz" role="tabpanel" hidden>
     <div class="ph"><div class="big">2</div><div><div class="eyebrow">PROGRAM 2</div><h2>中森明菜クイズ</h2></div></div>
-    <p class="lead">全<span id="q-total"></span>問の4択クイズです。答えると正解と解説が出ます。</p>
+    <p class="lead">レベルを選んで挑戦する4択クイズです。答えると正解と解説が出ます。「オリジナル」では、司会やみなさんが作った問題で遊べます。</p>
+    <div class="levels" role="group" aria-label="レベル">
+      <button class="lv" type="button" data-lv="easy"><b>初級</b><span>まずは肩慣らし</span></button>
+      <button class="lv" type="button" data-lv="mid"><b>中級</b><span>ファンなら答えたい</span></button>
+      <button class="lv" type="button" data-lv="hard"><b>上級</b><span>作家陣とB面の世界</span></button>
+      <button class="lv" type="button" data-lv="orig"><b>オリジナル</b><span id="orig-count">みんなが作った問題</span></button>
+    </div>
     <div class="box stack" id="quiz"></div>
+
+    <details class="box maker" id="maker">
+      <summary><span class="eyebrow">オリジナル問題を作る</span></summary>
+      <form class="stack" id="mk-form">
+        <div><label for="mk-q">問題文</label><textarea id="mk-q" maxlength="200" required placeholder="例：「DESIRE -情熱-」のサビで繰り返される言葉は？"></textarea></div>
+        <fieldset class="mk-choices">
+          <legend>選択肢（正解に印をつけてください）</legend>
+          <div class="mk-c"><input type="radio" name="mk-a" id="mk-a0" value="0" checked aria-label="Aを正解にする"><input type="text" id="mk-c0" maxlength="60" required placeholder="選択肢A" aria-label="選択肢A"></div>
+          <div class="mk-c"><input type="radio" name="mk-a" id="mk-a1" value="1" aria-label="Bを正解にする"><input type="text" id="mk-c1" maxlength="60" required placeholder="選択肢B" aria-label="選択肢B"></div>
+          <div class="mk-c"><input type="radio" name="mk-a" id="mk-a2" value="2" aria-label="Cを正解にする"><input type="text" id="mk-c2" maxlength="60" placeholder="選択肢C（省略可）" aria-label="選択肢C"></div>
+          <div class="mk-c"><input type="radio" name="mk-a" id="mk-a3" value="3" aria-label="Dを正解にする"><input type="text" id="mk-c3" maxlength="60" placeholder="選択肢D（省略可）" aria-label="選択肢D"></div>
+        </fieldset>
+        <div><label for="mk-e">解説（省略可）</label><input type="text" id="mk-e" maxlength="200" placeholder="答えのあとに表示されます"></div>
+        <div><label for="mk-by">作った人（省略可）</label><input type="text" id="mk-by" maxlength="30"></div>
+        <div class="row"><button class="btn" type="submit" id="mk-submit">問題を追加する</button><span class="status" id="mk-status"></span></div>
+      </form>
+      <div class="eyebrow" style="margin-top:8px">作った問題</div>
+      <ul class="qlist" id="mk-list"></ul>
+    </details>
   </section>
 
   <!-- 3 イントロ -->
@@ -306,20 +348,41 @@ const HISTORY = [
   {y:"現在", b:"ファンと一緒に、次のステージへ", s:"今日はここから先の話も語り合いましょう。"}
 ];
 
-const QUIZ = [
-  {q:"中森明菜のデビュー曲は？", c:["少女A","スローモーション","セカンド・ラブ","北ウイング"], a:1, e:"1982年5月1日発売の「スローモーション」。作詞は来生えつこ、作曲は来生たかおの姉弟コンビです。"},
-  {q:"明菜さんの誕生日は？", c:["5月1日","7月13日","10月9日","12月31日"], a:1, e:"1965年7月13日生まれです。5月1日はデビュー日。"},
-  {q:"明菜さんが合格したオーディション番組は？", c:["スター誕生！","ザ・ベストテン","夜のヒットスタジオ","ホリプロタレントスカウトキャラバン"], a:0, e:"日本テレビ『スター誕生！』。山口百恵の「夢先案内人」を歌いました。"},
-  {q:"「少女A」の作曲者は？", c:["筒美京平","芹澤廣明","林哲司","細野晴臣"], a:1, e:"作曲は芹澤廣明、作詞は売野雅勇です。"},
-  {q:"「セカンド・ラブ」の作詞者は？", c:["阿木燿子","松本隆","来生えつこ","康珍化"], a:2, e:"来生えつこ作詞、来生たかお作曲。初のオリコン1位を獲った曲です。"},
-  {q:"「北ウイング」の作曲者は？", c:["林哲司","玉置浩二","大沢誉志幸","高中正義"], a:0, e:"作曲は林哲司、作詞は康珍化。明菜さん自身がタイトルを提案したと言われています。"},
-  {q:"「飾りじゃないのよ涙は」を作詞・作曲したのは？", c:["加藤登紀子","竹内まりや","井上陽水","中島みゆき"], a:2, e:"井上陽水の作品。のちに陽水自身もセルフカバーしています。"},
-  {q:"1985年の日本レコード大賞を受賞した曲は？", c:["十戒 (1984)","ミ・アモーレ","SAND BEIGE -砂漠へ-","DESIRE -情熱-"], a:1, e:"「ミ・アモーレ」で初の大賞。作曲は松岡直也です。"},
-  {q:"1986年、2年連続のレコード大賞を受賞した曲は？", c:["ジプシー・クイーン","難破船","DESIRE -情熱-","TATTOO"], a:2, e:"「DESIRE -情熱-」。ボブヘアと着物風の衣装も話題になりました。"},
-  {q:"「難破船」を明菜さんに贈ったのは？", c:["加藤登紀子","井上陽水","玉置浩二","中島みゆき"], a:0, e:"加藤登紀子の作詞・作曲。1987年のシングルです。"},
-  {q:"1994年から続くカバーアルバムのシリーズ名は？", c:["歌姫","ZERO album","Femme Fatale","BITTER AND SWEET"], a:0, e:"『歌姫』シリーズ。昭和の名曲を明菜さんの解釈で歌っています。"},
-  {q:"2014年の紅白歌合戦で、ニューヨークから中継で歌った曲は？", c:["少女A","Rojo -Tierra-","難破船","Dear Friend"], a:1, e:"新曲「Rojo -Tierra-」を披露し、久しぶりの歌声に大きな反響がありました。"}
-];
+const QUIZ_SETS = {
+  easy: [
+    {q:"中森明菜のデビュー曲は？", c:["少女A","スローモーション","セカンド・ラブ","北ウイング"], a:1, e:"1982年5月1日発売の「スローモーション」です。"},
+    {q:"デビューした年は？", c:["1980年","1982年","1984年","1986年"], a:1, e:"1982年。同期には小泉今日子、早見優、堀ちえみらがいて「花の82年組」と呼ばれます。"},
+    {q:"明菜さんの誕生日は？", c:["5月1日","7月13日","10月9日","12月31日"], a:1, e:"1965年7月13日生まれ。5月1日はデビュー日です。"},
+    {q:"明菜さんが合格したオーディション番組は？", c:["スター誕生！","ザ・ベストテン","夜のヒットスタジオ","ホリプロタレントスカウトキャラバン"], a:0, e:"日本テレビの『スター誕生！』です。"},
+    {q:"「じれったい　じれったい」と歌う曲は？", c:["少女A","1/2の神話","禁区","十戒 (1984)"], a:0, e:"「少女A」。ツッパリ路線の代表曲です。"},
+    {q:"1985年の日本レコード大賞を受賞した曲は？", c:["十戒 (1984)","ミ・アモーレ","SAND BEIGE -砂漠へ-","難破船"], a:1, e:"「ミ・アモーレ」で初の大賞を受賞しました。"},
+    {q:"1986年、2年連続のレコード大賞を受賞した曲は？", c:["ジプシー・クイーン","難破船","DESIRE -情熱-","TATTOO"], a:2, e:"「DESIRE -情熱-」。2年連続の大賞は史上初の快挙でした。"},
+    {q:"「DESIRE -情熱-」で話題になった髪型は？", c:["ボブ","聖子ちゃんカット","ソバージュ","ポニーテール"], a:0, e:"ボブヘアに着物風の衣装。真似する人が続出しました。"}
+  ],
+  mid: [
+    {q:"初めてオリコン1位を獲ったシングルは？", c:["スローモーション","少女A","セカンド・ラブ","北ウイング"], a:2, e:"3枚目のシングル「セカンド・ラブ」で初の1位です。"},
+    {q:"『スター誕生！』の決戦大会で歌った山口百恵の曲は？", c:["プレイバックPart2","夢先案内人","秋桜","いい日旅立ち"], a:1, e:"「夢先案内人」。3度目の挑戦で合格をつかみました。"},
+    {q:"「セカンド・ラブ」の作詞者は？", c:["阿木燿子","松本隆","来生えつこ","康珍化"], a:2, e:"来生えつこ作詞、来生たかお作曲です。"},
+    {q:"「飾りじゃないのよ涙は」を作詞・作曲したのは？", c:["加藤登紀子","竹内まりや","井上陽水","中島みゆき"], a:2, e:"井上陽水の作品で、のちに陽水自身もセルフカバーしています。"},
+    {q:"「難破船」を明菜さんに贈ったのは？", c:["加藤登紀子","井上陽水","玉置浩二","中島みゆき"], a:0, e:"加藤登紀子の作詞・作曲。1987年のシングルです。"},
+    {q:"「北ウイング」の“北ウイング”とは？", c:["成田空港の出発ロビー","北海道の灯台","船の名前","劇場の座席"], a:0, e:"当時の新東京国際空港（成田）の北ウイングのこと。恋人を追ってロンドンへ旅立つ歌です。"},
+    {q:"1994年から続くカバーアルバムのシリーズ名は？", c:["歌姫","ZERO album","Femme Fatale","BITTER AND SWEET"], a:0, e:"『歌姫』シリーズです。"},
+    {q:"2014年の紅白歌合戦で、ニューヨークから中継で歌った曲は？", c:["少女A","Rojo -Tierra-","難破船","Dear Friend"], a:1, e:"新曲「Rojo -Tierra-」を披露しました。"}
+  ],
+  hard: [
+    {q:"「少女A」の作曲者は？", c:["筒美京平","芹澤廣明","林哲司","細野晴臣"], a:1, e:"作曲は芹澤廣明、作詞は売野雅勇です。"},
+    {q:"「禁区」の作曲者は？", c:["坂本龍一","細野晴臣","大沢誉志幸","玉置浩二"], a:1, e:"YMOの細野晴臣が作曲しました。"},
+    {q:"「1/2の神話」の作曲者は？", c:["大沢誉志幸","来生たかお","芹澤廣明","鈴木キサブロー"], a:0, e:"大沢誉志幸の作曲、売野雅勇の作詞です。"},
+    {q:"「北ウイング」の作曲者は？", c:["林哲司","玉置浩二","大沢誉志幸","高中正義"], a:0, e:"作曲は林哲司、作詞は康珍化です。"},
+    {q:"「サザン・ウインド」の作曲者は？", c:["井上陽水","玉置浩二","松岡直也","来生たかお"], a:1, e:"安全地帯の玉置浩二が作曲しました。"},
+    {q:"「十戒 (1984)」の作曲者は？", c:["高中正義","細野晴臣","林哲司","都志見隆"], a:0, e:"ギタリストの高中正義です。"},
+    {q:"「ミ・アモーレ」の作曲者は？", c:["松岡直也","林哲司","鈴木キサブロー","筒美京平"], a:0, e:"ラテン・フュージョンの松岡直也です。"},
+    {q:"「ミ・アモーレ」と同じメロディーに別の歌詞をつけた曲は？", c:["赤い鳥逃げた","SAND BEIGE -砂漠へ-","ジプシー・クイーン","BLONDE"], a:0, e:"「赤い鳥逃げた」。12インチシングルで発表されました。"},
+    {q:"「DESIRE -情熱-」の作詞者は？", c:["阿木燿子","来生えつこ","売野雅勇","康珍化"], a:0, e:"作詞は阿木燿子、作曲は鈴木キサブローです。"},
+    {q:"ファーストアルバムのタイトルは？", c:["プロローグ〈序幕〉","バリエーション〈変奏曲〉","ファンタジー〈幻想曲〉","不思議"], a:0, e:"1982年の『プロローグ〈序幕〉』です。"}
+  ]
+};
+const LEVEL_NAME = {easy:"初級", mid:"中級", hard:"上級", orig:"オリジナル"};
 
 /* ---------- helpers ---------- */
 const $ = id => document.getElementById(id);
@@ -356,26 +419,44 @@ HISTORY.forEach(h => {
 });
 
 /* ---------- 2 quiz ---------- */
-$("q-total").textContent = QUIZ.length;
-let qi = 0, qscore = 0, answered = false;
+let quizLv = store.get("quizLv","easy"), QUIZ = [], qi = 0, qscore = 0, answered = false;
+let origQuiz = [];
+function levelQuestions(lv){ return lv==="orig" ? [...origQuiz].sort((a,b)=>a.ts-b.ts) : QUIZ_SETS[lv]; }
+function startQuiz(lv){
+  quizLv = lv; store.set("quizLv", lv);
+  QUIZ = levelQuestions(lv); qi = 0; qscore = 0; answered = false;
+  document.querySelectorAll(".lv").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lv===lv)));
+  renderQuiz();
+}
+document.querySelectorAll(".lv").forEach(b => b.addEventListener("click", () => startQuiz(b.dataset.lv)));
 function renderQuiz(){
   const box = $("quiz"); box.replaceChildren();
+  if(!QUIZ.length){
+    box.append(el("div","empty", quizLv==="orig" ? "オリジナル問題はまだありません。下の「オリジナル問題を作る」から追加してください。" : "問題がありません。"));
+    if(quizLv==="orig") $("maker").open = true;
+    return;
+  }
   if(qi >= QUIZ.length){
-    box.append(el("div","eyebrow","結果発表"));
-    const s = el("div","score-big", qscore+" / "+QUIZ.length); box.append(s);
+    box.append(el("div","eyebrow", LEVEL_NAME[quizLv]+" ・ 結果発表"));
+    box.append(el("div","score-big", qscore+" / "+QUIZ.length));
     const msg = qscore===QUIZ.length ? "全問正解！あなたこそ真のマニアです。"
       : qscore>=QUIZ.length*0.7 ? "かなりのマニア。店主Aといい勝負です。"
       : qscore>=QUIZ.length*0.4 ? "なかなかの明菜通。今日でもっと詳しくなりましょう。"
       : "これから一緒に深めていきましょう！";
     box.append(el("p",null,msg));
+    const r = el("div","row");
     const again = el("button","btn gold","もう一度挑戦する");
-    again.addEventListener("click",()=>{ qi=0; qscore=0; answered=false; renderQuiz(); });
-    box.append(again); return;
+    again.addEventListener("click",()=>startQuiz(quizLv));
+    r.append(again);
+    const order = ["easy","mid","hard"], nx = order[order.indexOf(quizLv)+1];
+    if(nx){ const up = el("button","btn", LEVEL_NAME[nx]+"に進む"); up.addEventListener("click",()=>startQuiz(nx)); r.append(up); }
+    box.append(r); return;
   }
   const q = QUIZ[qi];
-  const meta = el("div","qmeta"); meta.append(el("span",null,"第"+(qi+1)+"問"), el("span",null,"正解 "+qscore));
+  const meta = el("div","qmeta"); meta.append(el("span",null,LEVEL_NAME[quizLv]+" ・ 第"+(qi+1)+"問 / "+QUIZ.length), el("span",null,"正解 "+qscore));
   const bar = el("div","bar"); const fill = el("i"); fill.style.width = (qi/QUIZ.length*100)+"%"; bar.append(fill);
   box.append(meta, bar, el("div","qtext",q.q));
+  if(q.by) box.append(el("div","note","出題："+q.by));
   const ch = el("div","choices");
   q.c.forEach((c,i) => {
     const b = el("button","choice"); b.type="button";
@@ -384,7 +465,7 @@ function renderQuiz(){
       if(answered) return; answered = true;
       if(i===q.a) qscore++;
       ch.querySelectorAll(".choice").forEach((x,j)=>{ if(j===q.a) x.classList.add("right"); else if(j===i) x.classList.add("wrong"); x.disabled=true; });
-      const ex = el("div","explain"); ex.append(el("b",null,i===q.a?"正解！ ":"残念！ "), document.createTextNode(q.e));
+      const ex = el("div","explain"); ex.append(el("b",null,i===q.a?"正解！ ":"残念！ 正解は「"+q.c[q.a]+"」 "), document.createTextNode(q.e||""));
       const next = el("button","btn", qi+1<QUIZ.length?"次の問題へ":"結果を見る");
       next.addEventListener("click",()=>{ qi++; answered=false; renderQuiz(); });
       box.append(ex, next); next.focus();
@@ -393,7 +474,52 @@ function renderQuiz(){
   });
   box.append(ch);
 }
-renderQuiz();
+
+/* オリジナル問題：claude.ai ではみんなで共有、それ以外ではこの端末に保存 */
+function origChanged(list){
+  const playing = quizLv==="orig" && qi>0 && qi<QUIZ.length;
+  origQuiz = list;
+  $("orig-count").textContent = "みんなが作った問題（"+list.length+"問）";
+  renderMaker();
+  if(quizLv==="orig" && !playing) startQuiz("orig");
+}
+function renderMaker(){
+  const ul = $("mk-list"); ul.replaceChildren();
+  if(!origQuiz.length){ ul.append(el("li","empty","作った問題がここに並びます。")); return; }
+  [...origQuiz].sort((a,b)=>a.ts-b.ts).forEach((q,n)=>{
+    const li = el("li","qitem");
+    const body = el("div","body");
+    body.append(el("p",null,"Q"+(n+1)+". "+q.q), el("span",null,"正解："+q.c[q.a]+(q.by?" ・ 出題："+q.by:"")));
+    li.append(body);
+    if(!db || canWrite){
+      const r = el("div","row");
+      confirmDelete(r, ()=>{
+        if(db) remove("quiz", q.id, "mk-status");
+        else { const left = origQuiz.filter(x=>x.id!==q.id); store.set("origQuiz", left); origChanged(left); }
+      });
+      li.append(r);
+    }
+    ul.append(li);
+  });
+}
+$("mk-form").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const q = $("mk-q").value.trim();
+  const raw = [0,1,2,3].map(i=>$("mk-c"+i).value.trim().slice(0,60));
+  const pick = Number((document.querySelector('input[name="mk-a"]:checked')||{}).value||0);
+  if(!raw[pick]){ $("mk-status").textContent = "正解にした選択肢が空欄です。"; return; }
+  const c = [], a = raw.slice(0,pick).filter(Boolean).length;
+  raw.forEach(x=>{ if(x) c.push(x); });
+  if(!q || c.length<2){ $("mk-status").textContent = "問題文と、選択肢を2つ以上入れてください。"; return; }
+  const item = {q:q.slice(0,200), c, a, e:$("mk-e").value.trim().slice(0,200), by:$("mk-by").value.trim().slice(0,30)};
+  let ok;
+  if(db) ok = await add("quiz", item, "mk-status", "mk-submit");
+  else {
+    const list = origQuiz.concat([Object.assign({id:"l"+Date.now(), ts:Date.now()}, item)]);
+    store.set("origQuiz", list); origChanged(list); $("mk-status").textContent = "この端末に保存しました。"; ok = true;
+  }
+  if(ok){ ["mk-q","mk-c0","mk-c1","mk-c2","mk-c3","mk-e"].forEach(id=>$(id).value=""); $("mk-a0").checked = true; }
+});
 
 /* ---------- 3 intro ---------- */
 let teams = store.get("teams", [{n:"チームA",p:0},{n:"チームB",p:0},{n:"チームC",p:0}]);
@@ -442,6 +568,7 @@ const sung = new Set(store.get("sung", []));
 function setReadOnly(msg){
   canWrite = false; readOnlyNote = msg;
   ["bs-submit","gq-submit","pt-submit"].forEach(id => $(id).disabled = true);
+  if(db){ $("mk-submit").disabled = true; $("mk-status").textContent = msg; }
   ["bs-status","gq-status","pt-status"].forEach(id => $(id).textContent = msg);
   renderAll();
 }
@@ -531,8 +658,10 @@ function renderParty(){
     ul.append(li);
   });
 }
-function renderAll(){ renderBest(); renderQuestions(); renderSing(); renderParty(); }
+function renderAll(){ renderBest(); renderQuestions(); renderSing(); renderParty(); renderMaker(); }
 renderAll();
+origChanged([]);
+startQuiz(quizLv);
 
 function subscribe(col, setter){
   db.collection(col).onSnapshot(snap=>{
@@ -576,16 +705,19 @@ $("party-form").addEventListener("submit", async e=>{
 
 (async ()=>{
   if(!window.claude || typeof window.claude.use!=="function"){
-    setReadOnly("共有機能はこのページを claude.ai で開いたときに使えます。"); renderNoDb(); return;
+    setReadOnly("共有機能はこのページを claude.ai で開いたときに使えます。"); renderNoDb(); origChanged(store.get("origQuiz",[])); return;
   }
   db = await window.claude.use("db");
-  if(!db){ setReadOnly("この端末ではみんなの投稿を読み込めません。サインインして開き直してください。"); renderNoDb(); return; }
+  if(!db){ setReadOnly("この端末ではみんなの投稿を読み込めません。サインインして開き直してください。"); renderNoDb(); origChanged(store.get("origQuiz",[])); return; }
   const user = await window.claude.use("user");
   const can = user ? await user.can("data.write") : null;
   if(can===false) setReadOnly("このページは閲覧のみです。投稿は司会者が代わりに入力します。");
   subscribe("best", v=>best=v);
   subscribe("questions", v=>questions=v);
   subscribe("rsvp", v=>party=v);
+  db.collection("quiz").onSnapshot(snap=>{
+    origChanged(snap.docs.map(d=>Object.assign({id:d.id}, d.data())).filter(x=>typeof x.ts==="number" && Array.isArray(x.c) && x.c.length>=2));
+  }, ()=>{});
 })();
 
 function renderNoDb(){
