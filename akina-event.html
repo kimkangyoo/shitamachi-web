@@ -210,8 +210,8 @@ footer{margin-top:40px;text-align:center;font-size:12px;color:var(--mute)}
 .split{display:flex;flex-direction:column;gap:16px}
 .split > *{min-width:0}
 
-/* ---------- 横型（ワイド画面・プロジェクター） ---------- */
-@media (min-width:900px){
+/* ---------- 横型（モニターに映す前提。どの画面幅でも横型で表示） ---------- */
+@media all{
   body{font-size:16px}
   .marquee{padding:22px 110px 18px;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:24px}
   .marquee h1{display:flex;align-items:baseline;gap:20px;flex-wrap:wrap}
@@ -219,6 +219,8 @@ footer{margin-top:40px;text-align:center;font-size:12px;color:var(--mute)}
   .marquee .sub{margin-top:0;font-size:clamp(26px,3vw,38px)}
   .marquee p{margin:0;max-width:22em;text-align:right;font-size:13px;text-wrap:balance}
   .tabs{justify-content:center}
+  .levels{grid-template-columns:repeat(5,minmax(0,1fr))}
+  .levels .lv:last-child{grid-column:auto}
   .tab{font-size:14px;padding:8px 16px 8px 8px}
   .phead{display:grid;grid-template-columns:minmax(0,auto) minmax(0,1fr);gap:32px;align-items:center;margin-bottom:18px}
   .phead .lead{margin:0;border-left:2px solid var(--line);padding-left:24px}
@@ -269,7 +271,7 @@ footer{margin-top:40px;text-align:center;font-size:12px;color:var(--mute)}
   <section class="panel" id="p-history" role="tabpanel">
     <div class="phead">
     <div class="ph"><div class="big">1</div><div><div class="eyebrow">PROGRAM 1</div><h2>中森明菜の歴史</h2></div></div>
-    <p class="lead">デビュー当時から現在までを年表で振り返ります。スライドや映像と一緒に、手元のスマホでも追いかけてください。</p>
+    <p class="lead">デビュー当時から現在までを年表で振り返ります。スライドや映像と一緒に追いかけてください。</p>
     </div>
     <ol class="timeline" id="timeline"></ol>
     <p class="note tl-hint">横にスクロールすると、現在まで続きます →</p>
@@ -406,6 +408,13 @@ footer{margin-top:40px;text-align:center;font-size:12px;color:var(--mute)}
 <script>
 (function(){
 "use strict";
+
+/* 横型の画面を、ウィンドウが狭いときは全体を縮小して収める */
+function fitStage(){
+  const z = Math.min(1, window.innerWidth/1200);
+  try{ document.documentElement.style.zoom = z<1 ? String(z) : ""; }catch(_){}
+}
+fitStage(); window.addEventListener("resize", fitStage);
 
 /* ---------- data ---------- */
 const SONGS = [
