@@ -85,6 +85,31 @@ nav{background:var(--dark);padding:22px 64px;display:flex;align-items:center;jus
 .chk.skipped .cb{background:#a89878;border-color:#a89878;color:#fff;}
 .chk.ok .chk-name,.chk.fixed .chk-name{text-decoration:line-through;text-decoration-color:#a89878;}
 .chk-btns .rb{min-width:0;font-size:11px;padding:6px 9px;}
+.chk.pop .cb{animation:pop .4s cubic-bezier(.3,1.8,.5,1);}
+@keyframes pop{0%{transform:scale(.6);}60%{transform:scale(1.25);}100%{transform:scale(1);}}
+.sound-btn{border:none;background:none;color:var(--gold);font-size:11px;letter-spacing:.06em;padding:6px 4px;}
+
+/* 完了演出 */
+.cele{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;background:rgba(12,6,0,.86);padding:16px;cursor:pointer;}
+.cele.show{display:flex;animation:fadein .3s;}
+#confetti{position:fixed;inset:0;pointer-events:none;}
+.cele-card{position:relative;text-align:center;color:#e8d090;width:100%;max-width:360px;background:var(--dark);border:1px solid #7a5218;padding:28px 22px 20px;box-shadow:0 0 0 6px rgba(200,136,10,.12);animation:fadein .3s;}
+.cele-en{font-size:13px;letter-spacing:.5em;color:var(--amber);animation:slidein .5s both;}
+.cele-stamp{margin:22px auto 26px;width:150px;height:150px;border:4px double #c8880a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Shippori Mincho',serif;font-size:34px;font-weight:700;line-height:1.25;color:#c8880a;letter-spacing:.1em;transform:rotate(-12deg);animation:stamp .55s .25s cubic-bezier(.2,1.6,.4,1) both;}
+.cele-rows div{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #3a2010;padding:10px 4px;font-size:13px;animation:slidein .4s both;}
+.cele-rows span{color:#c8a860;letter-spacing:.1em;}
+.cele-rows b{font-family:'Shippori Mincho',serif;font-size:22px;font-weight:400;color:#f2e8cc;}
+.cele em,.cele-rows em{font-style:normal;font-family:'Noto Sans JP',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;background:var(--amber);color:var(--dark);padding:2px 6px;margin-left:8px;vertical-align:4px;animation:blink 1s infinite;}
+.cele-title{margin-top:18px;font-size:14px;letter-spacing:.08em;line-height:2;animation:slidein .4s both;}
+.cele-title b{font-family:'Shippori Mincho',serif;font-size:19px;color:var(--amber);}
+.cele-title small{display:block;font-size:11px;color:#8b6820;}
+.cele-title em{display:block;width:fit-content;margin:0 auto 6px;}
+.cele-tap{margin-top:24px;font-size:10px;letter-spacing:.3em;color:#7a5218;animation:blink 1.6s infinite;}
+@keyframes fadein{from{opacity:0}}
+@keyframes slidein{from{opacity:0;transform:translateY(12px);}}
+@keyframes stamp{0%{opacity:0;transform:rotate(-12deg) scale(2.4);}100%{opacity:1;transform:rotate(-12deg) scale(1);}}
+@keyframes blink{50%{opacity:.45;}}
+@media (prefers-reduced-motion:reduce){.cele *,.chk.pop .cb{animation:none!important;}}
 .chk.skipped .rb.skip{background:#a89878;border-color:#a89878;color:#fff;}
 .tool.type{font-size:11px;font-family:'Shippori Mincho',serif;}
 .gb{display:block;font-size:12px;color:#fff;background:var(--fix);padding:2px 8px;margin-top:4px;width:fit-content;letter-spacing:.04em;}
@@ -200,7 +225,7 @@ footer{background:#0c0600;padding:28px 48px;border-top:1px solid #2a1804;margin-
 
 <section class="sec" style="padding-top:0">
   <div class="inner">
-    <div class="label">巡回ルート <button class="btn small" id="editBtn">ルートを編集</button></div>
+    <div class="label">巡回ルート <span><button class="sound-btn" id="soundBtn"></button> <button class="btn small" id="editBtn">ルートを編集</button></span></div>
     <p class="note" style="margin-bottom:12px" id="howto">終わったら左の□をタップしてチェック。見つけて片付けたときは「直した」を押すと、記録に残ります。</p>
     <div class="route" id="route"></div>
     <div class="add-spot" id="addSpot">
@@ -259,6 +284,17 @@ footer{background:#0c0600;padding:28px 48px;border-top:1px solid #2a1804;margin-
 <footer><div class="foot-logo">下町きろくの動画屋</div></footer>
 
 <div class="toast" id="toast"></div>
+
+<div class="cele" id="cele" role="dialog" aria-label="巡回完了">
+  <canvas id="confetti"></canvas>
+  <div class="cele-card">
+    <p class="cele-en">MISSION COMPLETE</p>
+    <div class="cele-stamp">巡回<br>完了</div>
+    <div class="cele-rows" id="celeRows"></div>
+    <p class="cele-title" id="celeTitle"></p>
+    <p class="cele-tap">タップで閉じる</p>
+  </div>
+</div>
 
 <script>
 (function(){
@@ -395,6 +431,75 @@ footer{background:#0c0600;padding:28px 48px;border-top:1px solid #2a1804;margin-
     }).join('');
   }
 
+  const isDone = k => { const r=S.days[k]; return r && r.total>0 && answered(r)>=r.total; };
+  function streakNow(){
+    const c = routineDate(); c.setHours(12,0,0,0);
+    if(!isDone(keyOf(c))) c.setDate(c.getDate()-1);
+    let n = 0; while(isDone(keyOf(c))){ n++; c.setDate(c.getDate()-1); }
+    return n;
+  }
+
+  // ===== ゲーム的な演出 =====
+  const TITLES = [[1,'巡回見習い'],[3,'巡回員'],[7,'巡回主任'],[14,'巡回隊長'],[30,'家の守り人'],[60,'巡回マスター'],[100,'伝説の巡回者']];
+  let actx = null;
+  function sfx(kind){
+    if(S.sound===false) return;
+    try{
+      actx = actx || new (window.AudioContext||window.webkitAudioContext)();
+      if(actx.state==='suspended') actx.resume();
+      const seq = {
+        tick:  [[1046,0,.07]],
+        fix:   [[659,0,.08],[988,.07,.12]],
+        clear: [[784,0,.09],[988,.08,.09],[1318,.16,.22]],
+        win:   [[523,0,.12],[659,.12,.12],[784,.24,.12],[1046,.36,.34],[784,.72,.1],[1046,.84,.7]]
+      }[kind];
+      const t0 = actx.currentTime + .01;
+      seq.forEach(([f,at,dur])=>{
+        const o = actx.createOscillator(), g = actx.createGain();
+        o.type = kind==='win' ? 'square' : 'triangle'; o.frequency.value = f;
+        g.gain.setValueAtTime(0, t0+at); g.gain.linearRampToValueAtTime(kind==='win'?.08:.12, t0+at+.01);
+        g.gain.exponentialRampToValueAtTime(.0001, t0+at+dur);
+        o.connect(g).connect(actx.destination); o.start(t0+at); o.stop(t0+at+dur+.02);
+      });
+    }catch(e){}
+  }
+
+  function celebrate(){
+    const d = today(), fx = fixedCount(d), streak = streakNow();
+    const mins = d.start&&d.end ? Math.max(1,Math.round((d.end-d.start)/60000)) : null;
+    const tk = todayKey();
+    const past = Object.keys(S.days).filter(k=>k!==tk && S.days[k].start!=null && S.days[k].end && isDone(k)).map(k=>(S.days[k].end-S.days[k].start)/60000);
+    const record = mins!=null && past.length>0 && (d.end-d.start)/60000 < Math.min(...past);
+    let cur = null, next = null;
+    TITLES.forEach(tt=>{ if(streak>=tt[0]) cur = tt; else if(!next) next = tt; });
+    const rows = [
+      ['所要時間', mins!=null ? mins+'分'+(record?'<em>NEW RECORD</em>':'') : '—'],
+      ['直した数', fx===0 ? '0<em>PERFECT</em>' : fx+'か所'],
+      ['連続巡回', streak+'日目'],
+    ];
+    $('celeRows').innerHTML = rows.map((r,i)=>'<div style="animation-delay:'+(0.9+i*0.35)+'s"><span>'+r[0]+'</span><b>'+r[1]+'</b></div>').join('');
+    const newTitle = cur && streak===cur[0];
+    $('celeTitle').style.animationDelay = (0.9+rows.length*0.35)+'s';
+    $('celeTitle').innerHTML = (cur ? (newTitle?'<em>称号ゲット！</em>':'')+'称号：<b>'+cur[1]+'</b>' : '')
+      + (next ? '<small>あと'+(next[0]-streak)+'日で「'+next[1]+'」</small>' : '<small>最高の称号に到達しています</small>');
+    $('cele').classList.add('show');
+    sfx('win');
+    try{ navigator.vibrate && navigator.vibrate([60,40,60,40,160]); }catch(_){}
+    confetti();
+  }
+  function confetti(){
+    const cv = $('confetti'), ctx = cv.getContext('2d'), W = cv.width = innerWidth, H = cv.height = innerHeight;
+    const colors = ['#c8880a','#e8d090','#6a7a38','#b8620a','#f2e8cc','#8b6820'];
+    const P = Array.from({length:150},()=>({x:W/2+(Math.random()-.5)*W*.3, y:H*.38, vx:(Math.random()-.5)*14, vy:-Math.random()*15-4, r:Math.random()*6+4, c:colors[Math.random()*colors.length|0], a:Math.random()*6, va:(Math.random()-.5)*.4}));
+    const t0 = performance.now();
+    (function frame(now){
+      const el = now-t0; ctx.clearRect(0,0,W,H);
+      P.forEach(p=>{ p.vy += .32; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.a += p.va;
+        ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.a); ctx.globalAlpha = Math.max(0,1-el/4200); ctx.fillStyle = p.c; ctx.fillRect(-p.r/2,-p.r/4,p.r,p.r/2); ctx.restore(); });
+      if(el<4200 && $('cele').classList.contains('show')) requestAnimationFrame(frame); else ctx.clearRect(0,0,W,H);
+    })(t0);
+  }
+
   function renderRecord(){
     const t = routineDate(); t.setHours(12,0,0,0);
     const tk = keyOf(t);
@@ -410,11 +515,7 @@ footer{background:#0c0600;padding:28px 48px;border-top:1px solid #2a1804;margin-
     }
     $('cal').innerHTML = html;
 
-    const isDone = k => { const r=S.days[k]; return r && r.total>0 && answered(r)>=r.total; };
-    let streak = 0; const c = new Date(t);
-    if(!isDone(keyOf(c))) c.setDate(c.getDate()-1);
-    while(isDone(keyOf(c))){ streak++; c.setDate(c.getDate()-1); }
-    $('stStreak').textContent = streak;
+    $('stStreak').textContent = streakNow();
     const ym = tk.slice(0,7), monthKeys = Object.keys(S.days).filter(k=>k.startsWith(ym));
     $('stMonth').textContent = monthKeys.filter(isDone).length;
     $('stFix').textContent = monthKeys.reduce((a,k)=>a+fixedCount(S.days[k]),0);
@@ -447,6 +548,7 @@ footer{background:#0c0600;padding:28px 48px;border-top:1px solid #2a1804;margin-
     }
     if(act==='ok' || act==='fix' || act==='done' || act==='skip'){
       const cid = btn.closest('.chk').dataset.c, d = today(), v = act;
+      const spotBefore = sp.checks.every(c=>d.res[c.id]);
       const cur = d.res[cid], primary = (v==='ok' || v==='done');
       // チェック欄：済みなら外す（「今日はなし」からは「やった」に変える）。小ボタン：同じものをもう一度押すと外す
       if(cur && (cur.v===v || (primary && cur.v!=='skip'))) delete d.res[cid];
@@ -454,10 +556,19 @@ footer{background:#0c0600;padding:28px 48px;border-top:1px solid #2a1804;margin-
       if(!d.start) d.start = Date.now();
       syncDay();
       const complete = answered(d)>=d.total;
-      if(complete && !d.end){ d.end = Date.now(); toast('巡回完了。おつかれさまでした'); try{navigator.vibrate&&navigator.vibrate(60);}catch(_){} window.scrollTo({top:0,behavior:'smooth'}); }
+      let celebrateNow = false;
+      if(complete && !d.end){ d.end = Date.now(); celebrateNow = true; }
       if(!complete) d.end = null;
       // 場所を回り終えたら閉じて次へ
-      if(sp.checks.every(c=>d.res[c.id])) openSpots.delete(sp.id);
+      const spotAfter = sp.checks.every(c=>d.res[c.id]);
+      if(spotAfter) openSpots.delete(sp.id);
+      const checkedNow = !!d.res[cid] && d.res[cid].v!=='skip';
+      setTimeout(()=>{
+        if(checkedNow){ const el = document.querySelector('.chk[data-c="'+cid+'"]'); if(el) el.classList.add('pop'); }
+        if(celebrateNow) celebrate();
+        else if(spotAfter && !spotBefore){ sfx('clear'); toast('「'+sp.name+'」クリア！'); }
+        else if(checkedNow) sfx(v==='fix' ? 'fix' : 'tick');
+      }, 0);
     }
     else if(act==='sup' && i>0){ [S.spots[i-1],S.spots[i]]=[S.spots[i],S.spots[i-1]]; }
     else if(act==='sdown' && i<S.spots.length-1){ [S.spots[i+1],S.spots[i]]=[S.spots[i],S.spots[i+1]]; }
@@ -486,6 +597,10 @@ footer{background:#0c0600;padding:28px 48px;border-top:1px solid #2a1804;margin-
     if(f==='chk'){ const c=sp.checks.find(x=>x.id===el.dataset.c); if(c){ if(v) c.name=v; else el.value=c.name; } }
     save();
   });
+  const soundLabel = ()=>{ $('soundBtn').textContent = S.sound===false ? '音：OFF' : '音：ON'; };
+  $('soundBtn').onclick = ()=>{ S.sound = S.sound===false; save(); soundLabel(); if(S.sound) sfx('tick'); };
+  soundLabel();
+  $('cele').onclick = ()=>{ $('cele').classList.remove('show'); window.scrollTo({top:0,behavior:'smooth'}); };
   $('garbageFields').addEventListener('change', e=>{ const w = e.target.dataset.gw; if(w==null) return; S.garbage[+w] = e.target.value.trim(); save(); });
   $('editBtn').onclick =()=>{ editing=!editing; if(document.activeElement) document.activeElement.blur(); renderAll(); };
   function addSpot(){
