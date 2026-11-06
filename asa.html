@@ -80,6 +80,16 @@ nav{background:var(--dark);padding:22px 64px;display:flex;align-items:center;jus
 .chk.skipped .chk-name{color:var(--muted);}
 .chk.skipped .rb.skip{background:#a89878;border-color:#a89878;color:#fff;}
 .tool.type{font-size:11px;font-family:'Shippori Mincho',serif;}
+.gb{display:block;font-size:12px;color:#fff;background:var(--fix);padding:2px 8px;margin-top:4px;width:fit-content;letter-spacing:.04em;}
+.gb.none{background:#a89878;}
+.chk.ok .gb,.chk.skipped .gb{opacity:.6;}
+.hero-gomi{display:inline-block;margin-top:14px;border:1px solid #7a5218;padding:8px 14px;font-size:12px;color:#e8d090;letter-spacing:.06em;line-height:1.7;}
+.hero-gomi b{color:var(--amber);font-weight:700;}
+.garbage-edit{display:none;margin-top:14px;background:var(--paper);border:1px solid var(--line);padding:14px 18px;}
+.garbage-edit.show{display:block;}
+.garbage-edit p{font-family:'Shippori Mincho',serif;font-size:14px;letter-spacing:.1em;color:var(--ink-strong);margin-bottom:10px;}
+.garbage-edit label{display:flex;align-items:center;gap:10px;margin-top:6px;font-size:13px;color:var(--gold);}
+.garbage-edit input{flex:1;min-width:0;border:1px solid #c8b080;background:#fffaf0;padding:7px 9px;font-size:13px;color:var(--ink-strong);}
 
 /* 編集 */
 .edit-bar{display:none;gap:6px;padding:10px 18px;border-top:1px solid #d8c498;flex-wrap:wrap;}
@@ -161,6 +171,7 @@ footer{background:#0c0600;padding:28px 48px;border-top:1px solid #2a1804;margin-
     <h1 class="hero-title">朝の巡回</h1>
     <p class="hero-date" id="heroDate"></p>
     <p class="hero-greet">起きたら、家をひと回り。<br>やらかしは、その場で直せばなかったことになる。</p>
+    <p class="hero-gomi" id="heroGomi"></p>
   </div>
 </div>
 
@@ -188,6 +199,10 @@ footer{background:#0c0600;padding:28px 48px;border-top:1px solid #2a1804;margin-
     <div class="add-spot" id="addSpot">
       <input type="text" id="addSpotName" placeholder="場所を追加（例：ベランダ）" maxlength="20">
       <button class="btn primary small" id="addSpotBtn">追加</button>
+    </div>
+    <div class="garbage-edit" id="garbageEdit">
+      <p>ゴミの日 <small style="font-family:'Noto Sans JP',sans-serif;font-size:11px;color:var(--gold);letter-spacing:0">収集のない日は空欄</small></p>
+      <div id="garbageFields"></div>
     </div>
   </div>
 </section>
@@ -261,16 +276,27 @@ footer{background:#0c0600;padding:28px 48px;border-top:1px solid #2a1804;margin-
   const hm = d => pad(d.getHours())+':'+pad(d.getMinutes());
   const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
+  // ゴミの日（0=日〜6=土）。空欄は収集なし
+  const DEFAULT_GARBAGE = ['','普通ゴミ','','プラスチック','普通ゴミ','ダンボール','資源ゴミ（ペットボトルなど）'];
+
   function defaults(){
     return { spots: DEFAULT_ROUTE.map(([name,checks])=>({id:uid(), name, checks:checks.map(c=>c[0]==='!' ? {id:uid(), name:c.slice(1), type:'do'} : {id:uid(), name:c})})), days:{} };
+  }
+  function migrate(s){
+    s.days = s.days||{};
+    if(!Array.isArray(s.garbage) || s.garbage.length!==7) s.garbage = DEFAULT_GARBAGE.slice();
+    const all = s.spots.flatMap(sp=>sp.checks);
+    if(!all.some(c=>c.garbage)){ const g = all.find(c=>c.name==='ゴミ出し'); if(g){ g.garbage = true; g.type = 'do'; } }
+    return s;
   }
   function load(){
     try{
       const s = JSON.parse(localStorage.getItem(KEY));
-      if(s && Array.isArray(s.spots)){ s.days = s.days||{}; return s; }
+      if(s && Array.isArray(s.spots)) return migrate(s);
     }catch(e){}
-    return defaults();
+    return migrate(defaults());
   }
+  const garbageOn = offset => { const d = routineDate(); d.setDate(d.getDate()+(offset||0)); return (S.garbage[d.getDay()]||'').trim(); };
   let S = load();
   function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ toast('保存できませんでした（ブラウザの設定を確認）'); } }
 
@@ -285,6 +311,13 @@ footer{background:#0c0600;padding:28px 48px;border-top:1px solid #2a1804;margin-
     const d = today(), ids = new Set(allChecks().map(c=>c.id));
     Object.keys(d.res).forEach(id=>{ if(!ids.has(id)) { delete d.res[id]; delete d.names[id]; } });
     d.total = ids.size;
+    // 収集のない日は、ゴミ出しを自動で「今日はなし」に
+    allChecks().forEach(c=>{
+      if(!c.garbage) return;
+      const r = d.res[c.id];
+      if(!garbageOn(0)){ if(!r) d.res[c.id] = {v:'skip', t:Date.now(), auto:true}; }
+      else if(r && r.auto) delete d.res[c.id];
+    });
     allChecks().forEach(c=>{ if(d.res[c.id]) d.names[c.id] = [c.spot.name, c.name]; });
   }
   const answered = d => Object.keys(d.res).length;
@@ -298,6 +331,8 @@ footer{background:#0c0600;padding:28px 48px;border-top:1px solid #2a1804;margin-
   function renderStatus(){
     const d = today(), total = d.total, n = answered(d), fx = fixedCount(d);
     $('heroDate').textContent = (()=>{ const r=routineDate(); return r.getFullYear()+'年'+(r.getMonth()+1)+'月'+r.getDate()+'日（'+WD[r.getDay()]+'）'; })();
+    const g0 = garbageOn(0), g1 = garbageOn(1);
+    $('heroGomi').innerHTML = '今日のゴミ：<b>'+esc(g0||'なし')+'</b>　／　明日：'+esc(g1||'なし');
     $('progText').innerHTML = n+'<span>/ '+total+'</span>';
     $('progBar').style.width = total ? (n/total*100)+'%' : '0';
     const complete = total>0 && n>=total;
@@ -313,6 +348,8 @@ footer{background:#0c0600;padding:28px 48px;border-top:1px solid #2a1804;margin-
     const d = today(), route = $('route');
     route.classList.toggle('editing', editing);
     $('addSpot').classList.toggle('show', editing);
+    $('garbageEdit').classList.toggle('show', editing);
+    if(editing) $('garbageFields').innerHTML = [1,2,3,4,5,6,0].map(w=>'<label>'+WD[w]+'<input type="text" data-gw="'+w+'" maxlength="24" value="'+esc(S.garbage[w]||'')+'" placeholder="収集なし"></label>').join('');
     $('editBtn').textContent = editing ? '編集を終える' : 'ルートを編集';
     $('howto').style.display = editing ? 'none' : '';
     if(!S.spots.length){ route.innerHTML = '<div class="empty">巡回する場所がありません。「ルートを編集」から追加してください。</div>'; return; }
@@ -337,7 +374,9 @@ footer{background:#0c0600;padding:28px 48px;border-top:1px solid #2a1804;margin-
         const btns = c.type==='do'
           ? '<button class="rb ok" data-act="done">やった</button><button class="rb skip" data-act="skip">今日はなし</button>'
           : '<button class="rb ok" data-act="ok">問題なし</button><button class="rb fix" data-act="fix">直した</button>';
-        return '<div class="chk '+st+'" data-c="'+c.id+'"><span class="chk-name">'+esc(c.name)+'</span><span class="chk-btns">'+btns+'</span></div>';
+        let label = esc(c.name);
+        if(c.garbage){ const g = garbageOn(0); label += g ? '<span class="gb">今日：'+esc(g)+'</span>' : '<span class="gb none">今日は収集なし</span>'; }
+        return '<div class="chk '+st+'" data-c="'+c.id+'"><span class="chk-name">'+label+'</span><span class="chk-btns">'+btns+'</span></div>';
       }).join('');
       const editBar = '<div class="edit-bar"><input type="text" placeholder="チェック項目を追加" maxlength="40" data-add="'+sp.id+'"><button class="btn primary small" data-act="cadd">追加</button></div>';
       return '<div class="spot'+(done?' done':'')+(open?'':' collapsed')+'" data-sp="'+sp.id+'">'
@@ -435,7 +474,8 @@ footer{background:#0c0600;padding:28px 48px;border-top:1px solid #2a1804;margin-
     if(f==='chk'){ const c=sp.checks.find(x=>x.id===el.dataset.c); if(c){ if(v) c.name=v; else el.value=c.name; } }
     save();
   });
-  $('editBtn').onclick = ()=>{ editing=!editing; if(document.activeElement) document.activeElement.blur(); renderAll(); };
+  $('garbageFields').addEventListener('change', e=>{ const w = e.target.dataset.gw; if(w==null) return; S.garbage[+w] = e.target.value.trim(); save(); });
+  $('editBtn').onclick =()=>{ editing=!editing; if(document.activeElement) document.activeElement.blur(); renderAll(); };
   function addSpot(){
     const v = $('addSpotName').value.trim(); if(!v){ $('addSpotName').focus(); return; }
     S.spots.push({id:uid(), name:v, checks:[{id:uid(), name:'ゴミ・服・開けっぱなしがない'}]});
@@ -459,7 +499,7 @@ footer{background:#0c0600;padding:28px 48px;border-top:1px solid #2a1804;margin-
       const j = JSON.parse(txt), d = j.data||j;
       if(!d || !Array.isArray(d.spots)) throw 0;
       if(!confirm('今のデータを読み込んだデータで置き換えますか？')) return;
-      S = {spots:d.spots, days:d.days||{}}; save(); renderAll(); toast('読み込みました');
+      S = migrate({spots:d.spots, days:d.days||{}, garbage:d.garbage}); save(); renderAll(); toast('読み込みました');
     }).catch(()=>toast('読み込めないファイルです')).finally(()=>{ e.target.value=''; });
   };
 
