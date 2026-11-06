@@ -78,6 +78,13 @@ nav{background:var(--dark);padding:22px 64px;display:flex;align-items:center;jus
 .chk.ok .rb.ok{background:var(--ok);border-color:var(--ok);color:#fff;}
 .chk.fixed .rb.fix{background:var(--fix);border-color:var(--fix);color:#fff;}
 .chk.skipped .chk-name{color:var(--muted);}
+.cb{width:32px;height:32px;flex-shrink:0;border:1.5px solid var(--gold);background:#fffaf0;color:transparent;font-size:16px;line-height:1;font-family:'Shippori Mincho',serif;}
+.chk-name{cursor:pointer;user-select:none;}
+.chk.ok .cb{background:var(--ok);border-color:var(--ok);color:#fff;}
+.chk.fixed .cb{background:var(--fix);border-color:var(--fix);color:#fff;font-size:13px;}
+.chk.skipped .cb{background:#a89878;border-color:#a89878;color:#fff;}
+.chk.ok .chk-name,.chk.fixed .chk-name{text-decoration:line-through;text-decoration-color:#a89878;}
+.chk-btns .rb{min-width:0;font-size:11px;padding:6px 9px;}
 .chk.skipped .rb.skip{background:#a89878;border-color:#a89878;color:#fff;}
 .tool.type{font-size:11px;font-family:'Shippori Mincho',serif;}
 .gb{display:block;font-size:12px;color:#fff;background:var(--fix);padding:2px 8px;margin-top:4px;width:fit-content;letter-spacing:.04em;}
@@ -194,7 +201,7 @@ footer{background:#0c0600;padding:28px 48px;border-top:1px solid #2a1804;margin-
 <section class="sec" style="padding-top:0">
   <div class="inner">
     <div class="label">巡回ルート <button class="btn small" id="editBtn">ルートを編集</button></div>
-    <p class="note" style="margin-bottom:12px" id="howto">確認する項目は「問題なし」か「直した」、やることは「やった」か「今日はなし」を押してください。直した数は記録に残ります。</p>
+    <p class="note" style="margin-bottom:12px" id="howto">終わったら左の□をタップしてチェック。見つけて片付けたときは「直した」を押すと、記録に残ります。</p>
     <div class="route" id="route"></div>
     <div class="add-spot" id="addSpot">
       <input type="text" id="addSpotName" placeholder="場所を追加（例：ベランダ）" maxlength="20">
@@ -371,12 +378,15 @@ footer{background:#0c0600;padding:28px 48px;border-top:1px solid #2a1804;margin-
         if(editing) return '<div class="chk"><input class="edit-input" data-f="chk" data-sp="'+sp.id+'" data-c="'+c.id+'" value="'+esc(c.name)+'" maxlength="40">'
           + '<button class="tool type" data-act="ctype" data-c="'+c.id+'" title="確認する項目／やること を切り替え">'+(c.type==='do'?'行':'確')+'</button>'
           + '<button class="tool del" data-act="cdel" data-c="'+c.id+'" aria-label="項目を削除">×</button></div>';
+        const main = c.type==='do' ? 'done' : 'ok';
         const btns = c.type==='do'
-          ? '<button class="rb ok" data-act="done">やった</button><button class="rb skip" data-act="skip">今日はなし</button>'
-          : '<button class="rb ok" data-act="ok">問題なし</button><button class="rb fix" data-act="fix">直した</button>';
+          ? '<button class="rb skip" data-act="skip">今日はなし</button>'
+          : '<button class="rb fix" data-act="fix">直した</button>';
+        const mark = st==='fixed' ? '直' : st==='skipped' ? '－' : '✓';
         let label = esc(c.name);
         if(c.garbage){ const g = garbageOn(0); label += g ? '<span class="gb">今日：'+esc(g)+'</span>' : '<span class="gb none">今日は収集なし</span>'; }
-        return '<div class="chk '+st+'" data-c="'+c.id+'"><span class="chk-name">'+label+'</span><span class="chk-btns">'+btns+'</span></div>';
+        return '<div class="chk '+st+'" data-c="'+c.id+'"><button class="cb" data-act="'+main+'" aria-label="'+esc(c.name)+'をチェック">'+mark+'</button>'
+          + '<span class="chk-name" data-act="'+main+'">'+label+'</span><span class="chk-btns">'+btns+'</span></div>';
       }).join('');
       const editBar = '<div class="edit-bar"><input type="text" placeholder="チェック項目を追加" maxlength="40" data-add="'+sp.id+'"><button class="btn primary small" data-act="cadd">追加</button></div>';
       return '<div class="spot'+(done?' done':'')+(open?'':' collapsed')+'" data-sp="'+sp.id+'">'
@@ -437,7 +447,9 @@ footer{background:#0c0600;padding:28px 48px;border-top:1px solid #2a1804;margin-
     }
     if(act==='ok' || act==='fix' || act==='done' || act==='skip'){
       const cid = btn.closest('.chk').dataset.c, d = today(), v = act;
-      if(d.res[cid] && d.res[cid].v===v) delete d.res[cid];
+      const cur = d.res[cid], primary = (v==='ok' || v==='done');
+      // チェック欄：済みなら外す（「今日はなし」からは「やった」に変える）。小ボタン：同じものをもう一度押すと外す
+      if(cur && (cur.v===v || (primary && cur.v!=='skip'))) delete d.res[cid];
       else d.res[cid] = {v, t:Date.now()};
       if(!d.start) d.start = Date.now();
       syncDay();
